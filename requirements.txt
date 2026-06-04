@@ -1,0 +1,6 @@
+django>=5.0
+gtts
+django-crispy-forms
+crispy-bootstrap5
+pillow
+whitenoise

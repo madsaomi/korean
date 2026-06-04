@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}한글 — Учим корейский{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#7f5af0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇰🇷</text></svg>">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="glass-blob glass-blob-1"></div>
+  <div class="glass-blob glass-blob-2"></div>
+  <div class="glass-blob glass-blob-3"></div>
+
+  <nav class="glass-nav navbar navbar-expand-lg fixed-top px-3 px-md-4">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="{% url 'index' %}" style="color: var(--text-primary);">
+        <span class="fs-5">한<span class="fw-light">글</span></span>
+        <span class="ms-2 fs-6 fw-light" style="color: var(--text-secondary);">K-lab</span>
+      </a>
+
+      <button class="navbar-toggler border-0 px-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu"
+              style="background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 8px; color: var(--text-primary);">
+        <span style="font-size: 1.5rem;">☰</span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+          <li class="nav-item">
+            <a class="nav-link nav-link-glass {% if request.path == '/hangul/' %}active{% endif %}" href="{% url 'hangul' %}">
+              <span class="me-1">ㅎㅇ</span> Алфавит
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-link-glass dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              📖 Уроки
+            </a>
+            <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+              <li><a class="dropdown-item" href="{% url 'lesson_list' %}">Все уроки</a></li>
+              <li><a class="dropdown-item" href="{% url 'category_list' %}">Словарь</a></li>
+              <li><a class="dropdown-item" href="{% url 'grammar:grammar_list' %}">Грамматика</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-glass {% if '/quiz/' in request.path %}active{% endif %}" href="{% url 'quiz_list' %}">🎯 Тесты</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-link-glass dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              🔄 Повторение
+            </a>
+            <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+              <li><a class="dropdown-item" href="{% url 'review' %}">📝 Карточки</a></li>
+              <li><a class="dropdown-item" href="{% url 'flashcard' %}">🃏 Флеш-режим</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-glass" href="{% url 'leaderboard' %}">🏆</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-glass" href="{% url 'unified_search' %}">🔍</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-link-glass" href="#" data-bs-toggle="modal" data-bs-target="#shortcutsModal" title="Клавиши">⌨️</a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-3">
+          <button id="theme-toggle" class="liquid-toggle-btn" aria-pressed="false" title="Сменить тему">
+            <span class="knob"></span>
+          </button>
+
+          {% if user.is_authenticated %}
+          <div class="position-relative">
+            <a href="{% url 'review' %}" class="nav-link nav-link-glass position-relative" title="Повторение">
+              🔄
+              {% if pending_review_count > 0 %}
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background: var(--accent); font-size: 0.55rem; padding: 0.2rem 0.4rem; transform: translate(-50%, -30%) !important;">
+                {{ pending_review_count }}
+              </span>
+              {% endif %}
+            </a>
+          </div>
+          <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" style="color: var(--text-primary);">
+              <div class="glass" style="padding: 0.35rem 0.75rem; border-radius: 100px;">
+                <span class="fw-medium small">{{ user.username }}</span>
+              </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+              <li><a class="dropdown-item" href="{% url 'profile' %}">👤 Профиль</a></li>
+              <li><hr class="dropdown-divider" style="border-color: var(--glass-border);"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">🚪 Выйти</a></li>
+            </ul>
+          </div>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn-glass btn-accent btn-sm text-decoration-none px-3 py-1 small">
+            Войти
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main style="padding-top: calc(var(--nav-height) + 1rem);" class="container py-4">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-dismissible fade show glass-card mb-4 {% if message.extra_tags %}{{ message.extra_tags }}{% endif %}" role="alert" style="border-left: 4px solid var(--accent);">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <button id="back-to-top" class="btn-glass" style="position: fixed; bottom: 2rem; right: 2rem; z-index: 999; display: none; padding: 0.5rem 0.75rem; font-size: 1.3rem;" aria-label="Наверх">⬆</button>
+
+  <footer class="footer-content text-center py-4 mt-5" style="color: var(--text-secondary); font-size: 0.85rem;">
+    <div class="container">
+      <p class="mb-1 fw-medium">
+        <span class="gradient-text fw-bold">한글 K-lab</span> — учим корейский с нуля
+      </p>
+      <p class="mb-0 opacity-50 small">made with <span class="streak-fire">❤</span></p>
+    </div>
+  </footer>
+
+  <div class="modal fade" id="shortcutsModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content" style="background: var(--glass-bg); backdrop-filter: blur(30px); border: 1px solid var(--glass-border); color: var(--text-primary);">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">⌨️ Клавиши</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-between mb-2"><kbd>←</kbd><kbd>→</kbd> <span>Перевернуть карточку</span></div>
+          <div class="d-flex justify-content-between mb-2"><kbd>↑</kbd> <span>Снова (флеш-карты)</span></div>
+          <div class="d-flex justify-content-between mb-2"><kbd>↓</kbd> <span>Нормально (флеш-карты)</span></div>
+          <div class="d-flex justify-content-between mb-2"><kbd>Enter</kbd> <span>Легко (флеш-карты)</span></div>
+          <div class="d-flex justify-content-between mb-2"><kbd>1</kbd>-<kbd>4</kbd> <span>Выбрать ответ (тест)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('{% static "sw.js" %}');</script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Флеш-карты{% endblock %}
+{% block content %}
+<a href="{% url 'review' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад к повторению</a>
+
+<div class="glass-card p-4 mb-4 text-center">
+  <h1 class="fw-bold mb-1">🃏 Флеш-карты</h1>
+  <p style="color: var(--text-secondary);">Клавиши: ← → переворот, ↑ Снова, ↓ Нормально, Enter Легко</p>
+</div>
+
+{% if card_count > 0 %}
+<form id="csrf-form" style="display:none;">{% csrf_token %}</form>
+{{ cards_json|json_script:"cards-data" }}
+<div id="flashcard-app" style="max-width: 500px; margin: 0 auto;">
+  <div class="text-center mb-3">
+    <small style="color: var(--text-secondary);">
+      <span id="current-index">1</span> / {{ card_count }}
+    </small>
+  </div>
+
+  <div class="flip-card" id="fc-card" style="height: 320px; cursor: pointer;">
+    <div class="flip-card-inner">
+      <div class="flip-card-front" id="fc-front">
+        <div class="fs-1 fw-bold" id="fc-korean" style="font-family: 'Noto Sans KR', sans-serif;"></div>
+        <small id="fc-roman" style="color: var(--text-secondary);" class="mt-2"></small>
+        <small id="fc-category" class="mt-2 badge" style="background: var(--accent);"></small>
+      </div>
+      <div class="flip-card-back">
+        <div class="fs-3 fw-bold" id="fc-russian"></div>
+        <small id="fc-example" style="color: var(--text-secondary);" class="mt-2"></small>
+        <small id="fc-example-tr" style="color: var(--text-secondary);"></small>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
+    <button class="btn-glass" id="btn-again" style="border-color: #e17055;">🔴 Снова <small>↑</small></button>
+    <button class="btn-glass" id="btn-good" style="border-color: #fdcb6e;">🟡 Нормально <small>↓</small></button>
+    <button class="btn-glass" id="btn-easy" style="border-color: #00b894;">🟢 Легко <small>Enter</small></button>
+  </div>
+</div>
+{% else %}
+<div class="glass-card p-5 text-center" style="max-width: 500px; margin: 0 auto;">
+  <div class="fs-1 mb-3">🎉</div>
+  <h2 class="fw-bold mb-2">Нет слов для повторения!</h2>
+  <p style="color: var(--text-secondary);">Добавь слова в словаре, чтобы начать.</p>
+  <a href="{% url 'category_list' %}" class="btn-glass btn-accent text-decoration-none mt-2">📖 Словарь</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const cards = JSON.parse(document.getElementById('cards-data').textContent);
+  if (!cards.length) return;
+
+  let idx = 0;
+  const cardEl = document.getElementById('fc-card');
+  const front = document.getElementById('fc-front');
+  const korean = document.getElementById('fc-korean');
+  const roman = document.getElementById('fc-roman');
+  const category = document.getElementById('fc-category');
+  const russian = document.getElementById('fc-russian');
+  const example = document.getElementById('fc-example');
+  const exampleTr = document.getElementById('fc-example-tr');
+  const currentIdx = document.getElementById('current-index');
+
+  function showCard(i) {
+    const c = cards[i];
+    korean.textContent = c.korean;
+    roman.textContent = c.romanization;
+    category.textContent = c.category;
+    russian.textContent = c.russian;
+    example.textContent = c.example || '';
+    exampleTr.textContent = c.example_tr || '';
+    currentIdx.textContent = i + 1;
+    cardEl.classList.remove('flipped');
+  }
+
+  let submitting = false;
+  async function submitAction(action) {
+    if (submitting) return;
+    submitting = true;
+    const c = cards[idx];
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const animClass = (action === 'again') ? 'slide-out-left' : 'slide-out-right';
+    cardEl.classList.add(animClass);
+
+    try {
+      const res = await fetch('{% url "flashcard" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          word_id: c.id,
+          action: action
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        idx++;
+        setTimeout(() => {
+          if (idx < cards.length) {
+            showCard(idx);
+            cardEl.classList.remove(animClass);
+            submitting = false;
+          } else {
+            location.reload();
+          }
+        }, 300);
+      } else {
+        throw new Error('Server error');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка соединения с сервером. Попробуйте еще раз.');
+      cardEl.classList.remove(animClass);
+      submitting = false;
+    }
+  }
+
+  cardEl.addEventListener('click', () => {
+    cardEl.classList.toggle('flipped');
+  });
+
+  document.getElementById('btn-again').addEventListener('click', () => submitAction('again'));
+  document.getElementById('btn-good').addEventListener('click', () => submitAction('good'));
+  document.getElementById('btn-easy').addEventListener('click', () => submitAction('easy'));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      cardEl.classList.toggle('flipped');
+    }
+    if (e.key === 'ArrowUp') { e.preventDefault(); submitAction('again'); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); submitAction('good'); }
+    if (e.key === 'Enter') { e.preventDefault(); submitAction('easy'); }
+  });
+
+  showCard(0);
+})();
+</script>
+{% endblock %}

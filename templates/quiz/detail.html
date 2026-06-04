@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block extra_head %}{% endblock %}
+{% block content %}
+<a href="{% url 'quiz_list' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад к тестам</a>
+
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <h1 class="fw-bold mb-1">🎯 {{ quiz.title }}</h1>
+      <p style="color: var(--text-secondary);">{{ quiz.description }}</p>
+      <div class="d-flex gap-2">
+        <span class="badge" style="background: var(--accent);">{{ quiz.get_level_display }}</span>
+        <span class="badge" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">{{ questions.count }} вопросов</span>
+        <span class="badge" style="background: rgba(0, 184, 148, 0.2); color: var(--text-primary);">Проходной: {{ quiz.passing_score }}%</span>
+      </div>
+    </div>
+    {% if timer > 0 %}
+    <div class="glass text-center px-3 py-2" id="timer" data-seconds="{{ timer }}">
+      <div class="fs-3 fw-bold" id="timer-display">{{ timer_min }}:{{ timer_sec|stringformat:"02d" }}</div>
+      <small style="color: var(--text-secondary);">осталось</small>
+    </div>
+    {% endif %}
+  </div>
+  <div class="mt-3 progress" style="height: 6px; background: var(--glass-bg); border-radius: 3px;">
+    <div class="progress-bar" id="quiz-progress" style="width: 0%; background: var(--accent); border-radius: 3px; transition: width 0.3s;"></div>
+  </div>
+</div>
+
+<form method="POST" action="{% url 'quiz_submit' quiz.id %}" id="quiz-form">
+  {% csrf_token %}
+  {% for q in questions %}
+  <div class="glass-card p-4 mb-3" data-question="{{ q.id }}">
+    <h5 class="fw-bold mb-3">{{ forloop.counter }}. {{ q.question_russian }}</h5>
+    {% if q.question_korean %}
+    <p class="fs-5 mb-3" style="font-family: 'Noto Sans KR', sans-serif;">{{ q.question_korean }}</p>
+    {% endif %}
+
+    {% if q.question_type == 'writing' %}
+    <input type="text" name="q_{{ q.id }}" class="glass-input" placeholder="Введите ответ...">
+    {% else %}
+    <div class="d-flex flex-column gap-2">
+      {% for answer in q.answers.all %}
+      <label class="quiz-option d-flex align-items-center gap-3">
+        <input type="radio" name="q_{{ q.id }}" value="{{ answer.text }}" class="form-check-input">
+        <span>{{ answer.text }}</span>
+        <small class="ms-auto" style="color: var(--text-secondary); opacity: 0.5;">{{ forloop.counter }}</small>
+      </label>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+  <div class="text-center mt-4">
+    <button type="submit" class="btn-glass btn-accent px-5 py-2 fs-5">📨 Отправить</button>
+    <span id="answered-count" class="ms-3" style="color: var(--text-secondary);">0/{{ questions.count }} отвечено</span>
+  </div>
+  {% else %}
+  <div class="glass-card p-4 text-center">
+    <p class="mb-2">Авторизуйся, чтобы пройти тест</p>
+    <a href="{% url 'login' %}" class="btn-glass btn-accent text-decoration-none">Войти</a>
+  </div>
+  {% endif %}
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const timerEl = document.getElementById('timer');
+  if (timerEl) {
+    let seconds = parseInt(timerEl.dataset.seconds);
+    const display = document.getElementById('timer-display');
+    const interval = setInterval(() => {
+      seconds--;
+      if (seconds <= 0) {
+        clearInterval(interval);
+        document.getElementById('quiz-form').submit();
+      }
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      display.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      if (seconds < 10) {
+        timerEl.style.borderColor = '#e17055';
+        timerEl.style.background = 'rgba(225, 112, 85, 0.2)';
+      }
+    }, 1000);
+  }
+
+  const total = {{ questions.count }};
+  const answeredEl = document.getElementById('answered-count');
+  const progressBar = document.getElementById('quiz-progress');
+  const updateCount = () => {
+    const answered = document.querySelectorAll('.quiz-option input[type="radio"]:checked, .glass-input:not(:placeholder-shown)').length;
+    if (answeredEl) answeredEl.textContent = answered + '/' + total + ' отвечено';
+    if (progressBar) progressBar.style.width = (answered / total * 100) + '%';
+  };
+  document.querySelectorAll('.quiz-option input, .glass-input').forEach(el => {
+    el.addEventListener('change', updateCount);
+    el.addEventListener('input', updateCount);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const key = parseInt(e.key);
+    if (key >= 1 && key <= 4) {
+      const cards = document.querySelectorAll('.glass-card[data-question]');
+      let closestCard = null;
+      let closestDist = Infinity;
+      const viewCenter = window.innerHeight / 2;
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(cardCenter - viewCenter);
+        if (dist < closestDist) { closestDist = dist; closestCard = card; }
+      });
+      if (closestCard) {
+        const opts = closestCard.querySelectorAll('.quiz-option input[type="radio"]');
+        if (key <= opts.length) opts[key - 1].click();
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

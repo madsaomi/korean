@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="glass-card auth-card">
+  <span class="auth-icon">🔑</span>
+  <h2>Вход</h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn-glass btn-accent w-100 mt-3 py-2">Войти</button>
+  </form>
+  <p class="text-center mt-3 mb-0" style="color: var(--text-secondary);">
+    Нет аккаунта? <a href="{% url 'register' %}" style="color: var(--accent); font-weight: 600;">Зарегистрироваться</a>
+  </p>
+</div>
+{% endblock %}

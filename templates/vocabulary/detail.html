@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'category_list' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад</a>
+
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+      <h1 class="fw-bold mb-1">{{ category.icon }} {{ category.name }}</h1>
+      <p style="color: var(--text-secondary);">{{ category.word_count }} слов</p>
+    </div>
+    <a href="{% url 'study_category' category.slug %}" class="btn-glass btn-accent text-decoration-none">📖 Изучать</a>
+  </div>
+</div>
+
+<div class="bento-grid">
+  {% for word in words %}
+  <div class="flip-card">
+    <div class="flip-card-inner">
+      <div class="flip-card-front">
+        <div class="fs-1 fw-bold" style="font-family: 'Noto Sans KR', sans-serif;">{{ word.korean }}</div>
+        <small style="color: var(--text-secondary);" class="mt-2">{{ word.romanization }}</small>
+        <button class="btn-glass btn-sm tts-btn mt-2" data-text="{{ word.korean }}">
+          🔊 Слушать
+        </button>
+        <a href="{% url 'word_detail' word.id %}" class="btn-glass btn-sm mt-1" style="font-size: 0.75rem;">🔍 Подробнее</a>
+      </div>
+      <div class="flip-card-back">
+        <div class="fs-4 fw-bold">{{ word.russian }}</div>
+        {% if word.example_sentence %}
+        <small style="color: var(--text-secondary);" class="mt-2">{{ word.example_sentence }}</small>
+        <small style="color: var(--text-secondary);">{{ word.example_translation }}</small>
+        {% endif %}
+        <small class="mt-2 badge" style="background: var(--accent);">{{ word.get_level_display }}</small>
+        {% if user.is_authenticated %}
+        <div class="d-flex gap-1 mt-2 flex-wrap justify-content-center">
+          <form method="POST" action="{% url 'add_to_review' %}">
+            {% csrf_token %}
+            <input type="hidden" name="word_id" value="{{ word.id }}">
+            <button type="submit" class="btn-glass btn-sm">📚</button>
+          </form>
+          <a href="{% url 'word_detail' word.id %}" class="btn-glass btn-sm">🔍</a>
+          <div class="dropdown d-inline">
+            <button class="btn-glass btn-sm dropdown-toggle" data-bs-toggle="dropdown">📋</button>
+            <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+              <li><a class="dropdown-item" href="{% url 'word_list_create' %}">➕ Новая</a></li>
+              {% if user.word_lists.exists %}
+              <li><hr class="dropdown-divider" style="border-color: var(--glass-border);"></li>
+              {% for wl in user.word_lists.all %}
+               <li>
+                 <form method="POST" action="{% url 'word_list_add_word' wl.id word.id %}" style="display:inline;">
+                   {% csrf_token %}
+                   <button type="submit" class="dropdown-item" style="background:none;border:none;color:inherit;padding:0.25rem 1rem;">{{ wl.name }}</button>
+                 </form>
+               </li>
+               {% endfor %}
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

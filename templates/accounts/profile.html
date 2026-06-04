@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<div class="glass-card p-4 mb-4">
+  <div class="d-flex align-items-center gap-4 flex-wrap">
+    <div class="fs-1">{{ profile.avatar|yesno:',👤' }}</div>
+    <div class="flex-grow-1">
+      <h2 class="fw-bold mb-1">{{ user.username }}</h2>
+      <p class="mb-1" style="color: var(--text-secondary);">{{ profile.native_language }} → 🇰🇷 Корейский</p>
+      <span class="badge" style="background: linear-gradient(135deg, var(--accent), var(--accent-dark));">{{ profile.get_level_display }}</span>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'achievements' %}" class="btn-glass btn-sm">🏆 {{ achievements_count }}/{{ total_possible }}</a>
+      <a href="{% url 'daily_goals' %}" class="btn-glass btn-sm">🎯 Цели</a>
+      <a href="{% url 'edit_profile' %}" class="btn-glass btn-sm">✏️</a>
+      <a href="{% url 'change_password' %}" class="btn-glass btn-sm">🔑</a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-4 col-md">
+    <div class="stat-card">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-value">{{ streak.current_streak }}</div>
+      <div class="stat-label">дней</div>
+    </div>
+  </div>
+  <div class="col-4 col-md">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-value">{{ lessons_done }}/{{ total_lessons }}</div>
+      <div class="stat-label">уроков</div>
+    </div>
+  </div>
+  <div class="col-4 col-md">
+    <div class="stat-card">
+      <div class="stat-icon">📖</div>
+      <div class="stat-value">{{ words_learned }}</div>
+      <div class="stat-label">слов</div>
+    </div>
+  </div>
+  <div class="col-4 col-md">
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value">{{ quizzes_done }}</div>
+      <div class="stat-label">тестов</div>
+    </div>
+  </div>
+  <div class="col-4 col-md">
+    <div class="stat-card">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-value">{{ words_in_review }}</div>
+      <div class="stat-label">в повторе</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-7">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">📈 Результаты тестов (14 дней)</h5>
+      <canvas id="quizChart" height="200"></canvas>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">🏆 Прогресс ачивок</h5>
+      <div class="d-flex justify-content-between mb-1">
+        <small style="color: var(--text-secondary);">{{ achievements_count }} из {{ total_possible }}</small>
+        <small style="color: var(--text-secondary);">{% widthratio achievements_count total_possible 100 %}%</small>
+      </div>
+      <div class="progress" style="height: 10px;">
+        <div class="progress-bar" style="width: {% widthratio achievements_count total_possible 100 %}%;"></div>
+      </div>
+      <a href="{% url 'achievements' %}" class="btn-glass btn-sm mt-3 text-decoration-none d-inline-block">🏆 Все ачивки</a>
+    </div>
+    <div class="glass-card p-4 mt-3">
+      <h5 class="fw-bold mb-3">📊 Детали</h5>
+      <div class="d-flex justify-content-between mb-2">
+        <small style="color: var(--text-secondary);">Рекорд стрика</small>
+        <span class="fw-bold">{{ streak.longest_streak }}🔥</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <small style="color: var(--text-secondary);">Уровень</small>
+        <span class="fw-bold">{{ profile.get_level_display }}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <small style="color: var(--text-secondary);">В повторении</small>
+        <span class="fw-bold">{{ words_in_review }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="glass-card p-4">
+  <h4 class="fw-bold mb-3">📋 История тестов</h4>
+  {% if quiz_history %}
+  {% for result in quiz_history %}
+  <div class="d-flex justify-content-between align-items-center py-2" style="border-bottom: 1px solid var(--glass-border);">
+    <div>
+      <span class="fw-medium">{{ result.quiz.title }}</span>
+      <small style="color: var(--text-secondary);" class="ms-2">{{ result.completed_at|date:"d.m.Y" }}</small>
+    </div>
+    <span class="badge" style="background: {% if result.percentage >= 70 %}#00b894{% else %}#e17055{% endif %};">
+      {{ result.percentage }}%
+    </span>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty-state py-3">
+    <p class="mb-0" style="color: var(--text-secondary);">Пока нет пройденных тестов</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const ctx = document.getElementById('quizChart');
+if (ctx) {
+  const data = {{ quiz_chart_json|safe }};
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.date),
+      datasets: [{
+        label: 'Средний балл',
+        data: data.map(d => d.avg),
+        borderColor: '#6C5CE7',
+        backgroundColor: 'rgba(108, 92, 231, 0.1)',
+        fill: true,
+        tension: 0.4,
+        spanGaps: true,
+        pointRadius: 5,
+        pointBackgroundColor: '#6C5CE7',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

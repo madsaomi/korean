@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Ежедневные цели{% endblock %}
+{% block content %}
+<h1 class="section-title">🎯 Ежедневные цели</h1>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="glass-card p-4 text-center">
+      <h4 class="fw-bold mb-4">📊 Прогресс сегодня</h4>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span>📚 Уроки</span>
+          <span>{{ lessons_today }} / {{ goal.lessons_target }}</span>
+        </div>
+        <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
+          <div class="progress-bar" style="width: {% if goal.lessons_target > 0 %}{% widthratio lessons_today goal.lessons_target 100 %}{% else %}0{% endif %}%; background: var(--accent); border-radius: 6px;"></div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span>📖 Слова</span>
+          <span>{{ words_today }} / {{ goal.words_target }}</span>
+        </div>
+        <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
+          <div class="progress-bar" style="width: {% if goal.words_target > 0 %}{% widthratio words_today goal.words_target 100 %}{% else %}0{% endif %}%; background: #00b894; border-radius: 6px;"></div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span>🎯 Тесты</span>
+          <span>{{ quizzes_today }} / {{ goal.quizzes_target }}</span>
+        </div>
+        <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
+          <div class="progress-bar" style="width: {% if goal.quizzes_target > 0 %}{% widthratio quizzes_today goal.quizzes_target 100 %}{% else %}0{% endif %}%; background: #e17055; border-radius: 6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="glass-card p-4">
+      <h4 class="fw-bold mb-4">⚙️ Настройка целей</h4>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="fw-medium mb-1">📖 Слов в день</label>
+          <input type="number" name="words_target" class="glass-input" value="{{ goal.words_target }}" min="1" max="100">
+        </div>
+        <div class="mb-3">
+          <label class="fw-medium mb-1">📚 Уроков в день</label>
+          <input type="number" name="lessons_target" class="glass-input" value="{{ goal.lessons_target }}" min="1" max="20">
+        </div>
+        <div class="mb-3">
+          <label class="fw-medium mb-1">🎯 Тестов в день</label>
+          <input type="number" name="quizzes_target" class="glass-input" value="{{ goal.quizzes_target }}" min="1" max="20">
+        </div>
+        <button type="submit" class="btn-glass btn-accent w-100">Сохранить</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Тесты{% endblock %}
+{% block content %}
+<h1 class="section-title">🎯 Тесты</h1>
+
+<div class="glass-card p-3 mb-4">
+  <div class="d-flex gap-2 flex-wrap" id="quiz-filters">
+    <button class="btn-glass btn-sm active-filter" data-filter="all" onclick="filterQuiz('all')">📋 Все</button>
+    <button class="btn-glass btn-sm" data-filter="beginner" onclick="filterQuiz('beginner')">🟢 С нуля</button>
+    <button class="btn-glass btn-sm" data-filter="elementary" onclick="filterQuiz('elementary')">🟡 Начальный</button>
+    <button class="btn-glass btn-sm" data-filter="intermediate" onclick="filterQuiz('intermediate')">🔴 Средний</button>
+  </div>
+</div>
+
+<script>
+function filterQuiz(level) {
+  document.querySelectorAll('#quiz-filters .btn-glass').forEach(b => b.classList.remove('active-filter'));
+  document.querySelector(`#quiz-filters [data-filter="${level}"]`).classList.add('active-filter');
+  document.querySelectorAll('.quiz-card').forEach(card => {
+    card.style.display = (level === 'all' || card.dataset.level === level) ? '' : 'none';
+  });
+}
+</script>
+
+<div class="bento-grid">
+  {% for quiz in quizzes %}
+  <a href="{% url 'quiz_detail' quiz.id %}" class="text-decoration-none glass-card quiz-card" data-level="{{ quiz.level }}" style="color: var(--text-primary);">
+    <h4 class="fw-bold mb-1">{{ quiz.title }}</h4>
+    <p style="color: var(--text-secondary);">{{ quiz.description|truncatewords:15 }}</p>
+    <div class="d-flex gap-2">
+      <span class="badge" style="background: var(--accent);">{{ quiz.get_level_display }}</span>
+      <span class="badge" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">
+        {{ quiz.q_count }} вопросов
+      </span>
+      {% if quiz.time_limit > 0 %}
+      <span class="badge" style="background: rgba(231, 76, 60, 0.2); color: var(--text-primary);">
+        ⏱ {{ quiz.time_limit }}с
+      </span>
+      {% endif %}
+    </div>
+  </a>
+  {% empty %}
+  <div class="glass-card empty-state">
+    <p style="color: var(--text-secondary);">Тесты пока не добавлены.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

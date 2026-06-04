@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Результат упражнения{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 text-center">
+      <div class="glass p-5">
+        <div class="display-1 mb-3">
+          {% if percentage >= 80 %}🎉{% elif percentage >= 50 %}👍{% else %}💪{% endif %}
+        </div>
+        <h3 class="mb-3">Результат</h3>
+
+        <div class="position-relative d-inline-block mb-4">
+          <canvas id="resultRing" width="180" height="180" style="transform:rotate(-90deg)"></canvas>
+          <div class="position-absolute top-50 start-50 translate-middle">
+            <span class="display-5 fw-bold">{{ correct }}</span>
+            <span class="fs-4 text-muted">/{{ total }}</span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="progress" style="height:12px">
+            <div class="progress-bar {% if percentage >= 80 %}bg-success{% elif percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}" style="width:{{ percentage }}%"></div>
+          </div>
+        </div>
+
+        <p class="fs-5 mb-4">
+          {% if percentage >= 80 %}Отличный результат! Продолжайте в том же духе!
+          {% elif percentage >= 50 %}Хорошо, но есть куда стремиться. Попробуйте ещё раз!
+          {% else %}Не расстраивайтесь! Повторите теорию и попробуйте снова.
+          {% endif %}
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+          <a href="{% url 'grammar:exercise_list' %}" class="btn btn-glass">📝 К упражнениям</a>
+          <a href="{% url 'grammar:grammar_list' %}" class="btn btn-outline-light">📖 К грамматике</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('resultRing').getContext('2d');
+const pct = {{ percentage }} / 100;
+ctx.strokeStyle = '#888';
+ctx.lineWidth = 12;
+ctx.beginPath();
+ctx.arc(90, 90, 78, 0, Math.PI * 2);
+ctx.stroke();
+ctx.strokeStyle = pct >= 0.8 ? '#28a745' : pct >= 0.5 ? '#ffc107' : '#dc3545';
+ctx.lineWidth = 12;
+ctx.lineCap = 'round';
+ctx.beginPath();
+ctx.arc(90, 90, 78, 0, Math.PI * 2 * pct);
+ctx.stroke();
+</script>
+{% endblock %}

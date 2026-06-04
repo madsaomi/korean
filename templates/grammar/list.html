@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Грамматика{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="section-title mb-0">📖 Грамматика</h1>
+  <a href="{% url 'grammar:exercise_list' %}" class="btn btn-glass">📝 Упражнения</a>
+</div>
+
+<div class="bento-grid">
+  {% for topic in topics %}
+  <a href="{% url 'grammar:grammar_detail' topic.slug %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
+    <div class="d-flex align-items-center gap-3">
+      <span class="fs-2">{{ topic.icon }}</span>
+      <div>
+        <h5 class="fw-bold mb-1">{{ topic.title }}</h5>
+        <small style="color: var(--text-secondary);">{{ topic.description|truncatewords:10 }}</small>
+        <div>
+          <span class="badge mt-2" style="background: var(--accent);">{{ topic.get_level_display }}</span>
+          <span class="badge mt-2" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">{{ topic.rule_count }} правил</span>
+        </div>
+      </div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="glass-card empty-state">
+    <p style="color: var(--text-secondary);">Грамматика пока не добавлена.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

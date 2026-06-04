@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Главная — Учим корейский{% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
+<div class="glass-card p-4 mb-4" style="max-width: 800px; margin: 0 auto; position: relative; overflow: hidden;">
+  <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(108, 92, 231, 0.08) 0%, transparent 70%); pointer-events: none;"></div>
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div class="fs-1">👋</div>
+    <div>
+      <h1 class="fw-bold mb-1">안녕하세요, {{ user.username }}!</h1>
+      <p class="mb-0" style="color: var(--text-secondary);">Продолжай заниматься</p>
+    </div>
+  </div>
+
+  {% if streak %}
+  <div class="mt-3 d-flex justify-content-center gap-4 flex-wrap">
+    <div class="stat-card" style="padding: 1rem;">
+      <span class="streak-fire fs-2">🔥</span>
+      <div class="fw-bold fs-4">{{ streak.current_streak }}</div>
+      <small style="color: var(--text-secondary);">дней подряд</small>
+    </div>
+    <div class="stat-card" style="padding: 1rem;">
+      <span class="fs-2">🏆</span>
+      <div class="fw-bold fs-4">{{ streak.longest_streak }}</div>
+      <small style="color: var(--text-secondary);">рекорд</small>
+    </div>
+    <div class="stat-card" style="padding: 1rem;">
+      <span class="fs-2">📚</span>
+      <div class="fw-bold fs-4">{{ lessons_done }}/{{ total_lessons }}</div>
+      <small style="color: var(--text-secondary);">уроков</small>
+    </div>
+    <div class="stat-card" style="padding: 1rem;">
+      <span class="fs-2">📖</span>
+      <div class="fw-bold fs-4">{{ words_learned }}</div>
+      <small style="color: var(--text-secondary);">слов</small>
+    </div>
+    <div class="stat-card" style="padding: 1rem;">
+      <span class="fs-2">🎯</span>
+      <div class="fw-bold fs-4">{{ quizzes_done }}</div>
+      <small style="color: var(--text-secondary);">тестов</small>
+    </div>
+    {% if words_in_review %}
+    <a href="{% url 'review' %}" class="text-decoration-none stat-card" style="padding: 1rem; color: var(--text-primary);">
+      <span class="fs-2">🔄</span>
+      <div class="fw-bold fs-4">{{ words_in_review }}</div>
+      <small style="color: var(--accent);">на повторении</small>
+    </a>
+    {% endif %}
+  </div>
+
+  {% if total_lessons %}
+  <div class="mt-3">
+    <div class="d-flex justify-content-between small mb-1">
+      <span style="color: var(--text-secondary);">Прогресс курса</span>
+      <span style="color: var(--text-secondary);">{% widthratio lessons_done total_lessons 100 %}%</span>
+    </div>
+    <div class="progress" style="height: 8px; background: var(--glass-bg); border-radius: 4px;">
+      <div class="progress-bar" style="width: {% widthratio lessons_done total_lessons 100 %}%; background: var(--accent); border-radius: 4px;"></div>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% else %}
+<div class="glass-card p-5 mb-4 text-center" style="max-width: 600px; margin: 0 auto;">
+  <h1 class="fw-bold mb-3">🇰🇷 한국어를 배우자!</h1>
+  <p class="fs-5 mb-4" style="color: var(--text-secondary);">Изучай корейский язык с нуля — бесплатно и в удобном темпе</p>
+  <div class="d-flex gap-3 justify-content-center flex-wrap">
+    <a href="{% url 'register' %}" class="btn-glass btn-accent px-4 py-2 fs-6">Начать учиться</a>
+    <a href="{% url 'login' %}" class="btn-glass px-4 py-2 fs-6">У меня есть аккаунт</a>
+  </div>
+</div>
+{% endif %}
+
+{% if word_of_day %}
+<div class="glass-card p-3 mb-4 text-center word-of-day-card" style="max-width: 400px; margin: 0 auto;">
+  <small style="color: var(--text-secondary);">🇰🇷 Слово дня</small>
+  <div class="fs-3 fw-bold" style="font-family: 'Noto Sans KR', sans-serif;" id="wod-word">{{ word_of_day.korean }}</div>
+  <div style="color: var(--text-secondary);">{{ word_of_day.romanization }} — <span class="fw-medium" style="color: var(--text-primary);" id="wod-ru">{{ word_of_day.russian }}</span></div>
+  <div class="d-flex justify-content-center gap-2 mt-2">
+    <button class="btn-glass btn-sm tts-btn" data-text="{{ word_of_day.korean }}">🔊</button>
+    <button class="btn-glass btn-sm" id="random-word-btn" onclick="randomWord()">🎲 Случайное</button>
+  </div>
+  <div id="random-result" class="mt-2" style="display:none;">
+    <a href="#" id="random-link" class="btn-glass btn-sm text-decoration-none">🔍 Подробнее</a>
+  </div>
+</div>
+<script>
+async function randomWord() {
+  const btn = document.getElementById('random-word-btn');
+  btn.textContent = '⏳';
+  try {
+    const r = await fetch('/random-word/');
+    const d = await r.json();
+    document.getElementById('wod-word').textContent = d.korean;
+    document.getElementById('wod-ru').textContent = d.russian + (d.romanization ? ' (' + d.romanization + ')' : '');
+    const tts = document.querySelector('.tts-btn');
+    if (tts) tts.dataset.text = d.korean;
+    const rdiv = document.getElementById('random-result');
+    rdiv.style.display = 'block';
+    document.getElementById('random-link').href = '/vocabulary/word/' + d.id + '/';
+    document.querySelectorAll('.tts-player').forEach(a => a.remove());
+  } catch(e) { console.error(e); }
+  btn.textContent = '🎲 Случайное';
+}
+</script>
+{% endif %}
+
+{% if courses %}
+<div class="mt-5">
+  <h2 class="section-title">📚 Курсы</h2>
+  <div class="bento-grid">
+    {% for course in courses %}
+    <a href="{% url 'lesson_detail' course.id %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
+      <div class="fs-1 mb-2">📖</div>
+      <h5 class="fw-bold">{{ course.title }}</h5>
+      <p class="small mb-0" style="color: var(--text-secondary);">{{ course.description|truncatewords:12 }}</p>
+      <span class="badge mt-2" style="background: var(--accent);">{{ course.get_level_display }}</span>
+      <small class="d-block mt-1" style="color: var(--text-secondary);">{{ course.lesson_count }} уроков</small>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if categories %}
+<div class="mt-5">
+  <h2 class="section-title">🏷️ Категории слов</h2>
+  <div class="bento-grid">
+    {% for cat in categories %}
+    <a href="{% url 'category_detail' cat.slug %}" class="text-decoration-none glass-card text-center" style="color: var(--text-primary);">
+      <div class="fs-1 mb-1">{{ cat.icon }}</div>
+      <h6 class="fw-bold mb-0">{{ cat.name }}</h6>
+      <small style="color: var(--text-secondary);">{{ cat.word_count }} слов</small>
+    </a>
+    {% endfor %}
+    <a href="{% url 'category_list' %}" class="text-decoration-none glass-card text-center d-flex align-items-center justify-content-center" style="color: var(--text-secondary);">
+      <span>📚 Все категории</span>
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% if quizzes %}
+<div class="mt-5">
+  <h2 class="section-title">🎯 Тесты</h2>
+  <div class="bento-grid">
+    {% for quiz in quizzes %}
+    <a href="{% url 'quiz_detail' quiz.id %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
+      <h5 class="fw-bold">{{ quiz.title }}</h5>
+      <p class="small mb-0" style="color: var(--text-secondary);">{{ quiz.description|truncatewords:8 }}</p>
+      <div class="d-flex gap-2 mt-2">
+        <span class="badge" style="background: var(--accent);">{{ quiz.get_level_display }}</span>
+        <span class="badge" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">{{ quiz.q_count }} вопросов</span>
+        {% if quiz.time_limit %}
+        <span class="badge" style="background: rgba(0, 184, 148, 0.2); color: var(--text-primary);">{{ quiz.time_limit }}с</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+    <a href="{% url 'quiz_list' %}" class="text-decoration-none glass-card text-center d-flex align-items-center justify-content-center" style="color: var(--text-secondary);">
+      <span>🎯 Все тесты</span>
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

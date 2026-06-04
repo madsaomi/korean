@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Ошибка сервера{% endblock %}
+{% block content %}
+<div class="glass-card p-5 text-center" style="max-width: 500px; margin: 2rem auto;">
+  <div class="fs-1 mb-3">💥</div>
+  <h2 class="fw-bold mb-2">500 — Ошибка сервера</h2>
+  <p style="color: var(--text-secondary);">Что-то пошло не так. Попробуй позже.</p>
+  <a href="{% url 'index' %}" class="btn-glass btn-accent text-decoration-none mt-3 d-inline-block">🏠 На главную</a>
+</div>
+{% endblock %}

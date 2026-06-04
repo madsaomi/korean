@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Конструктор предложений{% endblock %}
+{% block content %}
+<a href="{% url 'hangul' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад</a>
+
+<div class="glass-card p-4 mb-4">
+  <h1 class="fw-bold mb-2">🧱 Конструктор предложений</h1>
+  <p style="color: var(--text-secondary);">Нажимай на слова, чтобы составить предложение. Нажми на предложение, чтобы услышать.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="glass-card p-4 mb-4" id="sentence-area" style="min-height: 100px;">
+      <p class="text-center" style="color: var(--text-secondary);" id="placeholder">👆 Нажми на слова ниже, чтобы собрать предложение</p>
+      <div id="sentence-words" class="d-flex flex-wrap gap-2 justify-content-center" style="display: none !important;"></div>
+    </div>
+
+    <div class="text-center mb-4">
+      <button class="btn-glass" id="clear-btn">🗑️ Очистить</button>
+      <button class="btn-glass btn-accent" id="speak-btn" style="display: none;">🔊 Прослушать</button>
+    </div>
+
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">📦 Слова</h5>
+      <div id="word-bank" class="d-flex flex-wrap gap-2 justify-content-center">
+        {% for w in word_bank %}
+        <button class="btn-glass word-chip" data-korean="{{ w.korean }}" data-russian="{{ w.russian }}">
+          {{ w.korean }}
+          <small style="color: var(--text-secondary); display: block; font-size: 0.6rem;">{{ w.russian }}</small>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">💡 Как играть</h5>
+      <ul class="small" style="color: var(--text-secondary); padding-left: 1rem;">
+        <li class="mb-1">Нажимай на слова из банка</li>
+        <li class="mb-1">Собери предложение вверху</li>
+        <li class="mb-1">Нажимай на слово в предложении, чтобы убрать</li>
+        <li class="mb-1">🔊 — прослушать готовую фразу</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const sentenceWords = document.getElementById('sentence-words');
+  const placeholder = document.getElementById('placeholder');
+  const clearBtn = document.getElementById('clear-btn');
+  const speakBtn = document.getElementById('speak-btn');
+
+  document.querySelectorAll('.word-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const korean = btn.dataset.korean;
+      const russian = btn.dataset.russian;
+      placeholder.style.display = 'none';
+      sentenceWords.style.setProperty('display', 'flex', 'important');
+
+      const wordEl = document.createElement('span');
+      wordEl.className = 'glass px-3 py-2';
+      wordEl.style.cssText = 'cursor: pointer; font-family: Noto Sans KR, sans-serif; transition: all 0.2s;';
+      wordEl.innerHTML = `${korean} <small style="color: var(--text-secondary); font-family: Inter;">${russian}</small>`;
+      wordEl.title = 'Нажми, чтобы убрать';
+      wordEl.addEventListener('click', () => {
+        wordEl.remove();
+        if (sentenceWords.children.length === 0) {
+          placeholder.style.display = 'block';
+          sentenceWords.style.setProperty('display', 'none', 'important');
+          speakBtn.style.display = 'none';
+        }
+      });
+      sentenceWords.appendChild(wordEl);
+      speakBtn.style.display = 'inline-block';
+    });
+  });
+
+  clearBtn.addEventListener('click', () => {
+    sentenceWords.innerHTML = '';
+    placeholder.style.display = 'block';
+    sentenceWords.style.setProperty('display', 'none', 'important');
+    speakBtn.style.display = 'none';
+  });
+
+  speakBtn.addEventListener('click', async () => {
+    const text = Array.from(sentenceWords.children).map(el => el.childNodes[0].textContent.trim()).join(' ');
+    if (!text) return;
+    try {
+      const res = await fetch(`/hangul/tts/?text=${encodeURIComponent(text)}`);
+      const data = await res.json();
+      if (data.url) {
+        new Audio(data.url).play();
+      }
+    } catch (e) {
+      console.error('TTS error:', e);
+    }
+  });
+})();
+</script>
+{% endblock %}

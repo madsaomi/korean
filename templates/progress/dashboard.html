@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Прогресс{% endblock %}
+{% block content %}
+<h1 class="section-title">📊 Прогресс</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-value">{{ lesson_progress }}</div>
+      <div class="stat-label">Уроков</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon">📖</div>
+      <div class="stat-value">{{ words_learned }}</div>
+      <div class="stat-label">Слов</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value">{{ total_quizzes }}</div>
+      <div class="stat-label">Тестов</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon streak-fire">🔥</div>
+      <div class="stat-value">{{ streak.current_streak }}</div>
+      <div class="stat-label">Streak</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">🏃 Streak (30 дней)</h5>
+      <div class="streak-heatmap">
+        {% for day in streak_days %}
+        <div class="streak-cell" title="{{ day.date }}: {% if day.active %}✅{% else %}❌{% endif %}"
+             style="background: {% if day.active %}var(--accent){% else %}var(--glass-bg){% endif %};">
+        </div>
+        {% endfor %}
+      </div>
+      <div class="d-flex justify-content-end gap-1 mt-2">
+        <small style="color: var(--text-secondary);">Меньше</small>
+        <div style="width: 14px; height: 14px; border-radius: 4px; background: var(--glass-bg);"></div>
+        <div style="width: 14px; height: 14px; border-radius: 4px; background: var(--accent);"></div>
+        <small style="color: var(--text-secondary);">Больше</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">🏆 Статистика</h5>
+      <div class="d-flex justify-content-between mb-2">
+        <span style="color: var(--text-secondary);">Текущая серия</span>
+        <span class="fw-bold">{{ streak.current_streak }} дней</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span style="color: var(--text-secondary);">Рекорд</span>
+        <span class="fw-bold">{{ streak.longest_streak }} дней</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span style="color: var(--text-secondary);">Слов в повторении</span>
+        <span class="fw-bold">{{ words_in_review }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if quiz_scores %}
+<div class="glass-card p-4 mt-4">
+  <h5 class="fw-bold mb-3">📈 Результаты тестов</h5>
+  <canvas id="quizChart" height="200"></canvas>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+{% if quiz_scores %}
+new Chart(document.getElementById('quizChart'), {
+  type: 'bar',
+  data: {
+    labels: [{% for q in quiz_scores %}'{{ q.title|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    datasets: [{
+      label: '%',
+      data: [{% for q in quiz_scores %}{{ q.score }}{% if not forloop.last %},{% endif %}{% endfor %}],
+      backgroundColor: 'rgba(108, 92, 231, 0.7)',
+      borderColor: 'rgba(108, 92, 231, 1)',
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      y: { beginAtZero: true, max: 100 },
+      x: { grid: { display: false } }
+    }
+  }
+});
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Мои коллекции{% endblock %}
+{% block content %}
+<a href="{% url 'category_list' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Словарь</a>
+
+<h1 class="section-title">📋 Мои коллекции слов</h1>
+
+<div class="mb-4">
+  <a href="{% url 'word_list_create' %}" class="btn-glass btn-accent text-decoration-none">➕ Создать коллекцию</a>
+</div>
+
+{% if lists %}
+<div class="bento-grid">
+  {% for wl in lists %}
+  <a href="{% url 'word_list_detail' wl.id %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
+    <div class="fs-1 mb-1">📋</div>
+    <h5 class="fw-bold mb-1">{{ wl.name }}</h5>
+    <small style="color: var(--text-secondary);">{{ wl.word_count }} слов</small>
+    <small class="d-block mt-1" style="color: var(--text-secondary); font-size: 0.7rem;">
+      Создана {{ wl.created_at|date:"d.m.Y" }}
+    </small>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="glass-card empty-state" style="max-width: 500px; margin: 0 auto;">
+  <div class="empty-icon">📋</div>
+  <h3 class="fw-bold mb-2">Нет коллекций</h3>
+  <p style="color: var(--text-secondary);">Создай свою первую коллекцию слов!</p>
+</div>
+{% endif %}
+{% endblock %}

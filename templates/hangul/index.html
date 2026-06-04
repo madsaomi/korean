@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Хангыль — Алфавит{% endblock %}
+{% block content %}
+<div class="glass-card p-4 mb-4 text-center" style="position: relative; overflow: hidden;">
+  <div style="position: absolute; top: -20px; left: -20px; width: 80px; height: 80px; background: radial-gradient(circle, rgba(52, 152, 219, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+  <h1 class="fw-bold mb-2"><span class="gradient-text">🇰🇷 Хангыль 한글</span></h1>
+  <p class="mb-0" style="color: var(--text-secondary);">Корейский алфавит — нажми на букву, чтобы услышать произношение</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="glass-card p-3">
+      <h5 class="fw-bold mb-3">🟦 Согласные (자음)</h5>
+      <div class="hangul-grid" style="grid-template-columns: repeat(5, 1fr);">
+        {% for char, roman in consonants %}
+        <div class="hangul-cell consonant tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
+          {{ char }}<span class="romanji">{{ roman }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="glass-card p-3">
+      <h5 class="fw-bold mb-3">🟥 Гласные (모음)</h5>
+      <div class="hangul-grid" style="grid-template-columns: repeat(5, 1fr);">
+        {% for char, roman in vowels %}
+        <div class="hangul-cell vowel tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
+          {{ char }}<span class="romanji">{{ roman }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="glass-card p-3">
+      <h5 class="fw-bold mb-3">🟩 Финали (받침)</h5>
+      <div class="hangul-grid" style="grid-template-columns: repeat(7, 1fr);">
+        {% for char, roman in batchim %}
+        <div class="hangul-cell batchim tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
+          {{ char }}<span class="romanji">{{ roman }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-4 d-flex gap-3 justify-content-center flex-wrap">
+  <a href="{% url 'sentence_breakdown' %}" class="btn-glass btn-accent text-decoration-none px-4">🔍 Разбор предложений</a>
+  <a href="{% url 'sentence_builder' %}" class="btn-glass text-decoration-none px-4">🧱 Конструктор</a>
+</div>
+{% endblock %}

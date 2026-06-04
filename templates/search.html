@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Поиск{% endblock %}
+{% block content %}
+<h1 class="section-title">🔍 Поиск</h1>
+
+<div class="glass-card p-4 mb-4" style="max-width: 600px; margin: 0 auto;">
+  <form method="GET" action="{% url 'unified_search' %}">
+    <div class="d-flex gap-2 mb-3">
+      <input type="text" name="q" class="glass-input" value="{{ query }}" placeholder="Слово, грамматика, урок..." autofocus>
+      <button type="submit" class="btn-glass btn-accent">🔍</button>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <select name="cat" class="glass-input" style="width: auto; min-width: 140px;">
+        <option value="">📂 Все категории</option>
+        {% for c in categories %}
+        <option value="{{ c.slug }}" {% if selected_cat == c.slug %}selected{% endif %}>{{ c.icon }} {{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="level" class="glass-input" style="width: auto; min-width: 120px;">
+        <option value="">🎯 Все уровни</option>
+        <option value="beginner" {% if selected_level == 'beginner' %}selected{% endif %}>🟢 С нуля</option>
+        <option value="elementary" {% if selected_level == 'elementary' %}selected{% endif %}>🟡 Начальный</option>
+        <option value="intermediate" {% if selected_level == 'intermediate' %}selected{% endif %}>🔴 Средний</option>
+      </select>
+      {% if query %}
+      <button type="button" class="btn-glass btn-sm" onclick="window.location='{% url 'unified_search' %}'">✕ Сброс</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{% if query %}
+<div class="glass-card p-4 mb-4">
+  <h5 class="fw-bold mb-3">📖 Слова ({{ words|length }})</h5>
+  {% if words %}
+  <div class="row g-2">
+    {% for w in words %}
+    <div class="col-md-6 col-lg-4">
+      <div class="glass p-3 text-center">
+        <a href="{% url 'word_detail' w.id %}" class="text-decoration-none" style="color: var(--text-primary);">
+          <div class="fw-bold" style="font-family: 'Noto Sans KR', sans-serif;">{{ w.korean }}</div>
+          <small style="color: var(--text-secondary);">{{ w.russian }}</small>
+          <span class="badge d-block mt-1" style="background: var(--accent); font-size: 0.55rem;">{{ w.category.name }} · {{ w.get_level_display }}</span>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color: var(--text-secondary);">Нет совпадений</p>
+  {% endif %}
+</div>
+
+<div class="glass-card p-4 mb-4">
+  <h5 class="fw-bold mb-3">📝 Грамматика ({{ grammar|length }})</h5>
+  {% if grammar %}
+  <div class="d-flex flex-wrap gap-2">
+    {% for g in grammar %}
+    <a href="{% url 'grammar:grammar_detail' g.slug %}" class="btn-glass text-decoration-none">{{ g.icon }} {{ g.title }}</a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color: var(--text-secondary);">Нет совпадений</p>
+  {% endif %}
+</div>
+
+<div class="glass-card p-4">
+  <h5 class="fw-bold mb-3">📚 Уроки ({{ lessons|length }})</h5>
+  {% if lessons %}
+  <div class="d-flex flex-wrap gap-2">
+    {% for l in lessons %}
+    <a href="{% url 'lesson_detail_with_id' l.course.id l.id %}" class="btn-glass text-decoration-none">
+      {{ l.title }}
+      <small style="color: var(--text-secondary);">({{ l.course.title }})</small>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color: var(--text-secondary);">Нет совпадений</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

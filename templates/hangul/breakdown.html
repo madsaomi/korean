@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Разбор предложений{% endblock %}
+{% block content %}
+<a href="{% url 'hangul' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад</a>
+
+<div class="glass-card p-4 mb-4">
+  <h1 class="fw-bold mb-2">🔍 Разбор предложений</h1>
+  <p style="color: var(--text-secondary);">Вставь корейское предложение — получишь разбор по словам</p>
+</div>
+
+<div class="glass-card p-4 mb-4" style="max-width: 600px; margin: 0 auto;">
+  <form method="POST">
+    {% csrf_token %}
+    <label class="fw-medium mb-2">Корейское предложение:</label>
+    <input type="text" name="sentence" class="glass-input mb-2" value="{{ input_sentence }}"
+           placeholder="예: 저는 한국어를 공부해요" style="font-family: 'Noto Sans KR', sans-serif;">
+    <button type="submit" class="btn-glass btn-accent w-100">🔍 Разобрать</button>
+  </form>
+</div>
+
+{% if result %}
+<div class="glass-card p-4 mb-4" style="max-width: 600px; margin: 0 auto;">
+  <h4 class="fw-bold mb-3">📖 Разбор:</h4>
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    {% for item in result %}
+    <div class="glass p-2 text-center" style="min-width: 80px;">
+      <div class="fw-bold" style="font-family: 'Noto Sans KR', sans-serif;">{{ item.word }}</div>
+      {% if item.matches %}
+        {% for m in item.matches %}
+        <small style="color: var(--text-secondary); display: block;">{{ m.russian }}</small>
+        <small class="badge" style="background: var(--accent); font-size: 0.6rem;">{{ m.category }}</small>
+        {% endfor %}
+      {% else %}
+        <small style="color: #e17055;">—</small>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div class="glass p-3 text-center">
+    <p class="fs-5 mb-1" style="font-family: 'Noto Sans KR', sans-serif;">{{ input_sentence }}</p>
+    <button class="btn-glass btn-sm tts-btn" data-text="{{ input_sentence }}">🔊 Прослушать</button>
+  </div>
+</div>
+{% endif %}
+
+<div class="glass-card p-4" style="max-width: 600px; margin: 0 auto;">
+  <h5 class="fw-bold mb-3">💡 Примеры для разбора:</h5>
+  <div class="d-flex flex-wrap gap-2">
+    {% for sentence, translation, level in samples %}
+    <form method="POST" style="display: inline;">
+      {% csrf_token %}
+      <input type="hidden" name="sentence" value="{{ sentence }}">
+      <button type="submit" class="btn-glass btn-sm" style="text-align: left;">
+        <span style="font-family: 'Noto Sans KR', sans-serif;">{{ sentence }}</span>
+        <br><small style="color: var(--text-secondary);">{{ translation }}</small>
+      </button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Словарь{% endblock %}
+{% block content %}
+<h1 class="section-title">🏷️ Категории слов</h1>
+
+{% if user.is_authenticated %}
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <a href="{% url 'word_list_list' %}" class="btn-glass text-decoration-none">📋 Мои коллекции</a>
+  <a href="{% url 'study_custom' %}" class="btn-glass btn-accent text-decoration-none">🎯 Своя тренировка</a>
+</div>
+{% endif %}
+
+<div class="bento-grid">
+  {% for cat in categories %}
+  <a href="{% url 'category_detail' cat.slug %}" class="text-decoration-none glass-card text-center" style="color: var(--text-primary);">
+    <div class="fs-1 mb-2">{{ cat.icon }}</div>
+    <h5 class="fw-bold">{{ cat.name }}</h5>
+    <small style="color: var(--text-secondary);">{{ cat.word_count }} слов</small>
+  </a>
+  {% empty %}
+  <div class="glass-card empty-state">
+    <p style="color: var(--text-secondary);">Категории пока не добавлены.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

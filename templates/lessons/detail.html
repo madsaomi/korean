@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}{{ course.title }}{% endblock %}
+{% block content %}
+<a href="{% url 'lesson_list' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад к урокам</a>
+
+<div class="glass-card p-4 mb-4">
+  <h1 class="fw-bold mb-1">{{ course.title }}</h1>
+  <p style="color: var(--text-secondary);">{{ course.description }}</p>
+</div>
+
+{% if lesson %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="fw-bold mb-0">{{ lesson.title }}</h3>
+  {% if lesson_count > 1 %}
+  <small style="color: var(--text-secondary);">{{ current_idx|add:1 }} / {{ lesson_count }}</small>
+  {% endif %}
+</div>
+
+<div class="glass-card p-4 mb-4">
+  {% if steps %}
+  <div class="stepper">
+    {% for step in steps %}
+    <div class="step-item">
+      <div class="step-number">{{ forloop.counter }}</div>
+      <div class="step-content glass-card p-3">
+        {% if step.title %}<h6 class="fw-bold">{{ step.title }}</h6>{% endif %}
+
+        {% if step.content_korean %}
+        <p class="fs-5" style="font-family: 'Noto Sans KR', sans-serif;">{{ step.content_korean }}</p>
+        <button class="btn-glass btn-sm tts-btn" data-text="{{ step.content_korean }}" style="position: absolute; top: 1rem; right: 1rem;">
+          🔊
+        </button>
+        {% endif %}
+
+        {% if step.content_russian %}
+        <p style="color: var(--text-secondary);">{{ step.content_russian }}</p>
+        {% endif %}
+
+        {% if step.image %}
+        <img src="{{ step.image.url }}" class="img-fluid rounded-3 mt-2" alt="{{ step.title }}">
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color: var(--text-secondary);">Шаги урока пока не добавлены.</p>
+  {% endif %}
+</div>
+
+{% if prev_lesson or next_lesson %}
+<div class="d-flex justify-content-between gap-3">
+  {% if prev_lesson %}
+  <a href="{% url 'lesson_detail_with_id' course.id prev_lesson.id %}" class="btn-glass text-decoration-none">
+    ← {{ prev_lesson.title }}
+  </a>
+  {% else %}
+  <div></div>
+  {% endif %}
+  {% if next_lesson %}
+  <a href="{% url 'lesson_detail_with_id' course.id next_lesson.id %}" class="btn-glass btn-accent text-decoration-none">
+    {{ next_lesson.title }} →
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="glass-card p-5 text-center">
+  <h3 class="fw-bold mb-2">📭 Нет уроков</h3>
+  <p style="color: var(--text-secondary);">Уроки пока не добавлены в этот курс.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Создать коллекцию{% endblock %}
+{% block content %}
+<a href="{% url 'word_list_list' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад</a>
+
+<div class="glass-card p-4" style="max-width: 500px; margin: 0 auto;">
+  <h3 class="fw-bold mb-4">➕ Новая коллекция</h3>
+  <form method="POST">
+    {% csrf_token %}
+    <label class="fw-medium mb-2">Название:</label>
+    <input type="text" name="name" class="glass-input mb-3" placeholder="Мои любимые слова" required>
+    <button type="submit" class="btn-glass btn-accent w-100">Создать</button>
+  </form>
+</div>
+{% endblock %}

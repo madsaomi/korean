@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Лидерборд{% endblock %}
+{% block content %}
+<h1 class="section-title">🏆 Лидерборд</h1>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-4 text-center">
+        <span class="streak-fire">🔥</span> По стрику
+      </h5>
+      {% for s in top_streak %}
+      <div class="leaderboard-item {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+        <div class="leaderboard-rank {% if forloop.counter == 1 %}rank-gold{% elif forloop.counter == 2 %}rank-silver{% elif forloop.counter == 3 %}rank-bronze{% else %}rank-default{% endif %}">
+          {{ forloop.counter }}
+        </div>
+        <div class="flex-grow-1">
+          <span class="fw-medium">{{ s.user.username }}</span>
+        </div>
+        <span class="badge" style="background: var(--accent);">{{ s.current_streak }}🔥</span>
+      </div>
+      {% empty %}
+      <div class="empty-state py-3">
+        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-4 text-center">📚 По урокам</h5>
+      {% for u in top_lessons %}
+      <div class="leaderboard-item {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+        <div class="leaderboard-rank {% if forloop.counter == 1 %}rank-gold{% elif forloop.counter == 2 %}rank-silver{% elif forloop.counter == 3 %}rank-bronze{% else %}rank-default{% endif %}">
+          {{ forloop.counter }}
+        </div>
+        <div class="flex-grow-1">
+          <span class="fw-medium">{{ u.username }}</span>
+        </div>
+        <span class="badge" style="background: var(--accent);">{{ u.cnt }}📚</span>
+      </div>
+      {% empty %}
+      <div class="empty-state py-3">
+        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-4 text-center">🎯 По тестам</h5>
+      {% for u in top_quizzes %}
+      <div class="leaderboard-item {% if forloop.counter == 1 %}top-1{% elif forloop.counter == 2 %}top-2{% elif forloop.counter == 3 %}top-3{% endif %}">
+        <div class="leaderboard-rank {% if forloop.counter == 1 %}rank-gold{% elif forloop.counter == 2 %}rank-silver{% elif forloop.counter == 3 %}rank-bronze{% else %}rank-default{% endif %}">
+          {{ forloop.counter }}
+        </div>
+        <div class="flex-grow-1">
+          <span class="fw-medium">{{ u.username }}</span>
+        </div>
+        <span class="badge" style="background: var(--accent);">{{ u.cnt }}🎯</span>
+      </div>
+      {% empty %}
+      <div class="empty-state py-3">
+        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
