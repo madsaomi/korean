@@ -4,14 +4,12 @@
 {% block content %}
 <a href="{% url 'category_detail' category.slug %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← {{ category.name }}</a>
 
-<div class="glass-card p-3 mb-3">
-  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <span style="color: var(--text-secondary);">{{ category.icon }} {{ category.name }}</span>
-    <div class="d-flex align-items-center gap-2">
-      <small style="color: var(--text-secondary);">{{ current }} / {{ total }}</small>
-      <div class="progress" style="width: 120px; height: 6px; background: var(--glass-bg); border-radius: 3px;">
-        <div class="progress-bar" style="width: {% widthratio current total 100 %}%; background: var(--accent); border-radius: 3px;"></div>
-      </div>
+<div class="glass p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 50px; padding: 0.75rem 1.5rem !important;">
+  <span style="color: var(--text-secondary);">{{ category.icon }} {{ category.name }}</span>
+  <div class="d-flex align-items-center gap-2">
+    <small style="color: var(--text-secondary);">{{ current }} / {{ total }}</small>
+    <div class="progress" style="width: 120px; height: 6px; background: var(--glass-bg); border-radius: 3px;">
+      <div class="progress-bar" style="width: {% widthratio current total 100 %}%; background: var(--accent); border-radius: 3px;"></div>
     </div>
   </div>
 </div>
@@ -68,8 +66,8 @@
   <button class="btn-glass tts-btn" data-text="{{ word.korean }}">🔊</button>
 </div>
 
-<div class="glass-card p-3 mt-4 text-center">
-  <small style="color: var(--text-secondary);">⌨ Шорткаты: <kbd>→</kbd> Далее, <kbd>←</kbd> Назад, <kbd>Space</kbd> Показать/Скрыть</small>
+<div class="glass p-3 mt-4 text-center" style="border-radius: 50px; padding: 0.75rem 1.5rem !important;">
+  <small style="color: var(--text-secondary);">⌨ Шорткаты: <kbd>→</kbd> Далее, <kbd>←</kbd> Назад, <kbd>Space</kbd> Перевод</small>
 </div>
 {% endblock %}
 

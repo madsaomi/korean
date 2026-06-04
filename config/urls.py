@@ -14,6 +14,7 @@ urlpatterns = [
     path('progress/', include('progress.urls')),
     path('hangul/', include('hangul.urls')),
     path('review/', include('review.urls')),
+    path('library/', include('library.urls')),
     path('', include('core.urls')),
 ]
 

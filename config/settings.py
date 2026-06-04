@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'hangul',
     'review',
     'core',
+    'library',
 ]
 
 MIDDLEWARE = [
@@ -92,3 +93,6 @@ LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LIBRARY_DIR = BASE_DIR / 'Корейский'
+

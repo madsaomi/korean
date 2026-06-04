@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ file.name }} — Библиотека{% endblock %}
+
+{% block extra_head %}
+<style>
+  .library-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 991px) {
+    .library-layout {
+      grid-template-columns: 1fr;
+    }
+    .toc-sidebar { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">
+      <span>←</span> Все материалы
+    </a>
+    <div class="d-flex gap-2">
+      {% if prev_file %}
+      <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
+      {% endif %}
+      {% if next_file %}
+      <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="glass-card p-4 mb-4">
+  <h1 class="fw-bold mb-1">{{ file.icon }} {{ file.name }}</h1>
+  <p class="mb-0" style="color: var(--text-secondary);">{{ file.description }}</p>
+</div>
+
+<div class="library-layout">
+  <!-- Table of Contents Sidebar -->
+  <aside class="toc-sidebar">
+    <div class="glass-card p-3" style="position: sticky; top: calc(var(--nav-height) + 1.5rem); max-height: calc(100vh - var(--nav-height) - 3rem); overflow-y: auto;">
+      <h6 class="fw-bold mb-3" style="color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Оглавление</h6>
+      <nav class="toc-nav">
+        {% for item in toc %}
+        <a href="#{{ item.anchor }}" class="toc-link {% if item.level == 3 %}toc-sub{% endif %}">
+          {{ item.title }}
+        </a>
+        {% endfor %}
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="glass-card p-4 md-content">
+    {{ html_content|safe }}
+  </div>
+</div>
+
+<div class="mt-4">
+  <div class="d-flex justify-content-between flex-wrap gap-2">
+    {% if prev_file %}
+    <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
+    {% else %}
+    <span></span>
+    {% endif %}
+    {% if next_file %}
+    <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
