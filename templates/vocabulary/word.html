@@ -12,12 +12,12 @@
   <div class="d-flex justify-content-center gap-3 mt-3 flex-wrap">
     <button class="btn-glass tts-btn" data-text="{{ word.korean }}">🔊 Слушать</button>
     {% if user.is_authenticated %}
-    <form method="POST" action="{% url 'add_to_review' %}" style="display:inline;">
+    <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
       {% csrf_token %}
       <input type="hidden" name="word_id" value="{{ word.id }}">
       <button type="submit" class="btn-glass">📚 Повторять</button>
     </form>
-    <form method="POST" action="{% url 'add_to_review' %}" style="display:inline;">
+    <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
       {% csrf_token %}
       <input type="hidden" name="word_id" value="{{ word.id }}">
       <input type="hidden" name="mark_learned" value="1">

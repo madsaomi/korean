@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 import json
-from accounts.models import UserProfile, Streak
+from accounts.models import UserProfile, Streak, Achievement
 from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 from vocabulary.models import Word
 from lessons.models import Lesson
@@ -19,7 +19,7 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('username', 'native_language', 'level', 'password1', 'password2')
+        fields = ('username',)
 
     def save(self, commit=True):
         user = super().save(commit=commit)
@@ -64,15 +64,16 @@ def profile(request):
     last_14 = [now.date() - timedelta(days=i) for i in range(13, -1, -1)]
     quiz_chart = []
     for d in last_14:
-        results = UserQuizResult.objects.filter(
+        results_list = list(UserQuizResult.objects.filter(
             user=request.user, completed_at__date=d
-        )
-        avg = sum(r.percentage() for r in results) / results.count() if results else None
+        ))
+        total = len(results_list)
+        avg = sum(r.percentage() for r in results_list) / total if total else None
         quiz_chart.append({'date': d.isoformat()[5:], 'avg': avg})
 
     total_lessons = Lesson.objects.count()
     achievements_count = request.user.achievements.count()
-    total_possible = 11
+    total_possible = len(Achievement.ALL_CODES)
 
     return render(request, 'accounts/profile.html', {
         'profile': profile,
@@ -117,7 +118,25 @@ def change_password(request):
 @login_required
 def achievements_page(request):
     achievements = request.user.achievements.all()
-    return render(request, 'accounts/achievements.html', {'achievements': achievements})
+    earned_codes = set(achievements.values_list('code', flat=True))
+    all_achievements = [
+        {'code': 'streak_3', 'icon': '🔥', 'title': '3 дня подряд'},
+        {'code': 'streak_7', 'icon': '🔥🔥', 'title': 'Неделя без пропусков'},
+        {'code': 'streak_30', 'icon': '💪', 'title': 'Месяц силы (30д)'},
+        {'code': 'first_lesson', 'icon': '📚', 'title': 'Первый урок'},
+        {'code': 'five_lessons', 'icon': '📚📚', 'title': '5 уроков'},
+        {'code': 'ten_lessons', 'icon': '📚📚📚', 'title': '10 уроков'},
+        {'code': 'first_quiz', 'icon': '🎯', 'title': 'Первый тест'},
+        {'code': 'five_quizzes', 'icon': '🎯🎯', 'title': '5 тестов'},
+        {'code': 'ten_words', 'icon': '📖', 'title': '10 слов'},
+        {'code': 'fifty_words', 'icon': '📖📖', 'title': '50 слов'},
+        {'code': 'hundred_words', 'icon': '💯', 'title': '100 слов'},
+    ]
+    return render(request, 'accounts/achievements.html', {
+        'achievements': achievements,
+        'all_achievements': all_achievements,
+        'earned_codes': earned_codes,
+    })
 
 @login_required
 def daily_goals_page(request):

@@ -117,10 +117,11 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+{{ quiz_chart_json|json_script:"chart-data" }}
 <script>
 const ctx = document.getElementById('quizChart');
 if (ctx) {
-  const data = {{ quiz_chart_json|safe }};
+  const data = JSON.parse(document.getElementById('chart-data').textContent);
   new Chart(ctx, {
     type: 'line',
     data: {

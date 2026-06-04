@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.utils import timezone
 from gtts import gTTS
 import os
 import hashlib
@@ -42,6 +43,19 @@ def tts_audio(request):
     text = request.GET.get('text', '')
     if not text:
         return JsonResponse({'error': 'No text'}, status=400)
+    if len(text) > 200:
+        return JsonResponse({'error': 'Text too long'}, status=400)
+
+    # Rate limit: 15 TTS requests per minute per session
+    now = timezone.now().timestamp()
+    ts_key = 'tts_timestamps'
+    timestamps = request.session.get(ts_key, [])
+    timestamps = [t for t in timestamps if now - t < 60]
+    if len(timestamps) >= 15:
+        return JsonResponse({'error': 'Rate limit. Try again later.'}, status=429)
+    timestamps.append(now)
+    request.session[ts_key] = timestamps
+
     filename = f'{hashlib.md5(text.encode()).hexdigest()}.mp3'
     tts_dir = os.path.join(settings.MEDIA_ROOT, 'tts')
     os.makedirs(tts_dir, exist_ok=True)

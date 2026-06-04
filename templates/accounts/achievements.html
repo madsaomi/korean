@@ -29,50 +29,13 @@
 <div class="glass-card p-4 mt-4">
   <h4 class="fw-bold mb-3">🔒 Все достижения</h4>
   <div class="bento-grid">
-    <div class="glass text-center p-3">
-      <div class="fs-2">🔥</div>
-      <div>3 дня подряд</div>
+    {% for a in all_achievements %}
+    <div class="glass text-center p-3" style="opacity: {% if a.code in earned_codes %}1{% else %}0.5{% endif %};">
+      <div class="fs-2">{{ a.icon }}</div>
+      <div>{{ a.title }}</div>
+      {% if a.code in earned_codes %}<div class="small" style="color: var(--success);">✅</div>{% endif %}
     </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">🔥🔥</div>
-      <div>Неделя без пропусков</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">💪</div>
-      <div>Месяц силы (30д)</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">📚</div>
-      <div>Первый урок</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">📚📚</div>
-      <div>5 уроков</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">📚📚📚</div>
-      <div>10 уроков</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">🎯</div>
-      <div>Первый тест</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">🎯🎯</div>
-      <div>5 тестов</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">📖</div>
-      <div>10 слов</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">📖📖</div>
-      <div>50 слов</div>
-    </div>
-    <div class="glass text-center p-3">
-      <div class="fs-2">💯</div>
-      <div>100 слов</div>
-    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

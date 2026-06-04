@@ -30,7 +30,7 @@
         <div class="flip-card-back">
           <div class="fs-4 fw-bold">{{ word.russian }}</div>
           <small style="color: var(--text-secondary);" class="mt-1">{{ word.get_level_display }}</small>
-          <form method="POST" action="{% url 'add_to_review' %}" class="mt-2">
+          <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form mt-2">
             {% csrf_token %}
             <input type="hidden" name="word_id" value="{{ word.id }}">
             <button type="submit" class="btn-glass btn-sm">📚 В повторение</button>

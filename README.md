@@ -4,8 +4,8 @@
 
 **Изучай корейский язык с нуля — бесплатно и в удобном темпе**
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 </div>
@@ -20,21 +20,12 @@
 | **📚 Уроки** | Пошаговые курсы с прогрессом |
 | **📖 Словарь** | Категории слов, флеш-карты, коллекции |
 | **📝 Грамматика** | Правила с упражнениями |
+| **📘 Учебник** | 8 глав учебника с закладками, выделениями 6 цветов и поиском |
 | **🎯 Тесты** | Квизы с таймером и статистикой |
 | **🔄 Повторение** | Система интервального повторения (SRS) |
 | **🏆 Лидерборд** | Соревнуйся с другими учениками |
 | **📊 Прогресс** | Heatmap стрика, графики результатов |
 | **🎯 Дневные цели** | Отслеживай ежедневные задачи |
-
-## 📸 Скриншоты
-
-<div align="center">
-
-![Dashboard](https://via.placeholder.com/800x400/6C5CE7/ffffff?text=Dashboard)
-![Hangul](https://via.placeholder.com/800x400/667eea/ffffff?text=Hangul+Alphabet)
-![Vocabulary](https://via.placeholder.com/800x400/764ba2/ffffff?text=Vocabulary+Cards)
-
-</div>
 
 ## 🚀 Быстрый старт
 
@@ -61,6 +52,9 @@ pip install -r requirements.txt
 # Примени миграции
 python manage.py migrate
 
+# Импортируй учебник из markdown-файлов
+python manage.py import_library
+
 # Создай суперпользователя
 python manage.py createsuperuser
 
@@ -72,7 +66,7 @@ python manage.py runserver
 
 ## 🛠 Технологии
 
-- **Backend:** Django 4.2, Python 3.10+
+- **Backend:** Django 6.0, Python 3.14
 - **Frontend:** Bootstrap 5.3, Custom Glassmorphism CSS
 - **БД:** SQLite (разработка) / PostgreSQL (продакшн)
 - **Дополнительно:** Chart.js, Canvas Confetti, PWA (Service Worker)
@@ -82,16 +76,20 @@ python manage.py runserver
 ```
 k-lab/
 ├── accounts/       # Профиль, ачивки, дневные цели
-├── core/           # Главная страница, поиск
+├── api/            # REST API (DRF)
+├── config/         # Настройки Django, ASGI/WSGI
+├── core/           # Главная страница, поиск, middleware
 ├── grammar/        # Грамматика и упражнения
 ├── hangul/         # Алфавит, разбор предложений
 ├── lessons/        # Уроки и курсы
+├── library/        # Учебник (8 глав в БД), закладки, выделения
 ├── progress/       # Прогресс и статистика
 ├── quiz/           # Тесты и квизы
 ├── review/         # Повторение слов (SRS)
 ├── vocabulary/     # Словарь, категории, коллекции
-├── templates/      # HTML-шаблоны
+├── templates/      # HTML-шаблоны (включая кастомные страницы ошибок)
 ├── static/         # CSS, JS, медиа
+├── Корейский/      # Исходные markdown-файлы учебника (не в git)
 ├── manage.py
 └── requirements.txt
 ```

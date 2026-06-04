@@ -5,7 +5,8 @@ from django.http import JsonResponse
 from django.db.models import Count
 from django.utils import timezone
 from .models import Quiz, Question, Answer
-from progress.models import UserQuizResult
+from progress.models import UserLessonProgress, UserQuizResult
+from accounts.utils import check_lesson_achievements, check_quiz_achievements
 
 def quiz_list(request):
     quizzes = Quiz.objects.annotate(q_count=Count('questions'))
@@ -57,12 +58,14 @@ def quiz_submit(request, pk):
     percentage = int((score / total) * 100) if total else 0
 
     if percentage >= quiz.passing_score:
-        from progress.models import UserLessonProgress
         if quiz.lesson:
             UserLessonProgress.objects.update_or_create(
                 user=request.user, lesson=quiz.lesson,
                 defaults={'completed': True, 'score': percentage, 'completed_at': timezone.now()}
             )
+
+    check_lesson_achievements(request.user, request)
+    check_quiz_achievements(request.user, request)
 
     return render(request, 'quiz/result.html', {
         'quiz': quiz,

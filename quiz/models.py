@@ -46,3 +46,6 @@ class Answer(models.Model):
 
     def __str__(self):
         return f'{"✓" if self.is_correct else "✗"} {self.text}'
+
+    class Meta:
+        ordering = ['id']

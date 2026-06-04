@@ -13,8 +13,8 @@
       <h5 class="fw-bold mb-3">🟦 Согласные (자음)</h5>
       <div class="hangul-grid" style="grid-template-columns: repeat(5, 1fr);">
         {% for char, roman in consonants %}
-        <div class="hangul-cell consonant tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
-          {{ char }}<span class="romanji">{{ roman }}</span>
+        <div class="hangul-cell consonant tts-btn" data-text="{{ char }}" role="button">
+          {{ char }}<span class="romanization-text">{{ roman }}</span>
         </div>
         {% endfor %}
       </div>
@@ -26,8 +26,8 @@
       <h5 class="fw-bold mb-3">🟥 Гласные (모음)</h5>
       <div class="hangul-grid" style="grid-template-columns: repeat(5, 1fr);">
         {% for char, roman in vowels %}
-        <div class="hangul-cell vowel tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
-          {{ char }}<span class="romanji">{{ roman }}</span>
+        <div class="hangul-cell vowel tts-btn" data-text="{{ char }}" role="button">
+          {{ char }}<span class="romanization-text">{{ roman }}</span>
         </div>
         {% endfor %}
       </div>
@@ -39,8 +39,8 @@
       <h5 class="fw-bold mb-3">🟩 Финали (받침)</h5>
       <div class="hangul-grid" style="grid-template-columns: repeat(7, 1fr);">
         {% for char, roman in batchim %}
-        <div class="hangul-cell batchim tts-btn" data-text="{{ char }}" data-audio-url="/static/audio/hangul/{{ char }}.mp3" role="button">
-          {{ char }}<span class="romanji">{{ roman }}</span>
+        <div class="hangul-cell batchim tts-btn" data-text="{{ char }}" role="button">
+          {{ char }}<span class="romanization-text">{{ roman }}</span>
         </div>
         {% endfor %}
       </div>

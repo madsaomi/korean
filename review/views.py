@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from vocabulary.models import Word
 from progress.models import UserWordProgress
+from accounts.utils import check_word_achievements
 
 @login_required
 def review_page(request):
@@ -22,10 +23,9 @@ def review_page(request):
     if request.method == 'POST':
         word_id = None
         action = None
-        is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
+        is_ajax = (                request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
                    request.content_type == 'application/json')
         if request.content_type == 'application/json':
-            import json
             try:
                 data = json.loads(request.body)
                 word_id = data.get('word_id')
@@ -47,6 +47,7 @@ def review_page(request):
                     prog.learned = True
                     if not prog.learned_at:
                         prog.learned_at = now
+                    check_word_achievements(request.user, request)
                 elif action == 'good':
                     base_days = [1, 3, 7, 14, 30]
                     days = base_days[min(prog.review_count - 1, len(base_days) - 1)]
@@ -57,17 +58,6 @@ def review_page(request):
                 session['completed'] += 1
                 session[action] = session.get(action, 0) + 1
                 request.session.modified = True
-
-        if is_ajax:
-            from django.http import JsonResponse
-            pending_count = UserWordProgress.objects.filter(
-                user=request.user, next_review__lte=now, learned=False
-            ).count()
-            return JsonResponse({
-                'success': True,
-                'pending_count': pending_count,
-                'session_summary': session
-            })
         return redirect('review')
 
     pending_count = UserWordProgress.objects.filter(
@@ -106,7 +96,6 @@ def flashcard_mode(request):
         is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
                    request.content_type == 'application/json')
         if request.content_type == 'application/json':
-            import json
             try:
                 data = json.loads(request.body)
                 word_id = data.get('word_id')
@@ -128,6 +117,7 @@ def flashcard_mode(request):
                     prog.learned = True
                     if not prog.learned_at:
                         prog.learned_at = now
+                    check_word_achievements(request.user, request)
                 elif action == 'good':
                     base_days = [1, 3, 7, 14, 30]
                     days = base_days[min(prog.review_count - 1, len(base_days) - 1)]

@@ -1,0 +1,9 @@
+from django.contrib import admin
+from rest_framework.authtoken.models import Token
+
+
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ['key', 'user', 'created']
+    search_fields = ['user__username']
+    date_hierarchy = 'created'

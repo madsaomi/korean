@@ -55,5 +55,5 @@ coverage.xml
 .pytest_cache/
 .mypy_cache/
 
-# Collectstatic output
-staticfiles/
+# Batch scripts
+seed.bat

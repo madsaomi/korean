@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}🔖 Закладки — Библиотека{% endblock %}
+{% block extra_head %}
+<style>
+  .bookmark-color-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .bm-card:hover { transform: translateX(4px); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <h1 class="fw-bold mb-1"><span class="gradient-text">🔖 Мои закладки</span></h1>
+      <p style="color:var(--text-secondary);">{{ bookmarks|length }} закладок</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'library_highlights' %}" class="library-nav-btn text-decoration-none">🎨 Выделения</a>
+      <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← В библиотеку</a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  {% for bm in bookmarks %}
+  <div class="col-md-6">
+    <div class="library-card p-3 bm-card" data-id="{{ bm.id }}">
+      <div class="d-flex align-items-center gap-2">
+        <span class="bookmark-color-dot" id="bm-dot-{{ bm.id }}" style="background:{% if bm.color == 'green' %}#22c55e{% elif bm.color == 'blue' %}#3b82f6{% elif bm.color == 'pink' %}#ec4899{% elif bm.color == 'orange' %}#f97316{% elif bm.color == 'purple' %}#a855f7{% else %}#facc15{% endif %};"></span>
+        <a href="{% url 'library_detail' bm.slug %}" class="fw-bold text-decoration-none flex-grow-1" style="color:var(--accent);">{{ bm.title }}</a>
+        <small style="color:var(--text-secondary);">{{ bm.created_at|date:"d.m.Y" }}</small>
+      </div>
+      {% if bm.section %}
+      <div class="small" style="color:var(--text-secondary);">{{ bm.section }}</div>
+      {% endif %}
+      {% if bm.note %}
+      <p class="small mb-0 mt-1" style="color:var(--text-secondary);">📝 {{ bm.note|truncatechars:80 }}</p>
+      {% endif %}
+      <div class="d-flex gap-1 mt-2">
+        <select class="bm-color-select" data-id="{{ bm.id }}" style="font-size:0.75rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;padding:0.15rem 0.3rem;color:var(--text-primary);">
+          <option value="yellow" {% if bm.color == 'yellow' %}selected{% endif %}>🟡</option>
+          <option value="green" {% if bm.color == 'green' %}selected{% endif %}>🟢</option>
+          <option value="blue" {% if bm.color == 'blue' %}selected{% endif %}>🔵</option>
+          <option value="pink" {% if bm.color == 'pink' %}selected{% endif %}>🩷</option>
+          <option value="orange" {% if bm.color == 'orange' %}selected{% endif %}>🟠</option>
+          <option value="purple" {% if bm.color == 'purple' %}selected{% endif %}>🟣</option>
+        </select>
+        <button class="action-btn bm-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ bm.id }}">📝</button>
+        <button class="action-btn bm-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ bm.id }}">✕</button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="library-card p-4 text-center">
+      <p class="mb-0" style="color:var(--text-secondary);">У тебя пока нет закладок. Открой материал, выдели текст → 🔖</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCSRFToken() {
+  const m = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (m) return m.value;
+  return document.cookie.split('; ').find(r=>r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+document.querySelectorAll('.bm-color-select').forEach(sel => {
+  sel.addEventListener('change', async function() {
+    const id = this.dataset.id;
+    const color = this.value;
+    const res = await fetch('/library/api/bookmark/update/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}&color=${color}`,
+    });
+    const data = await res.json();
+    if (data.bookmarked) {
+      const dot = document.getElementById('bm-dot-' + id);
+      const colors = {green:'#22c55e',blue:'#3b82f6',pink:'#ec4899',orange:'#f97316',purple:'#a855f7',yellow:'#facc15'};
+      dot.style.background = colors[color] || '#facc15';
+    }
+  });
+});
+
+document.querySelectorAll('.bm-note-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const id = this.dataset.id;
+    const note = prompt('Заметка к закладке:', '');
+    if (note === null) return;
+    const res = await fetch('/library/api/bookmark/update/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}&note=${encodeURIComponent(note)}`,
+    });
+    if (res.ok) location.reload();
+  });
+});
+
+document.querySelectorAll('.bm-delete-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    if (!confirm('Удалить закладку?')) return;
+    const id = this.dataset.id;
+    const res = await fetch('/library/api/bookmark/delete/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}`,
+    });
+    const data = await res.json();
+    if (data.deleted) this.closest('.bm-card').remove();
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'error_base.html' %}
+{% block title %}403 — Доступ запрещён{% endblock %}
+{% block error_content %}
+<div class="error-icon">🚫</div>
+<div class="error-code">403</div>
+<div class="error-title">Доступ запрещён</div>
+<div class="error-desc">У тебя нет прав для просмотра этой страницы. Проверь, что ты вошёл в аккаунт.</div>
+<a href="{% url 'login' %}" class="btn-glass btn-accent">🔑 Войти</a>
+<br><br>
+<a href="{% url 'index' %}" class="btn-glass" style="font-size:.85rem;">🏠 На главную</a>
+{% endblock %}

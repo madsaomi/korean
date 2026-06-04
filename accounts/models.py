@@ -27,7 +27,16 @@ class Streak(models.Model):
     longest_streak = models.IntegerField(default=0)
     last_active_date = models.DateField(default=timezone.now)
 
+    def __str__(self):
+        return f'{self.user.username} — {self.current_streak} дней'
+
 class Achievement(models.Model):
+    ALL_CODES = {
+        'streak_3', 'streak_7', 'streak_30',
+        'first_lesson', 'five_lessons', 'ten_lessons',
+        'first_quiz', 'five_quizzes',
+        'ten_words', 'fifty_words', 'hundred_words',
+    }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
     code = models.CharField(max_length=50)
     title = models.CharField(max_length=200)

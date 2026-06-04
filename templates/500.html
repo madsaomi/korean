@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
-{% block title %}Ошибка сервера{% endblock %}
-{% block content %}
-<div class="glass-card p-5 text-center" style="max-width: 500px; margin: 2rem auto;">
-  <div class="fs-1 mb-3">💥</div>
-  <h2 class="fw-bold mb-2">500 — Ошибка сервера</h2>
-  <p style="color: var(--text-secondary);">Что-то пошло не так. Попробуй позже.</p>
-  <a href="{% url 'index' %}" class="btn-glass btn-accent text-decoration-none mt-3 d-inline-block">🏠 На главную</a>
-</div>
+{% extends 'error_base.html' %}
+{% block title %}500 — Ошибка сервера{% endblock %}
+{% block error_content %}
+<div class="error-icon">💥</div>
+<div class="error-code">500</div>
+<div class="error-title">Что-то пошло не так</div>
+<div class="error-desc">На сервере произошла ошибка. Мы уже знаем о проблеме и скоро всё починим.</div>
+<a href="{% url 'index' %}" class="btn-glass btn-accent">🏠 На главную</a>
+<br><br>
+<small style="color:var(--text-secondary);font-size:.8rem;display:block;margin-top:.5rem;">Попробуй обновить страницу через пару минут</small>
 {% endblock %}

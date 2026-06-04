@@ -34,7 +34,7 @@
         <small class="mt-2 badge" style="background: var(--accent);">{{ word.get_level_display }}</small>
         {% if user.is_authenticated %}
         <div class="d-flex gap-1 mt-2 flex-wrap justify-content-center">
-          <form method="POST" action="{% url 'add_to_review' %}">
+          <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form">
             {% csrf_token %}
             <input type="hidden" name="word_id" value="{{ word.id }}">
             <button type="submit" class="btn-glass btn-sm">📚</button>

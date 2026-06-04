@@ -66,7 +66,7 @@
     <div class="d-flex gap-2 mt-3 justify-content-center flex-wrap">
       <span class="badge" style="background: var(--accent);">{{ word.get_level_display }}</span>
       <span class="badge" style="background: rgba(108,92,231,0.2); color: var(--text-primary);">{{ word.category.name }}</span>
-      <form method="POST" action="{% url 'add_to_review' %}" style="display:inline;">
+      <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
         {% csrf_token %}
         <input type="hidden" name="word_id" value="{{ word.id }}">
         <button class="btn-glass btn-sm">📚</button>

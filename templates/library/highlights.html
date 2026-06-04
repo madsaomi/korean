@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Мои выделения — Библиотека{% endblock %}
+{% block extra_head %}
+<style>
+  .hl-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: transform .15s;
+  }
+  .hl-card:hover { transform: translateX(4px); }
+  .hl-color-bar {
+    width: 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .hl-text {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .hl-note {
+    background: rgba(253,203,110,0.1);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-left: 2px solid #fdcb6e;
+  }
+  .hl-color-dot {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+      <h1 class="fw-bold mb-1"><span class="gradient-text">🎨 Мои выделения</span></h1>
+      <p style="color:var(--text-secondary);">{{ highlights|length }} выделений</p>
+    </div>
+    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← В библиотеку</a>
+  </div>
+</div>
+
+{% regroup highlights by color as color_groups %}
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <button class="action-btn active" data-filter="all" onclick="filterHL('all')">Все</button>
+  {% for group in color_groups %}
+  <button class="action-btn" data-filter="{{ group.grouper }}" onclick="filterHL('{{ group.grouper }}')">
+    <span class="hl-color-dot" style="background:{% if group.grouper == 'yellow' %}#fef08a{% elif group.grouper == 'green' %}#bbf7d0{% elif group.grouper == 'blue' %}#bfdbfe{% elif group.grouper == 'pink' %}#fbcfe8{% elif group.grouper == 'orange' %}#fed7aa{% elif group.grouper == 'purple' %}#e9d5ff{% endif %};"></span>
+    {{ group.grouper }} ({{ group.list|length }})
+  </button>
+  {% endfor %}
+</div>
+
+{% regroup highlights by slug as page_groups %}
+<div id="hl-list">
+  {% for page in page_groups %}
+  {% with first=page.list|first %}
+  <div class="mb-4">
+    <h5 class="fw-bold mb-2">{{ first.page_icon }} <a href="{% url 'library_detail' page.grouper %}" class="text-decoration-none" style="color:var(--accent);">{{ first.page_name }}</a></h5>
+    {% for h in page.list %}
+    <div class="hl-card d-flex gap-3 align-items-start" data-color="{{ h.color }}">
+      <div class="hl-color-bar" style="background:{% if h.color == 'yellow' %}#fef08a{% elif h.color == 'green' %}#bbf7d0{% elif h.color == 'blue' %}#bfdbfe{% elif h.color == 'pink' %}#fbcfe8{% elif h.color == 'orange' %}#fed7aa{% elif h.color == 'purple' %}#e9d5ff{% endif %};height:100%;min-height:2rem;"></div>
+      <div class="flex-grow-1" style="min-width:0;">
+        <div class="hl-text">“{{ h.text }}”</div>
+        {% if h.note %}
+        <div class="hl-note">📝 {{ h.note }}</div>
+        {% endif %}
+        <div class="d-flex gap-2 mt-2 align-items-center">
+          <small style="color:var(--text-secondary);font-size:0.75rem;">{{ h.created_at|date:"d.m.Y H:i" }}</small>
+          <button class="action-btn hl-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ h.id }}" data-text="{{ h.text|escapejs }}">📝</button>
+          <button class="action-btn hl-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ h.id }}">✕</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endwith %}
+  {% empty %}
+  <div class="library-card p-4 text-center">
+    <p class="mb-0" style="color:var(--text-secondary);">У тебя пока нет выделений. Открой материал и выдели текст → выбери цвет 🟡🟢🔵🩷🟠🟣</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterHL(color) {
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === color));
+  document.querySelectorAll('.hl-card').forEach(c => {
+    c.style.display = color === 'all' || c.dataset.color === color ? '' : 'none';
+  });
+}
+document.querySelectorAll('.hl-delete-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    if (!confirm('Удалить выделение?')) return;
+    const id = this.dataset.id;
+    const res = await fetch('/library/api/highlight/delete/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}`,
+    });
+    const data = await res.json();
+    if (data.deleted) this.closest('.hl-card').remove();
+  });
+});
+document.querySelectorAll('.hl-note-btn').forEach(btn => {
+  btn.addEventListener('click', async function() {
+    const id = this.dataset.id;
+    const text = this.dataset.text;
+    const note = prompt('Заметка к выделению:', '');
+    if (note === null) return;
+    const res = await fetch('/library/api/highlight/update/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `id=${id}&note=${encodeURIComponent(note)}`,
+    });
+    const data = await res.json();
+    if (data.updated) location.reload();
+  });
+});
+</script>
+{% endblock %}

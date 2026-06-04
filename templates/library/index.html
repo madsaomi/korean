@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}📚 Библиотека — Учебные материалы{% endblock %}
 {% block content %}
 <div class="library-hero text-center mb-4">
@@ -6,20 +7,59 @@
   <div class="library-hero-orb library-hero-orb-2"></div>
   <div class="library-hero-orb library-hero-orb-3"></div>
   <h1 class="fw-bold mb-2"><span class="gradient-text">📚 Библиотека</span></h1>
-  <p class="mb-0" style="color: var(--text-secondary);">Полный курс корейского языка — нажми на пузырь, чтобы начать читать</p>
+  <p class="mb-0" style="color: var(--text-secondary);">Полный курс корейского языка</p>
 </div>
+
+{% if user.is_authenticated and total_files > 0 %}
+<div class="glass-card p-3 mb-4">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div style="flex:1;min-width:200px;">
+      <div class="d-flex justify-content-between small mb-1">
+        <span style="color:var(--text-secondary);">Прогресс чтения</span>
+        <span class="fw-bold" style="color:var(--accent);">{{ total_read }} / {{ total_files }}</span>
+      </div>
+      <div class="progress" style="height:8px;background:var(--glass-border);border-radius:10px;">
+        <div class="progress-bar" style="width:{% widthratio total_read total_files 100 %}%;background:linear-gradient(135deg,var(--accent),#a78bfa);border-radius:10px;"></div>
+      </div>
+    </div>
+     <a href="{% url 'library_random' %}" class="btn-glass btn-sm px-3 text-decoration-none">🎲 Случайная</a>
+     <a href="{% url 'library_bookmarks' %}" class="btn-glass btn-sm px-3 text-decoration-none">🔖 Закладки</a>
+     <a href="{% url 'library_highlights' %}" class="btn-glass btn-sm px-3 text-decoration-none">🎨 Выделения</a>
+     <a href="{% url 'library_search' %}" class="btn-glass btn-sm px-3 text-decoration-none">🔍 Поиск</a>
+  </div>
+</div>
+{% endif %}
+
+{% if not user.is_authenticated %}
+<div class="glass-card p-3 mb-4">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <span style="color:var(--text-secondary);">🔑 Войди, чтобы отмечать прочитанное, делать заметки и сохранять закладки</span>
+    <a href="{% url 'login' %}" class="btn-glass btn-accent btn-sm px-3 text-decoration-none ms-auto">Войти</a>
+  </div>
+</div>
+{% endif %}
 
 <div class="row g-4">
   {% for f in files %}
   <div class="col-md-6 col-lg-4">
-    <a href="{% url 'library_detail' f.slug %}" class="text-decoration-none">
-      <div class="library-card p-4 h-100" style="cursor: pointer;">
-        <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'library_detail' f.slug %}" class="text-decoration-none library-card-link">
+      <div class="library-card p-4 h-100">
+        <div class="d-flex align-items-start gap-3">
           <span class="library-card-icon">{{ f.icon }}</span>
-          <div class="flex-grow-1" style="min-width: 0;">
-            <h5 class="fw-bold mb-1" style="color: var(--text-primary);">{{ f.name }}</h5>
-            <p class="mb-2 small" style="color: var(--text-secondary);">{{ f.description }}</p>
-            <span class="library-badge">{{ f.size_kb }} KB</span>
+          <div class="flex-grow-1" style="min-width:0;">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <h5 class="fw-bold mb-0" style="color:var(--text-primary);">{{ f.name }}</h5>
+              {% if f.is_read %}<span class="badge" style="background:var(--success);font-size:0.6rem;">✓</span>{% endif %}
+              {% if f.is_bookmarked %}<span style="color:var(--accent);font-size:0.8rem;">🔖</span>{% endif %}
+            </div>
+            <p class="mb-2 small" style="color:var(--text-secondary);">{{ f.description }}</p>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+              <span class="library-badge">{{ f.size_kb }} KB</span>
+              <span class="library-badge" style="background:var(--glass-border);">⏱ {{ f.read_time }} мин</span>
+              {% for tag in f.tags %}
+              <span class="library-badge" style="background:rgba(var(--accent-rgb,127,90,240),0.15);color:var(--accent);">#{{ tag }}</span>
+              {% endfor %}
+            </div>
           </div>
         </div>
       </div>
@@ -29,7 +69,7 @@
   <div class="col-12">
     <div class="library-card p-5 text-center">
       <p class="fs-4 mb-2">📭</p>
-      <p style="color: var(--text-secondary);">Папка «Корейский» пуста или не найдена</p>
+      <p style="color:var(--text-secondary);">Папка «Корейский» пуста или не найдена</p>
     </div>
   </div>
   {% endfor %}

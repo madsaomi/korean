@@ -1,17 +1,17 @@
 import random
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Count, OuterRef, Subquery
+from django.db.models import Count, OuterRef, Subquery, Q
 from django.contrib.auth.models import User
 from lessons.models import Course, Lesson
 from vocabulary.models import Category, Word
 from quiz.models import Quiz
 from progress.models import UserLessonProgress, UserWordProgress, UserQuizResult
+from accounts.models import Streak
+from grammar.models import GrammarTopic
 
 def leaderboard(request):
-    from accounts.models import Streak
     top_streak = Streak.objects.select_related('user').order_by('-current_streak')[:10]
-    from django.db.models import Q
     top_lessons = User.objects.annotate(
         cnt=Count('lesson_progress', filter=Q(lesson_progress__completed=True))
     ).order_by('-cnt')[:10]
@@ -41,7 +41,6 @@ def random_word_api(request):
     })
 
 def index(request):
-    from django.db.models import Count
     courses = Course.objects.annotate(lesson_count=Count('lessons'))[:3]
     categories = Category.objects.annotate(word_count=Count('words'))[:6]
     quizzes = Quiz.objects.annotate(q_count=Count('questions'))[:3]
@@ -56,7 +55,6 @@ def index(request):
     if request.user.is_authenticated:
         streak = getattr(request.user, 'streak', None)
         if not streak:
-            from accounts.models import Streak
             streak = Streak.objects.create(user=request.user)
         lessons_done = UserLessonProgress.objects.filter(user=request.user, completed=True).count()
         words_learned = UserWordProgress.objects.filter(user=request.user, learned=True).count()
@@ -88,7 +86,6 @@ def unified_search(request):
     categories = Category.objects.all()
     levels = ['beginner', 'elementary', 'intermediate']
     if query:
-        from django.db.models import Q
         wq = Word.objects.filter(
             Q(korean__icontains=query) | Q(russian__icontains=query) | Q(romanization__icontains=query)
         )
@@ -97,11 +94,9 @@ def unified_search(request):
         if level:
             wq = wq.filter(level=level)
         words = wq.select_related('category')[:20]
-        from grammar.models import GrammarTopic
         grammar = GrammarTopic.objects.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
         )[:5]
-        from lessons.models import Lesson
         lessons = Lesson.objects.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
         ).select_related('course')[:5]

@@ -1,10 +1,9 @@
-{% extends 'base.html' %}
-{% block title %}Страница не найдена{% endblock %}
-{% block content %}
-<div class="glass-card p-5 text-center" style="max-width: 500px; margin: 2rem auto;">
-  <div class="fs-1 mb-3">🤷</div>
-  <h2 class="fw-bold mb-2">404 — Страница не найдена</h2>
-  <p style="color: var(--text-secondary);">Такой страницы нет. Проверь URL или вернись на главную.</p>
-  <a href="{% url 'index' %}" class="btn-glass btn-accent text-decoration-none mt-3 d-inline-block">🏠 На главную</a>
-</div>
+{% extends 'error_base.html' %}
+{% block title %}404 — Страница не найдена{% endblock %}
+{% block error_content %}
+<div class="error-icon">🔍</div>
+<div class="error-code">404</div>
+<div class="error-title">Страница не найдена</div>
+<div class="error-desc">Такой страницы не существует. Возможно, она была удалена или ты перешёл по неверной ссылке.</div>
+<a href="{% url 'index' %}" class="btn-glass btn-accent">🏠 На главную</a>
 {% endblock %}

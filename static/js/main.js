@@ -169,11 +169,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let deferredPrompt;
+  const installBanner = document.getElementById('pwa-install-banner');
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBanner) installBanner.style.display = 'flex';
+  });
+  if (installBanner) {
+    installBanner.querySelector('.pwa-install-btn')?.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      if (result.outcome === 'accepted') installBanner.style.display = 'none';
+      deferredPrompt = null;
+    });
+    installBanner.querySelector('.pwa-dismiss-btn')?.addEventListener('click', () => {
+      installBanner.style.display = 'none';
+    });
+  }
+
+  const offlineToast = document.getElementById('offline-toast') || (() => {
+    const t = document.createElement('div');
+    t.id = 'offline-toast';
+    t.className = 'offline-toast';
+    t.textContent = '🌐 Нет соединения с интернетом';
+    document.body.appendChild(t);
+    return t;
+  })();
+
+  const updateOnlineStatus = () => {
+    offlineToast.classList.toggle('visible', !navigator.onLine);
+  };
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
   document.addEventListener('submit', async (e) => {
     const form = e.target;
-    const action = form.getAttribute('action');
-    if (action && (action.includes('add-to-review') || action.includes('/add/'))) {
-      e.preventDefault();
+    if (!form.classList.contains('ajax-form') && !form.querySelector('[data-ajax-form]')) return;
+    e.preventDefault();
       const submitBtn = form.querySelector('[type="submit"]') || form.querySelector('button');
       const origHtml = submitBtn ? submitBtn.innerHTML : '';
       if (submitBtn) {
@@ -182,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       try {
         const formData = new FormData(form);
-        const res = await fetch(action, {
+        const res = await fetch(form.action, {
           method: 'POST',
           headers: {
             'X-Requested-With': 'XMLHttpRequest'
@@ -214,6 +249,19 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 1500);
         }
       }
-    }
   });
+
+  const navbar = document.querySelector('.glass-nav');
+  if (navbar) {
+    const handleScroll = () => {
+      if (window.scrollY > 30) {
+        navbar.classList.add('navbar-shrunk');
+      } else {
+        navbar.classList.remove('navbar-shrunk');
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+  }
 });
+

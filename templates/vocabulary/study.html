@@ -32,7 +32,7 @@
     <div class="d-flex gap-2 mt-3 justify-content-center flex-wrap">
       <span class="badge" style="background: var(--accent);">{{ word.get_level_display }}</span>
       {% if user.is_authenticated %}
-      <form method="POST" action="{% url 'add_to_review' %}" style="display:inline;">
+      <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
         {% csrf_token %}
         <input type="hidden" name="word_id" value="{{ word.id }}">
         <button type="submit" class="btn-glass btn-sm">📚 Повторять</button>

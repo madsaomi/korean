@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ file.name }} — Библиотека{% endblock %}
 
 {% block extra_head %}
@@ -10,53 +11,189 @@
     align-items: start;
   }
   @media (max-width: 991px) {
-    .library-layout {
-      grid-template-columns: 1fr;
-    }
+    .library-layout { grid-template-columns: 1fr; }
     .toc-sidebar { display: none; }
+  }
+  .korean-tts {
+    cursor: pointer;
+    border-bottom: 2px dashed rgba(127,90,240,0.3);
+    transition: all 0.2s;
+    position: relative;
+  }
+  .korean-tts:hover {
+    background: rgba(127,90,240,0.1);
+    border-bottom-color: var(--accent);
+  }
+  .korean-tts::after {
+    content: '🔊';
+    font-size: 0.65rem;
+    position: absolute;
+    top: -0.4rem;
+    right: -0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .korean-tts:hover::after { opacity: 1; }
+  .note-highlight {
+    background: rgba(253,203,110,0.25);
+    border-bottom: 2px solid #fdcb6e;
+    cursor: pointer;
+  }
+  .word-popup {
+    position: fixed;
+    z-index: 9999;
+    min-width: 250px;
+    max-width: 350px;
+    display: none;
+  }
+  .word-popup.show { display: block; }
+  .action-btn {
+    background: none;
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+  .action-btn.active {
+    background: rgba(127,90,240,0.15);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .note-chip {
+    background: rgba(253,203,110,0.15);
+    border-left: 3px solid #fdcb6e;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .note-chip small { color: var(--text-secondary); }
+
+  /* Highlight marks */
+  mark[data-highlight-id] {
+    border-radius: 3px;
+    padding: 0 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  mark[data-highlight-id]:hover { opacity: 0.8; }
+
+  /* Highlight toolbar */
+  .highlight-toolbar button:hover { transform: scale(1.15); }
+
+  /* Selection hint */
+  .highlight-hint {
+    text-align: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: var(--glass-bg);
+    border-radius: 8px;
+    border: 1px dashed var(--glass-border);
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="mb-4">
+<div class="mb-3">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">
-      <span>←</span> Все материалы
-    </a>
-    <div class="d-flex gap-2">
-      {% if prev_file %}
-      <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
+    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← Все материалы</a>
+    <div class="d-flex align-items-center gap-2">
+      {% if user.is_authenticated %}
+      <button class="action-btn {% if is_read %}active{% endif %}" id="btn-toggle-read" data-action="toggle_read" title="Отметить прочитанным">
+        {% if is_read %}✅ Прочитано{% else %}📖 Не прочитано{% endif %}
+      </button>
+      <button class="action-btn {% if is_bookmarked %}active{% endif %}" id="btn-toggle-bookmark" data-action="toggle_bookmark" title="Закладка">
+        {% if is_bookmarked %}🔖 {% else %}🔖 {% endif %}
+      </button>
+      <a href="{% url 'library_reader' file.slug %}" class="action-btn text-decoration-none" title="Режим чтения">📖 Читать</a>
+      <a href="{% url 'library_generate_quiz' file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу">🎯 Тест</a>
       {% endif %}
-      {% if next_file %}
-      <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
-      {% endif %}
+      <div class="d-flex gap-1">
+        {% if prev_file %}
+        <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">←</a>
+        {% endif %}
+        {% if next_file %}
+        <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">→</a>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
 
 <div class="glass-card p-4 mb-4">
-  <h1 class="fw-bold mb-1">{{ file.icon }} {{ file.name }}</h1>
-  <p class="mb-0" style="color: var(--text-secondary);">{{ file.description }}</p>
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <div>
+      <h1 class="fw-bold mb-1">{{ file.icon }} {{ file.name }}</h1>
+      <p class="mb-0" style="color:var(--text-secondary);">{{ file.description }}</p>
+    </div>
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <a href="{% url 'library_highlights' %}" class="action-btn text-decoration-none" style="font-size:0.75rem;">🎨 Выделения</a>
+      <span class="library-badge">{{ file.size_kb }} KB</span>
+      <span class="library-badge" style="background:var(--glass-border);">⏱ {{ file.read_time }} мин</span>
+      {% for tag in tags %}
+      <span class="library-badge" style="background:rgba(var(--accent-rgb,127,90,240),0.15);color:var(--accent);">#{{ tag }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% if user.is_authenticated %}
+  <div class="mt-2">
+    <form id="tag-form" class="d-flex gap-1 align-items-center flex-wrap" style="display:inline-flex;">{% csrf_token %}
+      <input type="text" id="tag-input" placeholder="#тег" class="form-control form-control-sm" style="width:100px;background:var(--glass-bg);border:1px solid var(--glass-border);font-size:0.8rem;">
+      <button type="submit" class="action-btn" style="font-size:0.75rem;">+</button>
+    </form>
+  </div>
+  {% endif %}
 </div>
 
+{% if user.is_authenticated %}
+<div class="highlight-hint">✨ Выдели текст → выбери цвет 🟡🟢🔵🩷🟠🟣 или создай заметку/закладку</div>
+{% endif %}
+
+{% if user.is_authenticated and notes %}
+<div class="mb-3">
+  <details>
+    <summary style="color:var(--text-secondary);cursor:pointer;font-size:0.9rem;">📝 Заметки ({{ notes|length }})</summary>
+    <div class="mt-2" id="notes-list">
+      {% for note in notes %}
+      <div class="note-chip" data-note-id="{{ note.id }}">
+        <div class="d-flex justify-content-between">
+          <small style="color:var(--text-secondary);">{{ note.highlighted_text|truncatechars:60 }}</small>
+          <button class="btn-delete-note action-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-note-id="{{ note.id }}">✕</button>
+        </div>
+        <p class="mb-0 mt-1">{{ note.content }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </details>
+</div>
+{% endif %}
+
 <div class="library-layout">
-  <!-- Table of Contents Sidebar -->
   <aside class="toc-sidebar">
-    <div class="glass-card p-3" style="position: sticky; top: calc(var(--nav-height) + 1.5rem); max-height: calc(100vh - var(--nav-height) - 3rem); overflow-y: auto;">
-      <h6 class="fw-bold mb-3" style="color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Оглавление</h6>
+    <div class="glass-card p-3" style="position:sticky;top:calc(var(--nav-height) + 1.5rem);max-height:calc(100vh - var(--nav-height) - 3rem);overflow-y:auto;">
+      <h6 class="fw-bold mb-3" style="color:var(--text-secondary);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Оглавление</h6>
       <nav class="toc-nav">
         {% for item in toc %}
-        <a href="#{{ item.anchor }}" class="toc-link {% if item.level == 3 %}toc-sub{% endif %}">
-          {{ item.title }}
-        </a>
+        <a href="#{{ item.anchor }}" class="toc-link {% if item.level == 3 %}toc-sub{% endif %}">{{ item.title }}</a>
         {% endfor %}
       </nav>
     </div>
+    <div class="glass-card p-3 mt-3 text-center">
+      <a href="{% url 'library_random' %}" class="text-decoration-none" style="color:var(--text-secondary);font-size:0.85rem;">🎲 Случайная статья</a>
+    </div>
   </aside>
 
-  <!-- Main Content -->
-  <div class="glass-card p-4 md-content">
+  <div class="glass-card p-4 md-content" id="md-content">
     {{ html_content|safe }}
   </div>
 </div>
@@ -73,4 +210,39 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Word popup -->
+<div class="word-popup glass-card p-3" id="word-popup">
+  <div id="word-popup-content">
+    <div class="text-center py-2"><span class="tts-spinner"><span></span><span></span><span></span></span></div>
+  </div>
+</div>
+
+<!-- Note popup -->
+<div class="modal fade" id="noteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--glass-bg);backdrop-filter:blur(30px);border:1px solid var(--glass-border);color:var(--text-primary);">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold">📝 Заметка</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small" style="color:var(--text-secondary);" id="note-highlighted-preview"></p>
+        <textarea class="form-control" id="note-content" rows="3" placeholder="Твоя заметка..." style="background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);"></textarea>
+        <input type="hidden" id="note-highlighted" value="">
+        <input type="hidden" id="note-anchor" value="">
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn-glass btn-sm px-3" id="btn-save-note">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const LIBRARY_SLUG = '{{ file.slug|escapejs }}';
+</script>
+<script src="{% static 'js/library.js' %}"></script>
 {% endblock %}

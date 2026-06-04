@@ -1,9 +1,10 @@
 import random
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Count
+from django.contrib.auth.decorators import login_required
 from .models import GrammarTopic, GrammarExercise
 
 def grammar_list(request):
-    from django.db.models import Count
     topics = GrammarTopic.objects.annotate(rule_count=Count('rules'))
     return render(request, 'grammar/list.html', {'topics': topics})
 
@@ -11,10 +12,10 @@ def grammar_detail(request, slug):
     topic = get_object_or_404(GrammarTopic, slug=slug)
     rules = topic.rules.all()
     for rule in rules:
-        rule.paired_examples = zip(
+        rule.paired_examples = list(zip(
             rule.korean_examples or [],
             rule.russian_examples or []
-        )
+        ))
     return render(request, 'grammar/detail.html', {'topic': topic, 'rules': rules})
 
 def exercise_list(request):
@@ -39,6 +40,7 @@ def exercise_list(request):
         'count': count,
     })
 
+@login_required
 def start_exercise(request):
     topic = request.GET.get('topic', '')
     difficulty = request.GET.get('difficulty', '')
@@ -66,6 +68,7 @@ def start_exercise(request):
 
     return redirect('grammar:do_exercise')
 
+@login_required
 def do_exercise(request):
     exercise_ids = request.session.get('grammar_exercise_ids', [])
     index = request.session.get('grammar_exercise_index', 0)
@@ -108,6 +111,7 @@ def do_exercise(request):
         'last_explanation': last_explanation,
     })
 
+@login_required
 def exercise_result(request):
     correct = request.session.get('grammar_exercise_correct', 0)
     total = request.session.get('grammar_exercise_total', 0)
