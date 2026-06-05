@@ -33,7 +33,7 @@
 {% block content %}
 <div class="reader-header">
   <div>
-    <a href="{% url 'library_detail' file.slug %}" class="text-decoration-none" style="color:var(--text-secondary);font-size:0.9rem;">← Назад</a>
+    <a href="{% url url_detail file.slug %}" class="text-decoration-none" style="color:var(--text-secondary);font-size:0.9rem;">← Назад</a>
     <h3 class="fw-bold mt-1 mb-0">{{ file.icon }} {{ file.name }}</h3>
   </div>
   <div class="reader-controls">
@@ -42,10 +42,11 @@
     <select id="reader-font-family">
       <option value="serif">Serif</option>
       <option value="sans-serif" selected>Sans</option>
-      <option value="'Noto Sans KR', sans-serif">Noto KR</option>
+      {% if current_lang_code == 'ko' %}<option value="'Noto Sans KR', sans-serif">Noto KR</option>{% endif %}
+      {% if current_lang_code == 'ja' %}<option value="'Noto Sans JP', sans-serif">Noto JP</option>{% endif %}
     </select>
     <button id="reader-theme-toggle" title="Тема">🌙</button>
-    <a href="{% url 'library_detail' file.slug %}" class="btn-glass btn-sm px-2 text-decoration-none">✕</a>
+    <a href="{% url url_detail file.slug %}" class="btn-glass btn-sm px-2 text-decoration-none">✕</a>
   </div>
 </div>
 
@@ -59,22 +60,21 @@
 
 <div class="d-flex justify-content-between mt-4 mb-4">
   {% if prev_file %}
-  <a href="{% url 'library_reader' prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
+  <a href="{% url url_reader prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
   {% else %}
   <span></span>
   {% endif %}
   {% if next_file %}
-  <a href="{% url 'library_reader' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
+  <a href="{% url url_reader next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
   {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>const LIBRARY_SLUG = '{{ file.slug|escapejs }}';</script>
+<script>const LIBRARY_SLUG = '{{ file.slug|escapejs }}'; const LIBRARY_LANG = '{{ current_lang_name }}';</script>
 <script src="{% static 'js/library.js' %}"></script>
 <script>
 (function() {
-  // Font size
   let fontSize = parseFloat(localStorage.getItem('reader_font_size') || '16');
   const content = document.getElementById('reader-content');
   const applySize = () => { content.style.fontSize = fontSize + 'px'; localStorage.setItem('reader_font_size', fontSize); };
@@ -82,13 +82,11 @@
   document.getElementById('reader-font-dec').onclick = () => { fontSize = Math.max(12, fontSize - 2); applySize(); };
   document.getElementById('reader-font-inc').onclick = () => { fontSize = Math.min(32, fontSize + 2); applySize(); };
 
-  // Font family
   const fontSelect = document.getElementById('reader-font-family');
   fontSelect.value = localStorage.getItem('reader_font_family') || 'sans-serif';
   content.style.setProperty('--reader-font-family', fontSelect.value);
   fontSelect.onchange = () => { content.style.setProperty('--reader-font-family', fontSelect.value); localStorage.setItem('reader_font_family', fontSelect.value); };
 
-  // Theme toggle
   const themeBtn = document.getElementById('reader-theme-toggle');
   let readerDark = localStorage.getItem('reader_dark') === 'true';
   const applyTheme = () => {
@@ -103,7 +101,6 @@
   applyTheme();
   themeBtn.onclick = () => { readerDark = !readerDark; localStorage.setItem('reader_dark', readerDark); applyTheme(); };
 
-  // Reading progress
   window.addEventListener('scroll', () => {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -111,7 +108,6 @@
     document.getElementById('reader-progress-bar').style.width = Math.min(100, progress) + '%';
   }, { passive: true });
 
-  // Keyboard navigation
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
     if (e.key === 'ArrowLeft') {

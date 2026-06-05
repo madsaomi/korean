@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}🔍 Поиск по библиотеке{% endblock %}
+{% block title %}🔍 Поиск — {{ current_lang_display }}{% endblock %}
 {% block content %}
 <div class="mb-4">
-  <h1 class="fw-bold mb-2"><span class="gradient-text">🔍 Поиск по библиотеке</span></h1>
-  <p style="color:var(--text-secondary);">Полнотекстовый поиск по всем учебным материалам</p>
+  <h1 class="fw-bold mb-2"><span class="gradient-text">🔍 Поиск</span></h1>
+  <p style="color:var(--text-secondary);">Полнотекстовый поиск по {{ current_lang_display|lower }}</p>
 </div>
 
 <form method="get" class="mb-4">
@@ -24,7 +24,7 @@
     <div class="library-card p-3">
       <div class="d-flex align-items-center gap-2 mb-2">
         <span>{{ r.file.icon }}</span>
-        <a href="{% url 'library_detail' r.file.slug %}" class="fw-bold text-decoration-none" style="color:var(--accent);">{{ r.file.name }}</a>
+        <a href="{% url url_detail r.file.slug %}" class="fw-bold text-decoration-none" style="color:var(--accent);">{{ r.file.name }}</a>
         <span class="library-badge ms-auto">{{ r.match_count }} совпад.</span>
       </div>
       {% for m in r.matches|slice:":5" %}

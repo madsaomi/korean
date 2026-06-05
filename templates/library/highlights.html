@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Мои выделения — Библиотека{% endblock %}
+{% block title %}Мои выделения — {{ current_lang_display }}{% endblock %}
 {% block extra_head %}
 <style>
   .hl-card {
@@ -41,13 +41,20 @@
 </style>
 {% endblock %}
 {% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{% url 'library_ko_highlights' %}" class="btn {% if current_lang_code == 'ko' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:50px 0 0 50px;{% if current_lang_code == 'ko' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇰🇷 Корейский</a>
+    <a href="{% url 'library_ja_highlights' %}" class="btn {% if current_lang_code == 'ja' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 50px 50px 0;{% if current_lang_code == 'ja' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇯🇵 Японский</a>
+  </div>
+</div>
+
 <div class="mb-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
       <h1 class="fw-bold mb-1"><span class="gradient-text">🎨 Мои выделения</span></h1>
       <p style="color:var(--text-secondary);">{{ highlights|length }} выделений</p>
     </div>
-    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← В библиотеку</a>
+    <a href="{% url url_index %}" class="library-nav-btn text-decoration-none">← {{ current_lang_display }}</a>
   </div>
 </div>
 
@@ -67,7 +74,7 @@
   {% for page in page_groups %}
   {% with first=page.list|first %}
   <div class="mb-4">
-    <h5 class="fw-bold mb-2">{{ first.page_icon }} <a href="{% url 'library_detail' page.grouper %}" class="text-decoration-none" style="color:var(--accent);">{{ first.page_name }}</a></h5>
+    <h5 class="fw-bold mb-2">{{ first.page_icon }} <a href="{% url url_detail page.grouper %}" class="text-decoration-none" style="color:var(--accent);">{{ first.page_name }}</a></h5>
     {% for h in page.list %}
     <div class="hl-card d-flex gap-3 align-items-start" data-color="{{ h.color }}">
       <div class="hl-color-bar" style="background:{% if h.color == 'yellow' %}#fef08a{% elif h.color == 'green' %}#bbf7d0{% elif h.color == 'blue' %}#bfdbfe{% elif h.color == 'pink' %}#fbcfe8{% elif h.color == 'orange' %}#fed7aa{% elif h.color == 'purple' %}#e9d5ff{% endif %};height:100%;min-height:2rem;"></div>
@@ -96,6 +103,9 @@
 
 {% block extra_js %}
 <script>
+const LIBRARY_LANG = '{{ current_lang_name }}';
+const apiBase = '/library/' + LIBRARY_LANG + '/api';
+
 function filterHL(color) {
   document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('active', b.dataset.filter === color));
   document.querySelectorAll('.hl-card').forEach(c => {
@@ -106,7 +116,7 @@ document.querySelectorAll('.hl-delete-btn').forEach(btn => {
   btn.addEventListener('click', async function() {
     if (!confirm('Удалить выделение?')) return;
     const id = this.dataset.id;
-    const res = await fetch('/library/api/highlight/delete/', {
+    const res = await fetch(apiBase + '/highlight/delete/', {
       method: 'POST',
       headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}`,
@@ -121,7 +131,7 @@ document.querySelectorAll('.hl-note-btn').forEach(btn => {
     const text = this.dataset.text;
     const note = prompt('Заметка к выделению:', '');
     if (note === null) return;
-    const res = await fetch('/library/api/highlight/update/', {
+    const res = await fetch(apiBase + '/highlight/update/', {
       method: 'POST',
       headers: {'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}&note=${encodeURIComponent(note)}`,

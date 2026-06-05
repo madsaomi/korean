@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}🔖 Закладки — Библиотека{% endblock %}
+{% block title %}🔖 Закладки — {{ current_lang_display }}{% endblock %}
 {% block extra_head %}
 <style>
   .bookmark-color-dot {
@@ -14,6 +14,13 @@
 </style>
 {% endblock %}
 {% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{% url 'library_ko_bookmarks' %}" class="btn {% if current_lang_code == 'ko' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:50px 0 0 50px;{% if current_lang_code == 'ko' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇰🇷 Корейский</a>
+    <a href="{% url 'library_ja_bookmarks' %}" class="btn {% if current_lang_code == 'ja' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 50px 50px 0;{% if current_lang_code == 'ja' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇯🇵 Японский</a>
+  </div>
+</div>
+
 <div class="mb-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
@@ -21,8 +28,8 @@
       <p style="color:var(--text-secondary);">{{ bookmarks|length }} закладок</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{% url 'library_highlights' %}" class="library-nav-btn text-decoration-none">🎨 Выделения</a>
-      <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← В библиотеку</a>
+      <a href="{% url url_highlights %}" class="library-nav-btn text-decoration-none">🎨 Выделения</a>
+      <a href="{% url url_index %}" class="library-nav-btn text-decoration-none">← {{ current_lang_display }}</a>
     </div>
   </div>
 </div>
@@ -33,7 +40,7 @@
     <div class="library-card p-3 bm-card" data-id="{{ bm.id }}">
       <div class="d-flex align-items-center gap-2">
         <span class="bookmark-color-dot" id="bm-dot-{{ bm.id }}" style="background:{% if bm.color == 'green' %}#22c55e{% elif bm.color == 'blue' %}#3b82f6{% elif bm.color == 'pink' %}#ec4899{% elif bm.color == 'orange' %}#f97316{% elif bm.color == 'purple' %}#a855f7{% else %}#facc15{% endif %};"></span>
-        <a href="{% url 'library_detail' bm.slug %}" class="fw-bold text-decoration-none flex-grow-1" style="color:var(--accent);">{{ bm.title }}</a>
+        <a href="{% url url_detail bm.slug %}" class="fw-bold text-decoration-none flex-grow-1" style="color:var(--accent);">{{ bm.title }}</a>
         <small style="color:var(--text-secondary);">{{ bm.created_at|date:"d.m.Y" }}</small>
       </div>
       {% if bm.section %}
@@ -68,6 +75,9 @@
 
 {% block extra_js %}
 <script>
+const LIBRARY_LANG = '{{ current_lang_name }}';
+const apiBase = '/library/' + LIBRARY_LANG + '/api';
+
 function getCSRFToken() {
   const m = document.querySelector('[name=csrfmiddlewaretoken]');
   if (m) return m.value;
@@ -78,7 +88,7 @@ document.querySelectorAll('.bm-color-select').forEach(sel => {
   sel.addEventListener('change', async function() {
     const id = this.dataset.id;
     const color = this.value;
-    const res = await fetch('/library/api/bookmark/update/', {
+    const res = await fetch(apiBase + '/bookmark/update/', {
       method: 'POST',
       headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}&color=${color}`,
@@ -97,7 +107,7 @@ document.querySelectorAll('.bm-note-btn').forEach(btn => {
     const id = this.dataset.id;
     const note = prompt('Заметка к закладке:', '');
     if (note === null) return;
-    const res = await fetch('/library/api/bookmark/update/', {
+    const res = await fetch(apiBase + '/bookmark/update/', {
       method: 'POST',
       headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}&note=${encodeURIComponent(note)}`,
@@ -110,7 +120,7 @@ document.querySelectorAll('.bm-delete-btn').forEach(btn => {
   btn.addEventListener('click', async function() {
     if (!confirm('Удалить закладку?')) return;
     const id = this.dataset.id;
-    const res = await fetch('/library/api/bookmark/delete/', {
+    const res = await fetch(apiBase + '/bookmark/delete/', {
       method: 'POST',
       headers: {'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/x-www-form-urlencoded'},
       body: `id=${id}`,

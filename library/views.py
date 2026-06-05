@@ -1,6 +1,6 @@
 import json, re, random, markdown, bleach
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
@@ -11,9 +11,12 @@ KOREAN_RE = re.compile(r'[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f\ua960-\ua97c]+
 HEADING_ID_RE = re.compile(r'<h([2-3])\s*[^>]*>(.*?)</h\1>', re.DOTALL)
 KOREAN_BLOCK_RE = re.compile(r'(<p[^>]*>)(.*?)(</p>)', re.DOTALL)
 
+LANG_NAMES = {'ko': 'korean', 'ja': 'japanese'}
+LANG_DISPLAY = {'ko': '🇰🇷 Корейский', 'ja': '🇯🇵 Японский'}
 
-def _get_files():
-    return list(LibraryPage.objects.all().order_by('order'))
+
+def _get_files(lang_code='ko'):
+    return list(LibraryPage.objects.filter(language=lang_code).order_by('order'))
 
 
 def _extract_toc(md_text):
@@ -66,11 +69,12 @@ def _add_heading_ids(html):
     return HEADING_ID_RE.sub(add_id, html)
 
 
-def _process_md_html(md_text):
+def _process_md_html(md_text, lang_code='ko'):
     md = markdown.Markdown(extensions=['tables', 'fenced_code', 'toc', 'nl2br'])
     html = md.convert(md_text)
     html = _add_heading_ids(html)
-    html = _add_korean_tts_spans(html)
+    if lang_code == 'ko':
+        html = _add_korean_tts_spans(html)
     allowed_tags = [
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
         'ul', 'ol', 'li', 'dl', 'dt', 'dd',
@@ -108,7 +112,7 @@ def _search_in_file(file_info, query):
     return results
 
 
-def _get_user_data(user, files):
+def _get_user_data(user, files, lang_code='ko'):
     if not user.is_authenticated:
         for f in files:
             f.is_read = False
@@ -119,14 +123,14 @@ def _get_user_data(user, files):
     slugs = [f.slug for f in files]
     read_progress = {
         r.slug: r for r in
-        ReadingProgress.objects.filter(user=user, slug__in=slugs)
+        ReadingProgress.objects.filter(user=user, language=lang_code, slug__in=slugs)
     }
     bookmarks = set(
-        Bookmark.objects.filter(user=user, slug__in=slugs)
+        Bookmark.objects.filter(user=user, language=lang_code, slug__in=slugs)
         .values_list('slug', flat=True)
     )
     tags = {}
-    for t in LibraryTag.objects.filter(user=user, slug__in=slugs):
+    for t in LibraryTag.objects.filter(user=user, language=lang_code, slug__in=slugs):
         tags.setdefault(t.slug, []).append(t.tag)
     for f in files:
         f.is_read = f.slug in read_progress and read_progress[f.slug].read
@@ -137,50 +141,85 @@ def _get_user_data(user, files):
     return files
 
 
-# ─── Views ────────────────────────────────────────────────────────────────
+def _lang_context(lang_code, extra=None):
+    pfx = f'library_{lang_code}_'
+    ctx = {
+        'current_lang_code': lang_code,
+        'current_lang_name': LANG_NAMES.get(lang_code, 'korean'),
+        'current_lang_display': LANG_DISPLAY.get(lang_code, '🇰🇷 Корейский'),
+        'other_lang_code': 'ja' if lang_code == 'ko' else 'ko',
+        'other_lang_name': LANG_NAMES.get('ja' if lang_code == 'ko' else 'ko'),
+        'other_lang_display': LANG_DISPLAY.get('ja' if lang_code == 'ko' else 'ko'),
+        'url_index': f'{pfx}index',
+        'url_detail': f'{pfx}detail',
+        'url_random': f'{pfx}random',
+        'url_search': f'{pfx}search',
+        'url_bookmarks': f'{pfx}bookmarks',
+        'url_highlights': f'{pfx}highlights',
+        'url_reader': f'{pfx}reader',
+        'url_generate_quiz': f'{pfx}generate_quiz',
+    }
+    if extra:
+        ctx.update(extra)
+    return ctx
 
-def library_index(request):
-    files = _get_files()
-    files = _get_user_data(request.user, files)
+
+# ─── Landing page ────────────────────────────────────────────────────────────
+
+def library_home(request):
+    ko_count = LibraryPage.objects.filter(language='ko').count()
+    ja_count = LibraryPage.objects.filter(language='ja').count()
+    return render(request, 'library/home.html', {
+        'ko_count': ko_count,
+        'ja_count': ja_count,
+    })
+
+
+# ─── Views ────────────────────────────────────────────────────────────────────
+
+def library_index(request, lang_code='ko'):
+    files = _get_files(lang_code)
+    files = _get_user_data(request.user, files, lang_code)
     total_read = sum(1 for f in files if f.is_read)
     total_files = len(files)
     query = request.GET.get('q', '')
-    return render(request, 'library/index.html', {
+    ctx = _lang_context(lang_code, {
         'files': files,
         'total_read': total_read,
         'total_files': total_files,
         'query': query,
     })
+    return render(request, 'library/index.html', ctx)
 
 
-def library_random(request):
-    files = _get_files()
+def library_random(request, lang_code='ko'):
+    files = _get_files(lang_code)
     if not files:
-        return redirect('library_index')
+        return redirect('library_' + lang_code + '_index')
     f = random.choice(files)
-    return redirect('library_detail', slug=f.slug)
+    return redirect('library_' + lang_code + '_detail', slug=f.slug)
 
 
-def library_detail(request, slug):
-    current = get_object_or_404(LibraryPage, slug=slug)
+def library_detail(request, slug, lang_code='ko'):
+    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
     current.size_kb = round(len(current.content.encode('utf-8')) / 1024, 1)
-    files = _get_files()
+    files = _get_files(lang_code)
     current_idx = next((i for i, f in enumerate(files) if f.slug == slug), -1)
 
     toc = _extract_toc(current.content)
-    html_content = _process_md_html(current.content)
+    html_content = _process_md_html(current.content, lang_code)
 
     prev_file = files[current_idx - 1] if current_idx > 0 else None
     next_file = files[current_idx + 1] if current_idx < len(files) - 1 else None
 
-    ctx = {
+    ctx = _lang_context(lang_code, {
         'file': current,
         'html_content': html_content,
         'toc': toc,
         'prev_file': prev_file,
         'next_file': next_file,
         'files': files,
-    }
+    })
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -188,14 +227,14 @@ def library_detail(request, slug):
             return JsonResponse({'error': 'auth_required'}, status=403)
         if action == 'toggle_read':
             prog, _ = ReadingProgress.objects.get_or_create(
-                user=request.user, slug=slug)
+                user=request.user, language=lang_code, slug=slug)
             prog.read = not prog.read
             prog.read_at = timezone.now() if prog.read else None
             prog.save(update_fields=['read', 'read_at'])
             return JsonResponse({'read': prog.read})
         elif action == 'toggle_bookmark':
             bm, created = Bookmark.objects.get_or_create(
-                user=request.user, slug=slug,
+                user=request.user, language=lang_code, slug=slug,
                 defaults={'title': current.name, 'anchor': ''})
             if not created:
                 bm.delete()
@@ -206,7 +245,7 @@ def library_detail(request, slug):
             content = request.POST.get('content', '')
             anchor = request.POST.get('anchor', '')
             note = Note.objects.create(
-                user=request.user, slug=slug,
+                user=request.user, language=lang_code, slug=slug,
                 anchor=anchor, highlighted_text=highlighted,
                 content=content)
             return JsonResponse({
@@ -223,32 +262,32 @@ def library_detail(request, slug):
             tag = request.POST.get('tag', '').strip().lower()
             if tag:
                 LibraryTag.objects.get_or_create(
-                    user=request.user, slug=slug, tag=tag)
+                    user=request.user, language=lang_code, slug=slug, tag=tag)
             return JsonResponse({'tags': list(
-                LibraryTag.objects.filter(user=request.user, slug=slug)
+                LibraryTag.objects.filter(user=request.user, language=lang_code, slug=slug)
                 .values_list('tag', flat=True))})
         elif action == 'remove_tag':
             tag = request.POST.get('tag', '').strip().lower()
             LibraryTag.objects.filter(
-                user=request.user, slug=slug, tag=tag).delete()
+                user=request.user, language=lang_code, slug=slug, tag=tag).delete()
             return JsonResponse({'tags': list(
-                LibraryTag.objects.filter(user=request.user, slug=slug)
+                LibraryTag.objects.filter(user=request.user, language=lang_code, slug=slug)
                 .values_list('tag', flat=True))})
         return JsonResponse({'error': 'unknown_action'}, status=400)
 
     if request.user.is_authenticated:
         prog = ReadingProgress.objects.filter(
-            user=request.user, slug=slug).first()
+            user=request.user, language=lang_code, slug=slug).first()
         ctx['is_read'] = prog.read if prog else False
         ctx['is_bookmarked'] = Bookmark.objects.filter(
-            user=request.user, slug=slug).exists()
+            user=request.user, language=lang_code, slug=slug).exists()
         ctx['notes'] = list(Note.objects.filter(
-            user=request.user, slug=slug).values(
+            user=request.user, language=lang_code, slug=slug).values(
             'id', 'highlighted_text', 'content', 'anchor', 'created_at'))
         ctx['tags'] = list(LibraryTag.objects.filter(
-            user=request.user, slug=slug).values_list('tag', flat=True))
+            user=request.user, language=lang_code, slug=slug).values_list('tag', flat=True))
         ctx['total_read'] = ReadingProgress.objects.filter(
-            user=request.user, read=True).count()
+            user=request.user, language=lang_code, read=True).count()
     else:
         ctx['is_read'] = ctx['is_bookmarked'] = False
         ctx['notes'] = []
@@ -259,11 +298,15 @@ def library_detail(request, slug):
     return render(request, 'library/detail.html', ctx)
 
 
-def library_search(request):
+def library_detail_old(request, slug):
+    return redirect('library_ko_detail', slug=slug)
+
+
+def library_search(request, lang_code='ko'):
     query = request.GET.get('q', '').strip()
     results = []
     if query:
-        files = _get_files()
+        files = _get_files(lang_code)
         for f in files:
             matches = _search_in_file(f, query)
             if matches:
@@ -273,43 +316,44 @@ def library_search(request):
                     'match_count': len(matches),
                 })
         results.sort(key=lambda r: -r['match_count'])
-    return render(request, 'library/search.html', {
+    ctx = _lang_context(lang_code, {
         'query': query,
         'results': results,
     })
+    return render(request, 'library/search.html', ctx)
 
 
-def library_reader(request, slug):
-    current = get_object_or_404(LibraryPage, slug=slug)
+def library_reader(request, slug, lang_code='ko'):
+    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
     current.size_kb = round(len(current.content.encode('utf-8')) / 1024, 1)
-    files = _get_files()
+    files = _get_files(lang_code)
     current_idx = next((i for i, f in enumerate(files) if f.slug == slug), -1)
 
     toc = _extract_toc(current.content)
-    html_content = _process_md_html(current.content)
+    html_content = _process_md_html(current.content, lang_code)
     prev_file = files[current_idx - 1] if current_idx > 0 else None
     next_file = files[current_idx + 1] if current_idx < len(files) - 1 else None
 
-    return render(request, 'library/reader.html', {
+    ctx = _lang_context(lang_code, {
         'file': current,
         'html_content': html_content,
         'toc': toc,
         'prev_file': prev_file,
         'next_file': next_file,
     })
+    return render(request, 'library/reader.html', ctx)
 
 
-def library_bookmarks(request):
+def library_bookmarks(request, lang_code='ko'):
     if not request.user.is_authenticated:
         return redirect('login')
-    bookmarks = Bookmark.objects.filter(user=request.user)
-    return render(request, 'library/bookmarks.html', {
-        'bookmarks': bookmarks,
-    })
+    bookmarks = Bookmark.objects.filter(user=request.user, language=lang_code)
+    ctx = _lang_context(lang_code, {'bookmarks': bookmarks})
+    return render(request, 'library/bookmarks.html', ctx)
 
 
 @login_required
-def api_word_lookup(request):
+def api_word_lookup(request, lang_code='ko'):
     word_text = request.GET.get('word', '').strip()
     if not word_text:
         return JsonResponse({'found': False})
@@ -334,7 +378,7 @@ def api_word_lookup(request):
 
 
 @login_required
-def api_add_to_vocab(request):
+def api_add_to_vocab(request, lang_code='ko'):
     word_id = request.POST.get('word_id')
     if not word_id:
         return JsonResponse({'success': False}, status=400)
@@ -350,21 +394,21 @@ def api_add_to_vocab(request):
 
 # ─── Highlight API ─────────────────────────────────────────────────────────
 
-def api_highlights_list(request):
+def api_highlights_list(request, lang_code='ko'):
     if not request.user.is_authenticated:
         return JsonResponse({'highlights': []})
     slug = request.GET.get('slug', '')
-    if not slug:
-        qs = Highlight.objects.filter(user=request.user).values(
+    if slug:
+        qs = Highlight.objects.filter(user=request.user, language=lang_code, slug=slug).values(
+            'id', 'text', 'color', 'note', 'anchor', 'start_offset', 'end_offset', 'created_at')
+    else:
+        qs = Highlight.objects.filter(user=request.user, language=lang_code).values(
             'id', 'text', 'color', 'slug', 'note', 'anchor', 'start_offset', 'end_offset', 'created_at').order_by('-created_at')
-        return JsonResponse({'highlights': list(qs)})
-    qs = Highlight.objects.filter(user=request.user, slug=slug).values(
-        'id', 'text', 'color', 'note', 'anchor', 'start_offset', 'end_offset', 'created_at')
     return JsonResponse({'highlights': list(qs)})
 
 
 @login_required
-def api_highlight_toggle(request):
+def api_highlight_toggle(request, lang_code='ko'):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     slug = request.POST.get('slug', '')
@@ -374,12 +418,13 @@ def api_highlight_toggle(request):
     start_off = int(request.POST.get('start_offset', 0))
     end_off = int(request.POST.get('end_offset', 0))
     existing = Highlight.objects.filter(
-        user=request.user, slug=slug, text=text, start_offset=start_off, end_offset=end_off)
+        user=request.user, language=lang_code, slug=slug, text=text,
+        start_offset=start_off, end_offset=end_off)
     if existing.exists():
         existing.delete()
         return JsonResponse({'highlighted': False, 'id': None})
     hl = Highlight.objects.create(
-        user=request.user,
+        user=request.user, language=lang_code,
         slug=slug,
         anchor=request.POST.get('anchor', ''),
         text=text,
@@ -392,7 +437,7 @@ def api_highlight_toggle(request):
 
 
 @login_required
-def api_highlight_update(request):
+def api_highlight_update(request, lang_code='ko'):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     hl_id = request.POST.get('id')
@@ -408,7 +453,7 @@ def api_highlight_update(request):
 
 
 @login_required
-def api_highlight_delete(request):
+def api_highlight_delete(request, lang_code='ko'):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     hl_id = request.POST.get('id')
@@ -421,7 +466,7 @@ def api_highlight_delete(request):
 # ─── Bookmark API ─────────────────────────────────────────────────────────
 
 @login_required
-def api_bookmark_update(request):
+def api_bookmark_update(request, lang_code='ko'):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     bm_id = request.POST.get('id')
@@ -437,7 +482,7 @@ def api_bookmark_update(request):
     if not slug:
         return JsonResponse({'error': 'missing slug'}, status=400)
     bm, created = Bookmark.objects.get_or_create(
-        user=request.user, slug=slug,
+        user=request.user, language=lang_code, slug=slug,
         defaults={'title': request.POST.get('title', slug), 'anchor': ''})
     if not created:
         bm.delete()
@@ -453,7 +498,7 @@ def api_bookmark_update(request):
 
 
 @login_required
-def api_bookmark_delete(request):
+def api_bookmark_delete(request, lang_code='ko'):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
     bm_id = request.POST.get('id')
@@ -466,20 +511,21 @@ def api_bookmark_delete(request):
 # ─── Highlights summary view ──────────────────────────────────────────────
 
 @login_required
-def library_highlights(request):
-    highlights = Highlight.objects.filter(user=request.user).order_by('-created_at').values(
+def library_highlights(request, lang_code='ko'):
+    highlights = Highlight.objects.filter(user=request.user, language=lang_code).order_by('-created_at').values(
         'id', 'slug', 'text', 'color', 'note', 'anchor', 'created_at')
     page_slugs = set(h['slug'] for h in highlights)
-    pages = {p.slug: p for p in LibraryPage.objects.filter(slug__in=page_slugs)}
+    pages = {p.slug: p for p in LibraryPage.objects.filter(language=lang_code, slug__in=page_slugs)}
     for h in highlights:
         page = pages.get(h['slug'])
         h['page_name'] = page.name if page else h['slug']
         h['page_icon'] = page.icon if page else '📄'
-    return render(request, 'library/highlights.html', {'highlights': highlights})
+    ctx = _lang_context(lang_code, {'highlights': highlights})
+    return render(request, 'library/highlights.html', ctx)
 
 
-def library_generate_quiz(request, slug):
-    current = get_object_or_404(LibraryPage, slug=slug)
+def library_generate_quiz(request, slug, lang_code='ko'):
+    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
     md_text = current.content
     lines = md_text.split('\n')
 
@@ -512,8 +558,9 @@ def library_generate_quiz(request, slug):
     random.shuffle(questions)
     questions = questions[:15]
 
-    return render(request, 'library/quiz.html', {
+    ctx = _lang_context(lang_code, {
         'file': current,
         'questions': questions,
         'questions_json': json.dumps(questions),
     })
+    return render(request, 'library/quiz.html', ctx)

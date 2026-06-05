@@ -104,9 +104,17 @@
 {% endblock %}
 
 {% block content %}
+<div class="d-flex align-items-center gap-2 mb-3">
+  <a href="{% url 'library_home' %}" class="library-nav-btn text-decoration-none" style="font-size:0.85rem;">📚</a>
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{% url 'library_ko_index' %}" class="btn {% if current_lang_code == 'ko' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:50px 0 0 50px;{% if current_lang_code == 'ko' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇰🇷 Корейский</a>
+    <a href="{% url 'library_ja_index' %}" class="btn {% if current_lang_code == 'ja' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 50px 50px 0;{% if current_lang_code == 'ja' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇯🇵 Японский</a>
+  </div>
+</div>
+
 <div class="mb-3">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <a href="{% url 'library_index' %}" class="library-nav-btn text-decoration-none">← Все материалы</a>
+    <a href="{% url url_index %}" class="library-nav-btn text-decoration-none">← {{ current_lang_display }}</a>
     <div class="d-flex align-items-center gap-2">
       {% if user.is_authenticated %}
       <button class="action-btn {% if is_read %}active{% endif %}" id="btn-toggle-read" data-action="toggle_read" title="Отметить прочитанным">
@@ -115,15 +123,15 @@
       <button class="action-btn {% if is_bookmarked %}active{% endif %}" id="btn-toggle-bookmark" data-action="toggle_bookmark" title="Закладка">
         {% if is_bookmarked %}🔖 {% else %}🔖 {% endif %}
       </button>
-      <a href="{% url 'library_reader' file.slug %}" class="action-btn text-decoration-none" title="Режим чтения">📖 Читать</a>
-      <a href="{% url 'library_generate_quiz' file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу">🎯 Тест</a>
+      <a href="{% url url_reader file.slug %}" class="action-btn text-decoration-none" title="Режим чтения">📖 Читать</a>
+      <a href="{% url url_generate_quiz file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу">🎯 Тест</a>
       {% endif %}
       <div class="d-flex gap-1">
         {% if prev_file %}
-        <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">←</a>
+        <a href="{% url url_detail prev_file.slug %}" class="library-nav-btn text-decoration-none">←</a>
         {% endif %}
         {% if next_file %}
-        <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">→</a>
+        <a href="{% url url_detail next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">→</a>
         {% endif %}
       </div>
     </div>
@@ -137,7 +145,7 @@
       <p class="mb-0" style="color:var(--text-secondary);">{{ file.description }}</p>
     </div>
     <div class="ms-auto d-flex gap-2 align-items-center">
-      <a href="{% url 'library_highlights' %}" class="action-btn text-decoration-none" style="font-size:0.75rem;">🎨 Выделения</a>
+      <a href="{% url url_highlights %}" class="action-btn text-decoration-none" style="font-size:0.75rem;">🎨 Выделения</a>
       <span class="library-badge">{{ file.size_kb }} KB</span>
       <span class="library-badge" style="background:var(--glass-border);">⏱ {{ file.read_time }} мин</span>
       {% for tag in tags %}
@@ -189,7 +197,7 @@
       </nav>
     </div>
     <div class="glass-card p-3 mt-3 text-center">
-      <a href="{% url 'library_random' %}" class="text-decoration-none" style="color:var(--text-secondary);font-size:0.85rem;">🎲 Случайная статья</a>
+      <a href="{% url url_random %}" class="text-decoration-none" style="color:var(--text-secondary);font-size:0.85rem;">🎲 Случайная статья</a>
     </div>
   </aside>
 
@@ -201,12 +209,12 @@
 <div class="mt-4">
   <div class="d-flex justify-content-between flex-wrap gap-2">
     {% if prev_file %}
-    <a href="{% url 'library_detail' prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
+    <a href="{% url url_detail prev_file.slug %}" class="library-nav-btn text-decoration-none">← {{ prev_file.name }}</a>
     {% else %}
     <span></span>
     {% endif %}
     {% if next_file %}
-    <a href="{% url 'library_detail' next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
+    <a href="{% url url_detail next_file.slug %}" class="library-nav-btn library-nav-btn-accent text-decoration-none">{{ next_file.name }} →</a>
     {% endif %}
   </div>
 </div>
@@ -243,6 +251,7 @@
 {% block extra_js %}
 <script>
 const LIBRARY_SLUG = '{{ file.slug|escapejs }}';
+const LIBRARY_LANG = '{{ current_lang_name }}';
 </script>
 <script src="{% static 'js/library.js' %}"></script>
 {% endblock %}

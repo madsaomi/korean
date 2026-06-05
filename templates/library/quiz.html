@@ -3,7 +3,7 @@
 {% block title %}🎯 Тест — {{ file.name }}{% endblock %}
 {% block content %}
 <div class="mb-4">
-  <a href="{% url 'library_detail' file.slug %}" class="library-nav-btn text-decoration-none">← {{ file.name }}</a>
+  <a href="{% url url_detail file.slug %}" class="library-nav-btn text-decoration-none">← {{ file.name }}</a>
   <h1 class="fw-bold mt-2 mb-1"><span class="gradient-text">🎯 Самопроверка</span></h1>
   <p style="color:var(--text-secondary);">{{ file.icon }} {{ file.name }} — {{ questions|length }} вопросов для самопроверки</p>
 </div>
@@ -29,6 +29,6 @@
 </div>
 
 <div class="text-center my-4">
-  <a href="{% url 'library_detail' file.slug %}" class="btn-glass btn-accent px-5 py-2 text-decoration-none">📖 Вернуться к материалу</a>
+  <a href="{% url url_detail file.slug %}" class="btn-glass btn-accent px-5 py-2 text-decoration-none">📖 Вернуться к материалу</a>
 </div>
 {% endblock %}

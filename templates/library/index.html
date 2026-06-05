@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}📚 Библиотека — Учебные материалы{% endblock %}
+{% block title %}📚 {{ current_lang_display }} — Учебные материалы{% endblock %}
 {% block content %}
-<div class="library-hero text-center mb-4">
-  <div class="library-hero-orb library-hero-orb-1"></div>
-  <div class="library-hero-orb library-hero-orb-2"></div>
-  <div class="library-hero-orb library-hero-orb-3"></div>
-  <h1 class="fw-bold mb-2"><span class="gradient-text">📚 Библиотека</span></h1>
-  <p class="mb-0" style="color: var(--text-secondary);">Полный курс корейского языка</p>
+<div class="d-flex align-items-center justify-content-between gap-2 mb-4">
+  <div>
+    <h1 class="fw-bold mb-1"><span class="gradient-text">{{ current_lang_display }}</span></h1>
+    <p class="mb-0" style="color: var(--text-secondary);">
+      {% if current_lang_code == 'ko' %}Полный курс корейского языка{% else %}Полный курс японского языка{% endif %}
+    </p>
+  </div>
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{% url 'library_ko_index' %}" class="btn {% if current_lang_code == 'ko' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:50px 0 0 50px;{% if current_lang_code == 'ko' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇰🇷 Корейский</a>
+    <a href="{% url 'library_ja_index' %}" class="btn {% if current_lang_code == 'ja' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 50px 50px 0;{% if current_lang_code == 'ja' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇯🇵 Японский</a>
+  </div>
 </div>
 
 {% if user.is_authenticated and total_files > 0 %}
@@ -22,10 +27,10 @@
         <div class="progress-bar" style="width:{% widthratio total_read total_files 100 %}%;background:linear-gradient(135deg,var(--accent),#a78bfa);border-radius:10px;"></div>
       </div>
     </div>
-     <a href="{% url 'library_random' %}" class="btn-glass btn-sm px-3 text-decoration-none">🎲 Случайная</a>
-     <a href="{% url 'library_bookmarks' %}" class="btn-glass btn-sm px-3 text-decoration-none">🔖 Закладки</a>
-     <a href="{% url 'library_highlights' %}" class="btn-glass btn-sm px-3 text-decoration-none">🎨 Выделения</a>
-     <a href="{% url 'library_search' %}" class="btn-glass btn-sm px-3 text-decoration-none">🔍 Поиск</a>
+     <a href="{% url url_random %}" class="btn-glass btn-sm px-3 text-decoration-none">🎲 Случайная</a>
+     <a href="{% url url_bookmarks %}" class="btn-glass btn-sm px-3 text-decoration-none">🔖 Закладки</a>
+     <a href="{% url url_highlights %}" class="btn-glass btn-sm px-3 text-decoration-none">🎨 Выделения</a>
+     <a href="{% url url_search %}" class="btn-glass btn-sm px-3 text-decoration-none">🔍 Поиск</a>
   </div>
 </div>
 {% endif %}
@@ -42,7 +47,7 @@
 <div class="row g-4">
   {% for f in files %}
   <div class="col-md-6 col-lg-4">
-    <a href="{% url 'library_detail' f.slug %}" class="text-decoration-none library-card-link">
+    <a href="{% url url_detail f.slug %}" class="text-decoration-none library-card-link">
       <div class="library-card p-4 h-100">
         <div class="d-flex align-items-start gap-3">
           <span class="library-card-icon">{{ f.icon }}</span>
@@ -69,7 +74,10 @@
   <div class="col-12">
     <div class="library-card p-5 text-center">
       <p class="fs-4 mb-2">📭</p>
-      <p style="color:var(--text-secondary);">Папка «Корейский» пуста или не найдена</p>
+      <p style="color:var(--text-secondary);">
+        {% if current_lang_code == 'ko' %}Папка «Корейский» пуста или не найдена
+        {% else %}Папка «Японский» пуста или не найдена{% endif %}
+      </p>
     </div>
   </div>
   {% endfor %}

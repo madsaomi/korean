@@ -2,9 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+LANGUAGES = [('ko', '🇰🇷 Корейский'), ('ja', '🇯🇵 Японский')]
+
 
 class LibraryPage(models.Model):
-    slug = models.SlugField(max_length=200, unique=True)
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
+    slug = models.SlugField(max_length=200)
     name = models.CharField(max_length=200)
     icon = models.CharField(max_length=10, default='📄')
     description = models.TextField(blank=True)
@@ -16,30 +19,34 @@ class LibraryPage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['order']
+        ordering = ['language', 'order']
+        unique_together = ['language', 'slug']
         verbose_name = 'Страница библиотеки'
         verbose_name_plural = 'Страницы библиотеки'
 
     def __str__(self):
-        return self.name
+        return f'[{"KO" if self.language == "ko" else "JA"}] {self.name}'
 
 
 class ReadingProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reading_progress')
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
     slug = models.CharField(max_length=200)
     read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ['user', 'slug']
+        unique_together = ['user', 'language', 'slug']
         verbose_name_plural = 'Reading progress'
 
     def __str__(self):
-        return f'{self.user.username} — {self.slug} ({'✓' if self.read else '○'})'
+        mark = '✓' if self.read else '○'
+        return f'{self.user.username} — {self.slug} ({mark})'
 
 
 class Bookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='library_bookmarks')
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
     slug = models.CharField(max_length=200)
     title = models.CharField(max_length=300)
     anchor = models.CharField(max_length=200, blank=True)
@@ -57,6 +64,7 @@ class Bookmark(models.Model):
 
 class Highlight(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='library_highlights')
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
     slug = models.CharField(max_length=200)
     anchor = models.CharField(max_length=200, blank=True)
     text = models.TextField()
@@ -76,6 +84,7 @@ class Highlight(models.Model):
 
 class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='library_notes')
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
     slug = models.CharField(max_length=200)
     anchor = models.CharField(max_length=200, blank=True)
     highlighted_text = models.TextField(blank=True)
@@ -92,11 +101,12 @@ class Note(models.Model):
 
 class LibraryTag(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='library_tags')
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
     slug = models.CharField(max_length=200)
     tag = models.CharField(max_length=50)
 
     class Meta:
-        unique_together = ['user', 'slug', 'tag']
+        unique_together = ['user', 'language', 'slug', 'tag']
 
     def __str__(self):
         return f'{self.user.username} — {self.slug}: {self.tag}'

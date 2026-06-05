@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}📚 Библиотека{% endblock %}
+{% block content %}
+<div class="library-hero text-center mb-5">
+  <div class="library-hero-orb library-hero-orb-1"></div>
+  <div class="library-hero-orb library-hero-orb-2"></div>
+  <div class="library-hero-orb library-hero-orb-3"></div>
+  <h1 class="fw-bold mb-2"><span class="gradient-text">📚 Библиотека</span></h1>
+  <p class="mb-0" style="color: var(--text-secondary);">Выбери язык для изучения</p>
+</div>
+
+<div class="row g-4 justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <a href="{% url 'library_ko_index' %}" class="text-decoration-none">
+      <div class="library-card p-5 text-center h-100" style="transition: transform 0.3s;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🇰🇷</div>
+        <h2 class="fw-bold gradient-text mb-2">Корейский</h2>
+        <p style="color:var(--text-secondary);">Полный курс корейского языка: хангыль, грамматика, лексика, фразы и культура</p>
+        <span class="badge" style="background:var(--accent);font-size:0.9rem;padding:0.4rem 1.2rem;">
+          {% if ko_count %}{{ ko_count }} глав{% else %}Начать изучение{% endif %}
+        </span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-6 col-lg-5">
+    <a href="{% url 'library_ja_index' %}" class="text-decoration-none">
+      <div class="library-card p-5 text-center h-100" style="transition: transform 0.3s;">
+        <div style="font-size:4rem;margin-bottom:1rem;">🇯🇵</div>
+        <h2 class="fw-bold" style="color:var(--accent);">Японский</h2>
+        <p style="color:var(--text-secondary);">Полный курс японского языка: хирагана, катакана, кандзи, грамматика N5-N4 и JLPT</p>
+        <span class="badge" style="background:var(--accent);font-size:0.9rem;padding:0.4rem 1.2rem;">
+          {% if ja_count %}{{ ja_count }} глав{% else %}Начать изучение{% endif %}
+        </span>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

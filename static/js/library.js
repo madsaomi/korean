@@ -4,6 +4,8 @@
   const csrf = document.querySelector('[name=csrfmiddlewaretoken]');
   const csrfToken = csrf ? csrf.value : '';
   const slug = typeof LIBRARY_SLUG !== 'undefined' ? LIBRARY_SLUG : '';
+  const lang = typeof LIBRARY_LANG !== 'undefined' ? LIBRARY_LANG : 'korean';
+  const apiBase = `/library/${lang}/api`;
 
   function getCSRF() {
     const c = document.querySelector('[name=csrfmiddlewaretoken]');
@@ -28,7 +30,7 @@
 
   async function fetchHighlights() {
     try {
-      const res = await fetch(`/library/api/highlights/?slug=${encodeURIComponent(slug)}`);
+      const res = await fetch(`${apiBase}/highlights/?slug=${encodeURIComponent(slug)}`);
       const data = await res.json();
       if (data.highlights) {
         data.highlights.forEach(h => renderHighlight(h));
@@ -114,7 +116,7 @@
     if (!confirm('Удалить выделение?')) return;
     const id = mark.dataset.highlightId;
     try {
-      const res = await fetch('/library/api/highlight/toggle/', {
+      const res = await fetch(`${apiBase}/highlight/toggle/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `slug=${encodeURIComponent(slug)}&text=${encodeURIComponent(mark.dataset.highlightText)}`,
@@ -242,7 +244,7 @@
 
   async function saveHighlight(text, color, anchor, startOff, endOff) {
     try {
-      const res = await fetch('/library/api/highlight/toggle/', {
+      const res = await fetch(`${apiBase}/highlight/toggle/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `slug=${encodeURIComponent(slug)}&text=${encodeURIComponent(text)}&color=${encodeURIComponent(color)}&anchor=${encodeURIComponent(anchor)}&start_offset=${startOff}&end_offset=${endOff}`,
@@ -257,7 +259,7 @@
   async function saveBookmark(text) {
     try {
       const title = document.querySelector('h1')?.textContent?.trim() || slug;
-      const res = await fetch('/library/api/bookmark/update/', {
+      const res = await fetch(`${apiBase}/bookmark/update/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}&note=${encodeURIComponent(text)}`,
@@ -350,7 +352,7 @@
     if (!wordText || wordText.length < 2) return;
     showPopup(wordText, 0, 0);
     try {
-      const res = await fetch(`/library/api/word-lookup/?word=${encodeURIComponent(wordText)}`);
+      const res = await fetch(`${apiBase}/word-lookup/?word=${encodeURIComponent(wordText)}`);
       const data = await res.json();
       if (data.found) {
         currentWordId = data.id;
@@ -371,7 +373,7 @@
         if (btn) {
           btn.addEventListener('click', async () => {
             try {
-              const r = await fetch('/library/api/add-to-vocab/', {
+              const r = await fetch(`${apiBase}/add-to-vocab/`, {
                 method: 'POST',
                 headers: {'X-CSRFToken': getCSRF(), 'Content-Type': 'application/x-www-form-urlencoded'},
                 body: `word_id=${data.id}`,
@@ -394,7 +396,8 @@
   document.addEventListener('dblclick', (e) => {
     const sel = window.getSelection();
     const text = sel.toString().trim();
-    if (text && /[\uac00-\ud7af]/.test(text)) {
+    // Korean or Japanese characters trigger word lookup
+    if (text && /[\uac00-\ud7af\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/.test(text)) {
       const word = text.split(/\s+/)[0];
       lookupWord(word);
       const range = sel.getRangeAt(0);
@@ -521,7 +524,7 @@
 
   // ─── Keyboard shortcuts ────────────────────────────────────────────────
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagNAME === 'TEXTAREA') return;
     if (e.key === 'b' || e.key === 'B') {
       const bm = document.getElementById('btn-toggle-bookmark');
       if (bm) bm.click();
