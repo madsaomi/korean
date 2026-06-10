@@ -5,29 +5,6 @@ from django.utils import timezone
 LANGUAGES = [('ko', '🇰🇷 Корейский'), ('ja', '🇯🇵 Японский')]
 
 
-class LibraryPage(models.Model):
-    language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)
-    slug = models.SlugField(max_length=200)
-    name = models.CharField(max_length=200)
-    icon = models.CharField(max_length=10, default='📄')
-    description = models.TextField(blank=True)
-    content = models.TextField()
-    order = models.PositiveIntegerField(default=0)
-    word_count = models.PositiveIntegerField(default=0)
-    read_time = models.PositiveIntegerField(default=1)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['language', 'order']
-        unique_together = ['language', 'slug']
-        verbose_name = 'Страница библиотеки'
-        verbose_name_plural = 'Страницы библиотеки'
-
-    def __str__(self):
-        return f'[{"KO" if self.language == "ko" else "JA"}] {self.name}'
-
-
 class ReadingProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reading_progress')
     language = models.CharField(max_length=2, choices=LANGUAGES, default='ko', db_index=True)

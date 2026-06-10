@@ -100,7 +100,6 @@ LOGIN_URL = '/accounts/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LIBRARY_DIR = BASE_DIR / 'Корейский'
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = True

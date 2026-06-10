@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from gtts import gTTS
 import os
+import json
 import hashlib
 from django.conf import settings
 
@@ -66,14 +67,25 @@ def tts_audio(request):
     return JsonResponse({'url': f'{settings.MEDIA_URL}tts/{filename}'})
 
 def sentence_builder(request):
-    import random
-    all_words = list(Word.objects.select_related('category')[:100])
-    random.shuffle(all_words)
+    from vocabulary.models import Category
+    words = Word.objects.select_related('category').all().order_by('category__name', 'korean')
+    categories = Category.objects.all().order_by('name')
     word_bank = [
-        {'id': w.id, 'korean': w.korean, 'russian': w.russian, 'category': w.category.name}
-        for w in all_words[:30]
+        {
+            'id': w.id,
+            'korean': w.korean,
+            'russian': w.russian,
+            'category': w.category.name,
+            'category_slug': w.category.slug,
+            'level': w.level,
+        }
+        for w in words
     ]
-    return render(request, 'hangul/builder.html', {'word_bank': word_bank})
+    return render(request, 'hangul/builder.html', {
+        'word_bank': word_bank,
+        'categories': categories,
+        'word_bank_json': json.dumps(word_bank, ensure_ascii=False),
+    })
 
 SAMPLE_SENTENCES = [
     ("저는 한국어를 공부해요", "Я учу корейский", "beginner"),

@@ -5,7 +5,7 @@
 
 <div class="glass-card p-4 mb-4">
   <h1 class="fw-bold mb-2">🧱 Конструктор предложений</h1>
-  <p style="color: var(--text-secondary);">Нажимай на слова, чтобы составить предложение. Нажми на предложение, чтобы услышать.</p>
+  <p style="color: var(--text-secondary);">Нажимай на слова, чтобы составить предложение. Перетаскивай или используй стрелки для изменения порядка.</p>
 </div>
 
 <div class="row g-4">
@@ -15,18 +15,64 @@
       <div id="sentence-words" class="d-flex flex-wrap gap-2 justify-content-center" style="display: none !important;"></div>
     </div>
 
-    <div class="text-center mb-4">
+    <div class="text-center mb-3" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
       <button class="btn-glass" id="clear-btn">🗑️ Очистить</button>
+      <button class="btn-glass" id="undo-btn" disabled>↩️ Отменить</button>
       <button class="btn-glass btn-accent" id="speak-btn" style="display: none;">🔊 Прослушать</button>
+      <button class="btn-glass" id="copy-btn" style="display: none;" title="Копировать в буфер">📋 Копировать</button>
+      <span id="word-count" class="btn-glass" style="opacity: 0.7; cursor: default;"></span>
+    </div>
+
+    <div class="glass-card p-3 mb-3" id="particles-bar" style="display: none;">
+      <div class="d-flex flex-wrap gap-1 align-items-center">
+        <small style="color:var(--text-secondary);margin-right:4px;">🔧 Частицы:</small>
+        <button class="btn-glass btn-sm particle-btn" data-particle="은/는">은/는</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="이/가">이/가</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="을/를">을/를</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="에">에</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="에서">에서</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="도">도</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="만">만</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="와/과">와/과</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="하고">하고</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="부터">부터</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="까지">까지</button>
+        <button class="btn-glass btn-sm particle-btn" data-particle="의">의</button>
+      </div>
     </div>
 
     <div class="glass-card p-4">
-      <h5 class="fw-bold mb-3">📦 Слова</h5>
-      <div id="word-bank" class="d-flex flex-wrap gap-2 justify-content-center">
+      <div class="mb-3">
+        <h5 class="fw-bold mb-2">🔍 Фильтры</h5>
+        <div class="d-flex gap-2 flex-wrap mb-2">
+          <input type="text" id="search-input" class="form-control" placeholder="Поиск слов..." style="flex: 1; min-width: 140px; background: var(--bg-primary); border: 1px solid var(--border-glass); color: var(--text-primary);">
+          <select id="sort-select" class="form-select" style="width: auto; background: var(--bg-primary); border: 1px solid var(--border-glass); color: var(--text-primary);">
+            <option value="default">🔤 Порядок</option>
+            <option value="alpha-asc">А-Я</option>
+            <option value="alpha-desc">Я-А</option>
+            <option value="category">По темам</option>
+            <option value="shuffle">🎲 Случайно</option>
+          </select>
+        </div>
+        <div id="category-filters" class="d-flex flex-wrap gap-1 mb-2">
+          <button class="btn-glass btn-sm category-filter active" data-category="all">Все</button>
+          {% for c in categories %}
+          <button class="btn-glass btn-sm category-filter" data-category="{{ c.slug }}">{{ c.name }}</button>
+          {% endfor %}
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn-glass btn-sm" id="toggle-trans-btn">🙈 Скрыть переводы</button>
+          <button class="btn-glass btn-sm" id="random-fill-btn">🎲 Случайные слова</button>
+        </div>
+      </div>
+
+      <h5 class="fw-bold mb-3">📦 Слова <small style="color: var(--text-secondary); font-weight: normal;" id="word-count-label">({{ word_bank|length }})</small></h5>
+      <div id="word-bank" class="d-flex flex-wrap gap-2 justify-content-center" style="max-height: 400px; overflow-y: auto;">
         {% for w in word_bank %}
-        <button class="btn-glass word-chip" data-korean="{{ w.korean }}" data-russian="{{ w.russian }}">
+        <button class="btn-glass word-chip" data-korean="{{ w.korean }}" data-russian="{{ w.russian }}" data-category="{{ w.category_slug }}" style="position: relative;">
           {{ w.korean }}
-          <small style="color: var(--text-secondary); display: block; font-size: 0.6rem;">{{ w.russian }}</small>
+          <small class="translation" style="color: var(--text-secondary); display: block; font-size: 0.6rem;">{{ w.russian }}</small>
+          <span class="category-badge" data-slug="{{ w.category_slug }}">{{ w.category }}</span>
         </button>
         {% endfor %}
       </div>
@@ -34,72 +80,431 @@
   </div>
 
   <div class="col-lg-4">
-    <div class="glass-card p-4">
+    <div class="glass-card p-4 mb-4">
       <h5 class="fw-bold mb-3">💡 Как играть</h5>
       <ul class="small" style="color: var(--text-secondary); padding-left: 1rem;">
         <li class="mb-1">Нажимай на слова из банка</li>
-        <li class="mb-1">Собери предложение вверху</li>
-        <li class="mb-1">Нажимай на слово в предложении, чтобы убрать</li>
-        <li class="mb-1">🔊 — прослушать готовую фразу</li>
+        <li class="mb-1">Используй 🔧 <strong>частицы</strong> для связи слов</li>
+        <li class="mb-1">Стрелки ◀ ▶ меняют порядок слов</li>
+        <li class="mb-1">Можно <strong>перетаскивать</strong> слова</li>
+        <li class="mb-1">Нажми на слово в предложении, чтобы убрать</li>
+        <li class="mb-1">🔊 — прослушать · ↩️ — отменить удаление</li>
+        <li class="mb-1"><kbd>Space</kbd> — озвучить · <kbd>Esc</kbd> — очистить · <kbd>Z</kbd> — отменить</li>
       </ul>
+    </div>
+
+    <div class="glass-card p-4">
+      <h5 class="fw-bold mb-3">📜 История</h5>
+      <div id="sentence-history">
+        <p class="small" style="color: var(--text-secondary);" id="history-empty">Пока пусто. Собери своё первое предложение!</p>
+        <ul id="history-list" class="list-unstyled mb-0" style="display: none;"></ul>
+      </div>
+      <button class="btn-glass btn-sm mt-2" id="clear-history-btn" style="display: none;">🗑️ Очистить историю</button>
     </div>
   </div>
 </div>
+
+<style>
+.category-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 0.5rem;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.word-chip { transition: transform .12s, opacity .12s, box-shadow .12s; }
+.word-chip.dragging { opacity: .35; }
+.word-chip.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.word-chip.added { animation: pop-in .2s ease; }
+.word-chip.removing { animation: pop-out .15s ease forwards; }
+@keyframes pop-in {
+  0% { transform: scale(.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes pop-out {
+  0% { transform: scale(1); opacity: 0; }
+  100% { transform: scale(.5); opacity: 0; }
+}
+.sentence-word-wrap .word-chip { cursor: grab; user-select: none; }
+.sentence-word-wrap .word-chip:active { cursor: grabbing; }
+.category-filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+#speak-btn.loading { opacity: .6; pointer-events: none; }
+#undo-btn:disabled { opacity: .35; pointer-events: none; }
+.particle-btn { font-size: .75rem; }
+.history-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 8px; border-radius: 8px; cursor: pointer;
+  transition: background .15s;
+}
+.history-item:hover { background: var(--bg-primary); }
+.history-item .history-text { font-family: Noto Sans KR, sans-serif; }
+.history-item .history-del { cursor: pointer; opacity: .5; padding: 0 4px; }
+.history-item .history-del:hover { opacity: 1; }
+.word-move-btn {
+  cursor: pointer; padding: 0 4px; font-size: .7rem; opacity: .5;
+  transition: opacity .15s; line-height: 1; display: inline-flex; align-items: center;
+}
+.word-move-btn:hover { opacity: 1; }
+.sentence-word-wrap {
+  display: inline-flex; align-items: center; gap: 2px;
+}
+.sentence-word-wrap .btn-glass { padding: 8px 12px; }
+.sentence-word-wrap .move-group { display: inline-flex; flex-direction: column; gap: 0; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 (function() {
+  const wordBank = document.getElementById('word-bank');
   const sentenceWords = document.getElementById('sentence-words');
   const placeholder = document.getElementById('placeholder');
   const clearBtn = document.getElementById('clear-btn');
+  const undoBtn = document.getElementById('undo-btn');
   const speakBtn = document.getElementById('speak-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  const wordCount = document.getElementById('word-count');
+  const searchInput = document.getElementById('search-input');
+  const sortSelect = document.getElementById('sort-select');
+  const toggleTransBtn = document.getElementById('toggle-trans-btn');
+  const randomFillBtn = document.getElementById('random-fill-btn');
+  const particlesBar = document.getElementById('particles-bar');
+  const historyList = document.getElementById('history-list');
+  const historyEmpty = document.getElementById('history-empty');
+  const clearHistoryBtn = document.getElementById('clear-history-btn');
+  const wordCountLabel = document.getElementById('word-count-label');
 
-  document.querySelectorAll('.word-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const korean = btn.dataset.korean;
-      const russian = btn.dataset.russian;
+  let dragSrcEl = null;
+  let showTranslations = true;
+  let currentSort = 'default';
+  let undoStack = [];
+
+  function declOfNum(n, t) { return t[n%10==1&&n%100!=11?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2]; }
+
+  function updateWordCount() {
+    const count = sentenceWords.children.length;
+    wordCount.textContent = `📝 ${count} ${declOfNum(count, ['слово', 'слова', 'слов'])}`;
+    speakBtn.style.display = count ? 'inline-block' : 'none';
+    copyBtn.style.display = count ? 'inline-block' : 'none';
+    particlesBar.style.display = count ? 'block' : 'none';
+    if (count === 0) {
+      placeholder.style.display = 'block';
+      sentenceWords.style.setProperty('display', 'none', 'important');
+    } else {
       placeholder.style.display = 'none';
       sentenceWords.style.setProperty('display', 'flex', 'important');
+    }
+  }
 
-      const wordEl = document.createElement('span');
-      wordEl.className = 'glass px-3 py-2';
-      wordEl.style.cssText = 'cursor: pointer; font-family: Noto Sans KR, sans-serif; transition: all 0.2s;';
-      wordEl.innerHTML = `${korean} <small style="color: var(--text-secondary); font-family: Inter;">${russian}</small>`;
-      wordEl.title = 'Нажми, чтобы убрать';
-      wordEl.addEventListener('click', () => {
-        wordEl.remove();
-        if (sentenceWords.children.length === 0) {
-          placeholder.style.display = 'block';
-          sentenceWords.style.setProperty('display', 'none', 'important');
-          speakBtn.style.display = 'none';
-        }
+  function getSentenceText() {
+    return Array.from(sentenceWords.children).map(el => {
+      const chip = el.querySelector('.btn-glass') || el;
+      return chip.dataset.korean || chip.childNodes[0].textContent.trim();
+    }).join(' ');
+  }
+
+  function makeSentenceWordEl(korean, russian, categorySlug) {
+    const wrap = document.createElement('span');
+    wrap.className = 'sentence-word-wrap';
+
+    const chip = document.createElement('span');
+    chip.className = 'btn-glass word-chip';
+    chip.draggable = true;
+    chip.dataset.korean = korean;
+    chip.dataset.russian = russian;
+    chip.dataset.category = categorySlug || '';
+    chip.innerHTML = korean + ` <small class="translation" style="color:var(--text-secondary);display:block;font-size:.6rem;${showTranslations?'':'display:none;'}">${russian}</small>`;
+
+    const moves = document.createElement('span');
+    moves.className = 'move-group';
+    moves.innerHTML = '<span class="word-move-btn" data-dir="left">◀</span><span class="word-move-btn" data-dir="right">▶</span>';
+
+    moves.querySelectorAll('.word-move-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (btn.dataset.dir === 'left') moveLeft(wrap);
+        else moveRight(wrap);
       });
-      sentenceWords.appendChild(wordEl);
-      speakBtn.style.display = 'inline-block';
+    });
+
+    wrap.appendChild(chip);
+    wrap.appendChild(moves);
+
+    chip.addEventListener('click', (e) => {
+      if (e.target.closest('.move-group,.word-move-btn')) return;
+      wrap.classList.add('removing');
+      undoStack.push({ korean, russian, categorySlug });
+      undoBtn.disabled = false;
+      setTimeout(() => { wrap.remove(); updateWordCount(); }, 150);
+    });
+
+    chip.addEventListener('dragstart', (e) => {
+      dragSrcEl = wrap;
+      chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      document.querySelectorAll('#sentence-words .sentence-word-wrap .word-chip').forEach(el => el.classList.remove('drag-over'));
+    });
+
+    chip.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (wrap !== dragSrcEl) chip.classList.add('drag-over');
+    });
+
+    chip.addEventListener('dragleave', () => { chip.classList.remove('drag-over'); });
+
+    chip.addEventListener('drop', (e) => {
+      e.preventDefault();
+      chip.classList.remove('drag-over');
+      if (dragSrcEl && dragSrcEl !== wrap) {
+        const after = wrap.nextSibling === dragSrcEl ? wrap : null;
+        if (after) sentenceWords.insertBefore(dragSrcEl, after);
+        else sentenceWords.insertBefore(dragSrcEl, wrap);
+      }
+      dragSrcEl = null;
+    });
+
+    chip.addEventListener('pointerdown', (e) => {
+      if ((e.pointerType === 'touch' || e.pointerType === 'pen') && !e.target.closest('.move-group,.word-move-btn')) {
+        dragSrcEl = wrap;
+        chip.setPointerCapture(e.pointerId);
+      }
+    });
+
+    chip.addEventListener('pointermove', (e) => {
+      if (!dragSrcEl || dragSrcEl !== wrap || (e.pointerType !== 'touch' && e.pointerType !== 'pen')) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (!el) return;
+      const target = el.closest('.sentence-word-wrap');
+      if (target && target !== dragSrcEl) {
+        const mid = target.getBoundingClientRect().left + target.getBoundingClientRect().width / 2;
+        if (e.clientX < mid) sentenceWords.insertBefore(dragSrcEl, target);
+        else sentenceWords.insertBefore(dragSrcEl, target.nextSibling);
+      }
+    });
+
+    chip.addEventListener('pointerup', () => { if (dragSrcEl === wrap) dragSrcEl = null; });
+
+    return wrap;
+  }
+
+  function moveLeft(el) {
+    const prev = el.previousElementSibling;
+    if (prev) el.parentNode.insertBefore(el, prev);
+  }
+
+  function moveRight(el) {
+    const next = el.nextElementSibling;
+    if (next) el.parentNode.insertBefore(next, el);
+  }
+
+  function addWordToSentence(korean, russian, categorySlug) {
+    const wrap = makeSentenceWordEl(korean, russian, categorySlug);
+    sentenceWords.appendChild(wrap);
+    const chip = wrap.querySelector('.word-chip');
+    chip.classList.add('added');
+    setTimeout(() => chip.classList.remove('added'), 200);
+    updateWordCount();
+  }
+
+  function applyFiltersAndSort() {
+    const activeCat = document.querySelector('.category-filter.active');
+    const category = activeCat ? activeCat.dataset.category : 'all';
+    const query = searchInput.value.toLowerCase().trim();
+    const container = wordBank;
+    const chips = Array.from(container.querySelectorAll('.word-chip'));
+
+    let visible = chips.filter(el => {
+      const matchCat = category === 'all' || el.dataset.category === category;
+      const korean = el.dataset.korean.toLowerCase();
+      const russian = el.dataset.russian.toLowerCase();
+      const matchSearch = !query || korean.includes(query) || russian.includes(query);
+      el.style.display = matchCat && matchSearch ? '' : 'none';
+      return matchCat && matchSearch;
+    });
+
+    if (currentSort === 'shuffle') {
+      for (let i = visible.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        container.appendChild(visible[i]);
+        container.appendChild(visible[j]);
+      }
+    } else if (currentSort === 'alpha-asc') {
+      visible.sort((a, b) => a.dataset.korean.localeCompare(b.dataset.korean));
+      visible.forEach(el => container.appendChild(el));
+    } else if (currentSort === 'alpha-desc') {
+      visible.sort((a, b) => b.dataset.korean.localeCompare(a.dataset.korean));
+      visible.forEach(el => container.appendChild(el));
+    } else if (currentSort === 'category') {
+      visible.sort((a, b) => a.dataset.category.localeCompare(b.dataset.category) || a.dataset.korean.localeCompare(b.dataset.korean));
+      visible.forEach(el => container.appendChild(el));
+    }
+
+    wordCountLabel.textContent = `(${visible.length})`;
+  }
+
+  function addSentenceToHistory(text) {
+    let h = JSON.parse(localStorage.getItem('sentence_history') || '[]');
+    h = h.filter(s => s !== text);
+    h.unshift(text);
+    if (h.length > 20) h = h.slice(0, 20);
+    localStorage.setItem('sentence_history', JSON.stringify(h));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const h = JSON.parse(localStorage.getItem('sentence_history') || '[]');
+    if (h.length === 0) {
+      historyEmpty.style.display = 'block';
+      historyList.style.display = 'none';
+      clearHistoryBtn.style.display = 'none';
+      return;
+    }
+    historyEmpty.style.display = 'none';
+    historyList.style.display = 'block';
+    clearHistoryBtn.style.display = 'inline-block';
+    historyList.innerHTML = h.map((text, idx) => `
+      <li class="history-item" data-idx="${idx}">
+        <span class="history-text">${text}</span>
+        <span class="history-del" title="Удалить">✕</span>
+      </li>
+    `).join('');
+    historyList.querySelectorAll('.history-item').forEach(item => {
+      const text = h[parseInt(item.dataset.idx)];
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.history-del')) {
+          let hh = JSON.parse(localStorage.getItem('sentence_history') || '[]');
+          hh = hh.filter(s => s !== text);
+          localStorage.setItem('sentence_history', JSON.stringify(hh));
+          renderHistory();
+          return;
+        }
+        speakText(text);
+      });
+    });
+  }
+
+  async function speakText(text) {
+    if (!text) return;
+    speakBtn.classList.add('loading');
+    try {
+      const res = await fetch(`/hangul/tts/?text=${encodeURIComponent(text)}`);
+      const data = await res.json();
+      if (data.url) {
+        const audio = new Audio(data.url);
+        audio.onended = () => speakBtn.classList.remove('loading');
+        audio.onerror = () => speakBtn.classList.remove('loading');
+        audio.play();
+      } else { speakBtn.classList.remove('loading'); }
+    } catch (e) { speakBtn.classList.remove('loading'); console.error('TTS error:', e); }
+  }
+
+  // --- Event handlers ---
+
+  document.querySelectorAll('.category-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFiltersAndSort();
+    });
+  });
+
+  searchInput.addEventListener('input', applyFiltersAndSort);
+
+  sortSelect.addEventListener('change', () => {
+    currentSort = sortSelect.value;
+    applyFiltersAndSort();
+  });
+
+  toggleTransBtn.addEventListener('click', () => {
+    showTranslations = !showTranslations;
+    toggleTransBtn.textContent = showTranslations ? '🙈 Скрыть переводы' : '👁️ Показать переводы';
+    document.querySelectorAll('.translation').forEach(el => {
+      el.style.display = showTranslations ? '' : 'none';
+    });
+  });
+
+  randomFillBtn.addEventListener('click', () => {
+    sentenceWords.innerHTML = '';
+    undoStack = [];
+    undoBtn.disabled = true;
+    const chips = Array.from(wordBank.querySelectorAll('.word-chip')).filter(el => el.style.display !== 'none');
+    if (!chips.length) return;
+    const count = Math.min(4 + Math.floor(Math.random() * 4), chips.length);
+    const picked = [...chips].sort(() => Math.random() - 0.5).slice(0, count);
+    picked.forEach(el => addWordToSentence(el.dataset.korean, el.dataset.russian, el.dataset.category));
+  });
+
+  document.querySelectorAll('#word-bank .word-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addWordToSentence(btn.dataset.korean, btn.dataset.russian, btn.dataset.category);
+    });
+  });
+
+  document.querySelectorAll('.particle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addWordToSentence(btn.dataset.particle, '', 'particle');
     });
   });
 
   clearBtn.addEventListener('click', () => {
     sentenceWords.innerHTML = '';
-    placeholder.style.display = 'block';
-    sentenceWords.style.setProperty('display', 'none', 'important');
-    speakBtn.style.display = 'none';
+    undoStack = [];
+    undoBtn.disabled = true;
+    updateWordCount();
+  });
+
+  undoBtn.addEventListener('click', () => {
+    const item = undoStack.pop();
+    if (!item) { undoBtn.disabled = true; return; }
+    addWordToSentence(item.korean, item.russian, item.categorySlug);
+    if (!undoStack.length) undoBtn.disabled = true;
   });
 
   speakBtn.addEventListener('click', async () => {
-    const text = Array.from(sentenceWords.children).map(el => el.childNodes[0].textContent.trim()).join(' ');
+    const text = getSentenceText();
+    if (!text) return;
+    addSentenceToHistory(text);
+    await speakText(text);
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const text = getSentenceText();
     if (!text) return;
     try {
-      const res = await fetch(`/hangul/tts/?text=${encodeURIComponent(text)}`);
-      const data = await res.json();
-      if (data.url) {
-        new Audio(data.url).play();
-      }
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = '✅ Скопировано';
+      setTimeout(() => { copyBtn.textContent = '📋 Копировать'; }, 2000);
     } catch (e) {
-      console.error('TTS error:', e);
+      copyBtn.textContent = '❌ Ошибка';
+      setTimeout(() => { copyBtn.textContent = '📋 Копировать'; }, 2000);
     }
   });
+
+  clearHistoryBtn.addEventListener('click', () => {
+    localStorage.removeItem('sentence_history');
+    renderHistory();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.code === 'Space') { e.preventDefault(); speakBtn.click(); }
+    if (e.code === 'Escape') { clearBtn.click(); }
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { undoBtn.click(); }
+    if (e.code === 'KeyZ' && !e.ctrlKey && !e.metaKey) { undoBtn.click(); }
+  });
+
+  renderHistory();
+  updateWordCount();
 })();
 </script>
 {% endblock %}

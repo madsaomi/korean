@@ -1,8 +1,7 @@
 import re
+from dataclasses import dataclass
 from pathlib import Path
-from django.core.management.base import BaseCommand
 from django.conf import settings
-from library.models import LibraryPage
 
 ICONS = {
     'ko': {
@@ -19,6 +18,7 @@ ICONS = {
         'глоссарий': '📖', 'словарь': '📖', 'ресурсы': '🔗',
     },
 }
+
 DESCRIPTIONS = {
     'ko': {
         'введение': 'Общая информация о корейском языке, история и мотивация',
@@ -49,66 +49,99 @@ DESCRIPTIONS = {
 }
 
 
-class Command(BaseCommand):
-    help = 'Импортирует Markdown-файлы в базу данных как LibraryPage'
+@dataclass
+class PageInfo:
+    language: str
+    slug: str
+    name: str
+    icon: str
+    description: str
+    content: str
+    order: int
+    word_count: int
+    read_time: int
 
-    def add_arguments(self, parser):
-        parser.add_argument('--dir', type=str, default=None, help='Путь к папке с .md файлами')
-        parser.add_argument('--language', type=str, default='ko', choices=['ko', 'ja'],
-                            help='Язык: ko (Корейский) или ja (Японский)')
+    @property
+    def size_kb(self):
+        return round(len(self.content.encode('utf-8')) / 1024, 1)
 
-    def handle(self, *args, **options):
-        lang = options['language']
-        default_dir = 'Корейский' if lang == 'ko' else 'Японский'
-        if options['dir']:
-            lib_dir = Path(options['dir'])
-        elif lang == 'ko' and hasattr(settings, 'LIBRARY_DIR'):
-            lib_dir = settings.LIBRARY_DIR
-        else:
-            lib_dir = settings.BASE_DIR / default_dir
 
-        if not lib_dir.exists():
-            self.stderr.write(f'Папка {lib_dir} не найдена')
-            return
+def _get_md_dir(language):
+    return settings.BASE_DIR / ('Корейский' if language == 'ko' else 'Японский')
 
-        md_files = sorted(lib_dir.glob('*.md'))
-        if not md_files:
-            self.stderr.write(f'В папке {lib_dir} нет .md файлов')
-            return
 
-        icons = ICONS.get(lang, {})
-        descriptions = DESCRIPTIONS.get(lang, {})
+def _parse_frontmatter(text):
+    if text.startswith('---'):
+        parts = text.split('---', 2)
+        if len(parts) >= 3:
+            try:
+                import yaml
+                fm = yaml.safe_load(parts[1]) or {}
+                return fm, parts[2].strip()
+            except Exception:
+                pass
+    return {}, text
 
-        for order, f in enumerate(md_files, start=1):
-            slug = f.stem
-            name_clean = re.sub(r'^\d+_', '', f.stem)
+
+def _file_to_pageinfo(filepath, language, order):
+    text = filepath.read_text(encoding='utf-8')
+    fm, body = _parse_frontmatter(text)
+
+    slug = filepath.stem
+    name_clean = re.sub(r'^\d+_', '', filepath.stem)
+
+    icon = fm.get('icon', '')
+    if not icon:
+        icons = ICONS.get(language, {})
+        for key, val in icons.items():
+            if key in name_clean.lower():
+                icon = val
+                break
+        if not icon:
             icon = '📄'
-            for key, val in icons.items():
-                if key in name_clean.lower():
-                    icon = val
-                    break
-            desc = ''
-            for key, val in descriptions.items():
-                if key in name_clean.lower():
-                    desc = val
-                    break
-            md_text = f.read_text(encoding='utf-8')
-            word_count = len(md_text.split())
-            read_time = max(1, round(word_count / 200))
 
-            page, created = LibraryPage.objects.update_or_create(
-                language=lang, slug=slug,
-                defaults={
-                    'name': name_clean,
-                    'icon': icon,
-                    'description': desc,
-                    'content': md_text,
-                    'order': order,
-                    'word_count': word_count,
-                    'read_time': read_time,
-                }
-            )
-            status = 'создан' if created else 'обновлён'
-            self.stdout.write(f'[OK] {page.name} ({slug}) - {status}')
+    description = fm.get('description', '')
+    if not description:
+        descriptions = DESCRIPTIONS.get(language, {})
+        for key, val in descriptions.items():
+            if key in name_clean.lower():
+                description = val
+                break
 
-        self.stdout.write(f'Импортировано {len(md_files)} страниц(ы) для языка {lang}')
+    word_count = len(body.split())
+    read_time = max(1, round(word_count / 200))
+
+    return PageInfo(
+        language=language, slug=slug, name=name_clean,
+        icon=icon, description=description, content=body,
+        order=order, word_count=word_count, read_time=read_time,
+    )
+
+
+def get_all_pages(language='ko'):
+    md_dir = _get_md_dir(language)
+    if not md_dir.exists():
+        return []
+    files = sorted(md_dir.rglob('*.md'))
+    return [_file_to_pageinfo(f, language, i + 1) for i, f in enumerate(files)]
+
+
+def get_page(language, slug):
+    md_dir = _get_md_dir(language)
+    all_files = sorted(md_dir.rglob('*.md'))
+    for i, f in enumerate(all_files):
+        if f.stem == slug:
+            return _file_to_pageinfo(f, language, i + 1)
+    return None
+
+
+def get_page_count(language='ko'):
+    md_dir = _get_md_dir(language)
+    if not md_dir.exists():
+        return 0
+    return len(list(md_dir.rglob('*.md')))
+
+
+def get_pages_by_slugs(language, slugs):
+    pages = get_all_pages(language)
+    return {p.slug: p for p in pages if p.slug in slugs}

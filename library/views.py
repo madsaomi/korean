@@ -4,7 +4,8 @@ from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Q
-from .models import LibraryPage, ReadingProgress, Bookmark, Note, Highlight, LibraryTag
+from .models import ReadingProgress, Bookmark, Note, Highlight, LibraryTag
+from .pages import get_all_pages, get_page, get_page_count, get_pages_by_slugs
 from vocabulary.models import Word
 
 KOREAN_RE = re.compile(r'[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f\ua960-\ua97c]+')
@@ -16,7 +17,7 @@ LANG_DISPLAY = {'ko': '🇰🇷 Корейский', 'ja': '🇯🇵 Японс�
 
 
 def _get_files(lang_code='ko'):
-    return list(LibraryPage.objects.filter(language=lang_code).order_by('order'))
+    return get_all_pages(lang_code)
 
 
 def _extract_toc(md_text):
@@ -118,7 +119,6 @@ def _get_user_data(user, files, lang_code='ko'):
             f.is_read = False
             f.is_bookmarked = False
             f.tags = []
-            f.size_kb = round(len(f.content.encode('utf-8')) / 1024, 1)
         return files
     slugs = [f.slug for f in files]
     read_progress = {
@@ -136,7 +136,6 @@ def _get_user_data(user, files, lang_code='ko'):
         f.is_read = f.slug in read_progress and read_progress[f.slug].read
         f.is_bookmarked = f.slug in bookmarks
         f.tags = tags.get(f.slug, [])
-        f.size_kb = round(len(f.content.encode('utf-8')) / 1024, 1)
         f.read_progress_obj = read_progress.get(f.slug)
     return files
 
@@ -167,8 +166,8 @@ def _lang_context(lang_code, extra=None):
 # ─── Landing page ────────────────────────────────────────────────────────────
 
 def library_home(request):
-    ko_count = LibraryPage.objects.filter(language='ko').count()
-    ja_count = LibraryPage.objects.filter(language='ja').count()
+    ko_count = get_page_count('ko')
+    ja_count = get_page_count('ja')
     return render(request, 'library/home.html', {
         'ko_count': ko_count,
         'ja_count': ja_count,
@@ -201,8 +200,10 @@ def library_random(request, lang_code='ko'):
 
 
 def library_detail(request, slug, lang_code='ko'):
-    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
-    current.size_kb = round(len(current.content.encode('utf-8')) / 1024, 1)
+    current = get_page(lang_code, slug)
+    if not current:
+        raise Http404
+    # size_kb is a property on PageInfo
     files = _get_files(lang_code)
     current_idx = next((i for i, f in enumerate(files) if f.slug == slug), -1)
 
@@ -324,8 +325,9 @@ def library_search(request, lang_code='ko'):
 
 
 def library_reader(request, slug, lang_code='ko'):
-    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
-    current.size_kb = round(len(current.content.encode('utf-8')) / 1024, 1)
+    current = get_page(lang_code, slug)
+    if not current:
+        raise Http404
     files = _get_files(lang_code)
     current_idx = next((i for i, f in enumerate(files) if f.slug == slug), -1)
 
@@ -515,7 +517,7 @@ def library_highlights(request, lang_code='ko'):
     highlights = Highlight.objects.filter(user=request.user, language=lang_code).order_by('-created_at').values(
         'id', 'slug', 'text', 'color', 'note', 'anchor', 'created_at')
     page_slugs = set(h['slug'] for h in highlights)
-    pages = {p.slug: p for p in LibraryPage.objects.filter(language=lang_code, slug__in=page_slugs)}
+    pages = get_pages_by_slugs(lang_code, page_slugs)
     for h in highlights:
         page = pages.get(h['slug'])
         h['page_name'] = page.name if page else h['slug']
@@ -525,7 +527,9 @@ def library_highlights(request, lang_code='ko'):
 
 
 def library_generate_quiz(request, slug, lang_code='ko'):
-    current = get_object_or_404(LibraryPage, language=lang_code, slug=slug)
+    current = get_page(lang_code, slug)
+    if not current:
+        raise Http404
     md_text = current.content
     lines = md_text.split('\n')
 

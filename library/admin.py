@@ -1,12 +1,5 @@
 from django.contrib import admin
-from .models import LibraryPage, ReadingProgress, Bookmark, Note, Highlight, LibraryTag
-
-
-@admin.register(LibraryPage)
-class LibraryPageAdmin(admin.ModelAdmin):
-    list_display = ['name', 'order', 'word_count', 'read_time']
-    search_fields = ['name', 'content']
-    ordering = ['order']
+from .models import ReadingProgress, Bookmark, Note, Highlight, LibraryTag
 
 
 @admin.register(ReadingProgress)

@@ -2,6 +2,7 @@
 cd /d "%~dp0"
 call venv\Scripts\activate.bat
 python manage.py seed_data
-python manage.py import_library
-python manage.py import_library --language ja
+echo.
+echo Учебник теперь читается напрямую из .md файлов.
+echo Импорт больше не требуется.
 pause
