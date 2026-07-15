@@ -1,4 +1,4 @@
-import json, re, random, markdown, bleach
+import json, re, random, markdown, nh3
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
@@ -84,12 +84,11 @@ def _process_md_html(md_text, lang_code='ko'):
         'a', 'img', 'em', 'i', 'strong', 'b', 'u', 's', 'span', 'div',
         'abbr', 'acronym', 'sub', 'sup',
     ]
-    allowed_attrs = {
-        'a': ['href', 'title', 'rel'],
-        'img': ['src', 'alt', 'title', 'width', 'height'],
-        '*': ['id', 'class'],
-    }
-    html = bleach.clean(html, tags=allowed_tags, attributes=allowed_attrs, strip=True)
+    # ammonia (nh3) has no "*" wildcard, so allow id/class on every tag explicitly
+    allowed_attrs = {tag: ['id', 'class'] for tag in allowed_tags}
+    allowed_attrs['a'] = ['href', 'title', 'rel', 'id', 'class']
+    allowed_attrs['img'] = ['src', 'alt', 'title', 'width', 'height', 'id', 'class']
+    html = nh3.clean(html, tags=allowed_tags, attributes=allowed_attrs)
     return html
 
 
@@ -417,8 +416,14 @@ def api_highlight_toggle(request, lang_code='ko'):
     text = request.POST.get('text', '').strip()
     if not slug or not text:
         return JsonResponse({'error': 'missing fields'}, status=400)
-    start_off = int(request.POST.get('start_offset', 0))
-    end_off = int(request.POST.get('end_offset', 0))
+    try:
+        start_off = int(request.POST.get('start_offset', 0))
+    except (ValueError, TypeError):
+        start_off = 0
+    try:
+        end_off = int(request.POST.get('end_offset', 0))
+    except (ValueError, TypeError):
+        end_off = 0
     existing = Highlight.objects.filter(
         user=request.user, language=lang_code, slug=slug, text=text,
         start_offset=start_off, end_offset=end_off)

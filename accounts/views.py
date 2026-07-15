@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Sum
+from django.db.models.functions import TruncDate
 import json
 from accounts.models import UserProfile, Streak, Achievement
 from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
@@ -62,14 +64,21 @@ def profile(request):
 
     now = timezone.now()
     last_14 = [now.date() - timedelta(days=i) for i in range(13, -1, -1)]
+    agg = (
+        UserQuizResult.objects
+        .filter(user=request.user, completed_at__date__gte=last_14[0])
+        .annotate(day=TruncDate('completed_at'))
+        .values('day')
+        .annotate(total_score=Sum('score'), total_total=Sum('total'))
+    )
+    avg_by_day = {
+        row['day']: int((row['total_score'] / row['total_total']) * 100)
+        if row['total_total'] else None
+        for row in agg
+    }
     quiz_chart = []
     for d in last_14:
-        results_list = list(UserQuizResult.objects.filter(
-            user=request.user, completed_at__date=d
-        ))
-        total = len(results_list)
-        avg = sum(r.percentage() for r in results_list) / total if total else None
-        quiz_chart.append({'date': d.isoformat()[5:], 'avg': avg})
+        quiz_chart.append({'date': d.isoformat()[5:], 'avg': avg_by_day.get(d)})
 
     total_lessons = Lesson.objects.count()
     achievements_count = request.user.achievements.count()
@@ -142,12 +151,8 @@ def achievements_page(request):
 def daily_goals_page(request):
     from accounts.models import DailyGoal
     goal, _ = DailyGoal.objects.get_or_create(user=request.user)
-    from django.utils import timezone
-    from datetime import timedelta
-    from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 
     today = timezone.now().date()
-    tomorrow = today + timedelta(days=1)
 
     lessons_today = UserLessonProgress.objects.filter(
         user=request.user, completed_at__date=today
@@ -160,9 +165,13 @@ def daily_goals_page(request):
     ).count()
 
     if request.method == 'POST':
-        goal.words_target = max(1, int(request.POST.get('words_target', 5)))
-        goal.lessons_target = max(1, int(request.POST.get('lessons_target', 1)))
-        goal.quizzes_target = max(1, int(request.POST.get('quizzes_target', 1)))
+        try:
+            goal.words_target = max(1, min(100, int(request.POST.get('words_target', 5))))
+            goal.lessons_target = max(1, min(50, int(request.POST.get('lessons_target', 1))))
+            goal.quizzes_target = max(1, min(50, int(request.POST.get('quizzes_target', 1))))
+        except (ValueError, TypeError):
+            messages.error(request, '❌ Введите корректные числа')
+            return redirect('daily_goals')
         goal.save(update_fields=['words_target', 'lessons_target', 'quizzes_target'])
         messages.success(request, '✅ Цели обновлены')
         return redirect('daily_goals')

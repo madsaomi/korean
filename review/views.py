@@ -8,9 +8,15 @@ from accounts.utils import check_word_achievements
 
 @login_required
 def review_page(request):
+    session_key = 'review_session'
+
+    # Handle session reset early, before any DB work
+    if request.GET.get('reset_session'):
+        request.session.pop(session_key, None)
+        return redirect('review')
+
     now = timezone.now()
 
-    session_key = 'review_session'
     if session_key not in request.session:
         request.session[session_key] = {'start': now.isoformat(), 'completed': 0, 'again': 0, 'good': 0, 'easy': 0}
 
@@ -76,10 +82,6 @@ def review_page(request):
 
     if session['completed'] > 0:
         ctx['session_summary'] = session
-
-    if request.GET.get('reset_session'):
-        request.session.pop(session_key, None)
-        return redirect('review')
 
     return render(request, 'review/index.html', ctx)
 

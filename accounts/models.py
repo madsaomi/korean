@@ -25,7 +25,7 @@ class Streak(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='streak')
     current_streak = models.IntegerField(default=0)
     longest_streak = models.IntegerField(default=0)
-    last_active_date = models.DateField(default=timezone.now)
+    last_active_date = models.DateField(null=True, blank=True, default=None)
 
     def __str__(self):
         return f'{self.user.username} — {self.current_streak} дней'

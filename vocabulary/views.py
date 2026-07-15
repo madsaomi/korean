@@ -21,12 +21,27 @@ def study_custom(request):
     except (ValueError, TypeError):
         count = 10
 
-    qs = Word.objects.all()
-    if cat:
-        qs = qs.filter(category__slug=cat)
-    if level:
-        qs = qs.filter(level=level)
-    words = list(qs.order_by('?')[:count])
+    # Build a session key based on filters to keep a stable word set
+    session_key = f'study_custom_{cat}_{level}_{count}'
+    reshuffle = request.GET.get('reshuffle') == '1'
+
+    word_ids = request.session.get(session_key) if not reshuffle else None
+
+    if word_ids:
+        # Restore the saved word set from session
+        words_qs = Word.objects.filter(id__in=word_ids)
+        words_map = {w.id: w for w in words_qs}
+        words = [words_map[wid] for wid in word_ids if wid in words_map]
+    else:
+        # Generate a new random set
+        qs = Word.objects.all()
+        if cat:
+            qs = qs.filter(category__slug=cat)
+        if level:
+            qs = qs.filter(level=level)
+        words = list(qs.order_by('?')[:count])
+        request.session[session_key] = [w.id for w in words]
+
     total = len(words)
     if total == 0:
         words = []
@@ -74,6 +89,7 @@ def study_custom(request):
         'revealed': revealed if words else False,
         'base_qs': base_qs,
     })
+
 
 def category_list(request):
     categories = Category.objects.annotate(word_count=Count('words'))
@@ -154,8 +170,15 @@ def add_to_review(request):
 
     msg = ''
     if word_id:
+        try:
+            word = Word.objects.get(id=word_id)
+        except (Word.DoesNotExist, ValueError, TypeError):
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': 'Слово не найдено'}, status=400)
+            messages.error(request, '❌ Слово не найдено')
+            return redirect(request.META.get('HTTP_REFERER', 'category_list'))
         prog, created = UserWordProgress.objects.get_or_create(
-            user=request.user, word_id=word_id,
+            user=request.user, word=word,
             defaults={'next_review': timezone.now()}
         )
         if mark_learned:

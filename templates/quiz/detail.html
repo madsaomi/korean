@@ -42,7 +42,7 @@
     <div class="d-flex flex-column gap-2">
       {% for answer in q.answers.all %}
       <label class="quiz-option d-flex align-items-center gap-3">
-        <input type="radio" name="q_{{ q.id }}" value="{{ answer.text }}" class="form-check-input">
+        <input type="radio" name="q_{{ q.id }}" value="{{ answer.id }}" class="form-check-input">
         <span>{{ answer.text }}</span>
         <small class="ms-auto" style="color: var(--text-secondary); opacity: 0.5;">{{ forloop.counter }}</small>
       </label>

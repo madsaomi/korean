@@ -25,10 +25,26 @@ def progress_dashboard(request):
         streak = Streak.objects.create(user=request.user)
     today = now.date()
     last_30 = [today - timedelta(days=i) for i in range(29, -1, -1)]
+
+    lesson_agg = (
+        UserLessonProgress.objects
+        .filter(user=request.user, completed_at__gte=thirty_days_ago)
+        .annotate(day=TruncDate('completed_at'))
+        .values('day').annotate(count=Count('id'))
+    )
+    quiz_agg = (
+        UserQuizResult.objects
+        .filter(user=request.user, completed_at__gte=thirty_days_ago)
+        .annotate(day=TruncDate('completed_at'))
+        .values('day').annotate(count=Count('id'))
+    )
+    lesson_by_day = {row['day']: row['count'] for row in lesson_agg}
+    quiz_by_day = {row['day']: row['count'] for row in quiz_agg}
+
     streak_days = []
     for d in last_30:
-        prog = UserLessonProgress.objects.filter(user=request.user, completed_at__date=d).count()
-        quiz = UserQuizResult.objects.filter(user=request.user, completed_at__date=d).count()
+        prog = lesson_by_day.get(d, 0)
+        quiz = quiz_by_day.get(d, 0)
         streak_days.append({'date': d.isoformat(), 'active': prog > 0 or quiz > 0, 'lessons': prog, 'quizzes': quiz})
 
     all_results = UserQuizResult.objects.filter(user=request.user)[:20]

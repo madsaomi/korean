@@ -14,29 +14,38 @@ def lesson_detail(request, course_id, lesson_id=None):
     course = get_object_or_404(Course, id=course_id)
     lessons = list(course.lessons.all())
 
+    if not lessons and not lesson_id:
+        return render(request, 'lessons/detail.html', {
+            'course': course,
+            'lesson': None,
+            'steps': [],
+            'prev_lesson': None,
+            'next_lesson': None,
+            'lesson_count': 0,
+            'current_idx': None,
+        })
+
     if lesson_id:
         lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
     else:
-        lesson = lessons[0] if lessons else None
+        lesson = lessons[0]
 
-    steps = lesson.steps.all() if lesson else []
+    steps = lesson.steps.all()
 
     current_idx = None
     prev_lesson = None
     next_lesson = None
-    if lesson and lessons:
-        for i, l in enumerate(lessons):
-            if l.id == lesson.id:
-                current_idx = i
-                prev_lesson = lessons[i - 1] if i > 0 else None
-                next_lesson = lessons[i + 1] if i < len(lessons) - 1 else None
-                break
+    for i, l in enumerate(lessons):
+        if l.id == lesson.id:
+            current_idx = i
+            prev_lesson = lessons[i - 1] if i > 0 else None
+            next_lesson = lessons[i + 1] if i < len(lessons) - 1 else None
+            break
 
-    if lesson:
-        UserLessonProgress.objects.get_or_create(
-            user=request.user, lesson=lesson,
-            defaults={'completed': False}
-        )
+    UserLessonProgress.objects.get_or_create(
+        user=request.user, lesson=lesson,
+        defaults={'completed': False}
+    )
 
     return render(request, 'lessons/detail.html', {
         'course': course,
@@ -47,3 +56,4 @@ def lesson_detail(request, course_id, lesson_id=None):
         'lesson_count': len(lessons),
         'current_idx': current_idx,
     })
+

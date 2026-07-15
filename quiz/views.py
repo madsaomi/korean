@@ -33,16 +33,26 @@ def quiz_submit(request, pk):
     results = []
 
     for q in questions:
-        selected = request.POST.get(f'q_{q.id}')
+        raw = request.POST.get(f'q_{q.id}', '').strip()
         correct_answers = q.answers.filter(is_correct=True)
-        correct_texts = [a.text for a in correct_answers]
-        is_correct = (selected or '').strip() in [t.strip() for t in correct_texts]
+        correct_ids = {str(a.id) for a in correct_answers}
+        correct_texts = {a.text.strip() for a in correct_answers}
+
+        # Radio inputs submit the answer id; writing questions submit free text.
+        if raw.isdigit():
+            selected_answer = q.answers.filter(id=int(raw)).first()
+            selected_text = selected_answer.text if selected_answer else ''
+            is_correct = bool(selected_answer and str(selected_answer.id) in correct_ids)
+        else:
+            selected_text = raw
+            is_correct = raw in correct_texts
+
         if is_correct:
             score += 1
         correct_answer = correct_answers.first()
         results.append({
             'question': q,
-            'selected': selected,
+            'selected': selected_text,
             'correct_answer': correct_answer.text if correct_answer else '',
             'is_correct': is_correct,
             'explanation': correct_answer.explanation if correct_answer else '',
@@ -76,3 +86,4 @@ def quiz_submit(request, pk):
         'results': results,
         'passed': percentage >= quiz.passing_score,
     })
+

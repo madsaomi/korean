@@ -7,9 +7,13 @@
   const lang = typeof LIBRARY_LANG !== 'undefined' ? LIBRARY_LANG : 'korean';
   const apiBase = `/library/${lang}/api`;
 
+  function getCookie(name) {
+    const m = document.cookie.match('(^|; )' + name + '=([^;]*)');
+    return m ? decodeURIComponent(m[2]) : '';
+  }
   function getCSRF() {
     const c = document.querySelector('[name=csrfmiddlewaretoken]');
-    return c ? c.value : csrfToken;
+    return c ? c.value : (getCookie('csrftoken') || csrfToken);
   }
 
   const HIGHLIGHT_COLORS = {

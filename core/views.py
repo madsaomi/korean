@@ -1,4 +1,3 @@
-import random
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Count, OuterRef, Subquery, Q
@@ -48,8 +47,9 @@ def index(request):
 
     word_count = Word.objects.count()
     if word_count:
-        random_idx = random.randint(0, word_count - 1)
-        word_of_day = Word.objects.order_by('pk')[random_idx]
+        # Deterministic per-day selection so "word of the day" is stable within a day
+        day_index = (now.date().toordinal() - 1) % word_count
+        word_of_day = Word.objects.order_by('pk')[day_index]
         ctx['word_of_day'] = word_of_day
 
     if request.user.is_authenticated:

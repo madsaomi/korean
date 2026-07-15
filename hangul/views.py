@@ -4,6 +4,7 @@ from django.utils import timezone
 from gtts import gTTS
 import os
 import json
+import hmac
 import hashlib
 from django.conf import settings
 
@@ -57,7 +58,9 @@ def tts_audio(request):
     timestamps.append(now)
     request.session[ts_key] = timestamps
 
-    filename = f'{hashlib.md5(text.encode()).hexdigest()}.mp3'
+    # Unguessable cache filename: keyed by text via HMAC-SECRET_KEY (not reversible)
+    token = hmac.new(settings.SECRET_KEY.encode(), text.encode(), hashlib.sha256).hexdigest()[:32]
+    filename = f'{token}.mp3'
     tts_dir = os.path.join(settings.MEDIA_ROOT, 'tts')
     os.makedirs(tts_dir, exist_ok=True)
     filepath = os.path.join(tts_dir, filename)
