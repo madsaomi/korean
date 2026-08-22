@@ -5,7 +5,7 @@
 **Изучай корейский и японский язык с нуля — бесплатно и в удобном темпе**
 
 [![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
+[![Django](https://img.shields.io/badge/Django-5.x-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 </div>
@@ -31,7 +31,7 @@
 
 ### Требования
 
-- Python 3.10+
+- Python 3.12+ (проверено на 3.14)
 - pip
 
 ### Установка
@@ -52,10 +52,6 @@ pip install -r requirements.txt
 # Примени миграции
 python manage.py migrate
 
-# Импортируй учебник (корейский + японский)
-python manage.py import_library
-python manage.py import_library --language ja
-
 # Создай суперпользователя
 python manage.py createsuperuser
 
@@ -73,10 +69,16 @@ seed.bat
 
 ## 🛠 Технологии
 
-- **Backend:** Django 6.0, Python 3.14
+- **Backend:** Django 5.x, Python 3.14
 - **Frontend:** Bootstrap 5.3, Custom Glassmorphism CSS
 - **БД:** SQLite (разработка) / PostgreSQL (продакшн)
-- **Дополнительно:** Chart.js, Canvas Confetti, PWA (Service Worker)
+- **Дополнительно:** DRF, Chart.js, Canvas Confetti, PWA (Service Worker)
+
+## 🤖 Для ИИ-агентов
+
+Инструкции для агентов (opencode, Codex, Claude Code, Cursor, Gemini CLI):
+[AGENTS.md](AGENTS.md) → `.agents/` — архитектура, команды, конвенции,
+журнал работ и доска хэндоффа.
 
 ## 📁 Структура проекта
 
@@ -87,7 +89,7 @@ k-lab/
 ├── config/         # Настройки Django, ASGI/WSGI
 ├── core/           # Главная страница, поиск, middleware
 ├── grammar/        # Грамматика и упражнения
-├── hangul/         # Алфавит, разбор предложений
+├── hangul/         # Алфавит, разбор предложений, TTS-озвучка
 ├── lessons/        # Уроки и курсы
 ├── library/        # Учебник (корейский + японский), закладки, выделения
 ├── progress/       # Прогресс и статистика
@@ -98,6 +100,7 @@ k-lab/
 ├── static/         # CSS, JS, медиа
 ├── Корейский/      # Исходные markdown-файлы корейского учебника
 ├── Японский/       # Исходные markdown-файлы японского учебника
+├── AGENTS.md       # Инструкции для ИИ-агентов (+ .agents/)
 ├── manage.py
 └── requirements.txt
 ```

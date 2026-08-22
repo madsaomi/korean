@@ -1,0 +1,10 @@
+line-length = 100
+target-version = "py312"
+extend-exclude = ["venv", "staticfiles", "media", "migrations"]
+
+[lint]
+# RUF012 (mutable class defaults) is normal in Django: model Meta, choices, etc.
+ignore = ["RUF012", "BLE001"]
+
+[lint.per-file-ignores]
+"**/tests*.py" = ["B017"]

@@ -16,6 +16,7 @@ python -m venv venv
 
 ```powershell
 .\venv\Scripts\python.exe -m pytest -q              # тесты — ВСЕГДА после правок
+.\venv\Scripts\ruff.exe check .                     # линтер — обязателен перед сдачей
 .\venv\Scripts\python.exe manage.py runserver       # дев-сервер на :8000
 .\venv\Scripts\python.exe manage.py makemigrations  # после изменений моделей
 .\venv\Scripts\python.exe manage.py migrate
@@ -32,9 +33,22 @@ python -m venv venv
 
 ## Проверки перед завершением задачи
 
-1. `pytest -q` — зелёный (89 тестов на момент аудита).
-2. Менял модели? → миграция создана и `makemigrations --check` молчит.
-3. `manage.py check` без ошибок.
+1. `pytest -q` — зелёный.
+2. `ruff check .` — без ошибок (конфиг в ruff.toml).
+3. Менял модели? → миграция создана и `makemigrations --check` молчит.
+4. `manage.py check` без ошибок.
+
+## CI
+
+GitHub Actions: `.github/workflows/ci.yml` — ruff + makemigrations --check + pytest
+на каждый push в main и PR. Если CI красный у твоего коммита — чини до передачи.
+
+## Зависимости
+
+- `requirements.txt` — диапазоны версий (гуманный вид).
+- `requirements-lock.txt` — точные пины (`pip freeze`); прод и CI-воспроизводимость.
+  Обновляй lock при изменении requirements: `pip freeze > requirements-lock.txt`
+  (исключая ruff, он живёт в requirements-dev.txt).
 
 ## Нюансы окружения
 

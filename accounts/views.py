@@ -1,19 +1,21 @@
+import json
+from datetime import timedelta
+
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.utils import timezone
-from datetime import timedelta
+from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
+from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.db.models.functions import TruncDate
-import json
-from accounts.models import UserProfile, Streak, Achievement
-from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
-from vocabulary.models import Word
+from django.shortcuts import redirect, render
+from django.utils import timezone
+
+from accounts.models import Achievement, DailyGoal, Streak, UserProfile
 from lessons.models import Lesson
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
+
 
 class SignUpForm(UserCreationForm):
     native_language = forms.CharField(max_length=50, initial='Русский', label='Родной язык')

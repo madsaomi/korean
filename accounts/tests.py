@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.auth.models import User
-from accounts.models import UserProfile, Streak, Achievement, DailyGoal
+
+from accounts.models import Achievement, DailyGoal, Streak, UserProfile
 
 
 @pytest.fixture
@@ -28,7 +29,7 @@ class TestUserProfile:
 @pytest.mark.django_db
 class TestStreak:
     def test_streak_create(self, user):
-        streak, created = Streak.objects.get_or_create(user=user)
+        streak, _created = Streak.objects.get_or_create(user=user)
         assert streak.current_streak == 0
         assert streak.longest_streak == 0
 
@@ -57,7 +58,7 @@ class TestAchievement:
             Achievement.objects.create(user=user, code='first_word', title='Duplicate')
 
     def test_ordering(self, user):
-        a1 = Achievement.objects.create(user=user, code='a', title='A')
+        Achievement.objects.create(user=user, code='a', title='A')
         a2 = Achievement.objects.create(user=user, code='b', title='B')
         qs = Achievement.objects.filter(user=user)
         assert qs.first() == a2

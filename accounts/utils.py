@@ -1,10 +1,11 @@
 from django.contrib import messages
+
 from accounts.models import Achievement
 from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 
 
 def grant_achievement(user, code, title, description, icon, request=None):
-    achievement, created = Achievement.objects.get_or_create(
+    _, created = Achievement.objects.get_or_create(
         user=user, code=code,
         defaults={'title': title, 'description': description, 'icon': icon}
     )

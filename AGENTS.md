@@ -36,7 +36,9 @@
 
 1. **Тесты только через pytest**: `.\venv\Scripts\python.exe -m pytest -q`
    (`manage.py test` находит 0 тестов — тесты используют pytest-фикстуры).
-2. **Всегда запускай тесты** после изменений и `makemigrations --check`, если менял модели.
+2. **Всегда запускай тесты и линтер** после изменений:
+   `.\venv\Scripts\python.exe -m pytest -q` + `.\venv\Scripts\ruff.exe check .`,
+   и `makemigrations --check`, если менял модели.
 3. **Никаких raw SQL**, никакого `|safe` без nh3-санитизации, никаких `fields = '__all__'` в новых сериализаторах.
 4. **Даты**: сравнение дат пользователя — только `timezone.localdate()`, не `timezone.now().date()` (UTC ≠ локальная зона).
 5. **Пользовательские данные всегда фильтруй по `request.user`** (IDOR).

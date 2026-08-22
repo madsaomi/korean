@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
-from django.utils import timezone
-from quiz.models import Quiz, Question, Answer
+
 from progress.models import UserQuizResult
+from quiz.models import Answer, Question, Quiz
 
 
 @pytest.fixture
@@ -72,7 +72,7 @@ class TestUserQuizResult:
         assert result.percentage() == 0
 
     def test_latest_first(self, user, quiz):
-        r1 = UserQuizResult.objects.create(user=user, quiz=quiz, score=5, total=10)
+        UserQuizResult.objects.create(user=user, quiz=quiz, score=5, total=10)
         r2 = UserQuizResult.objects.create(user=user, quiz=quiz, score=9, total=10)
         qs = UserQuizResult.objects.filter(user=user)
         assert qs.first() == r2

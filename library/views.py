@@ -1,13 +1,20 @@
-import json, re, random, markdown, nh3
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, Http404
+import json
+import random
+import re
+
+import markdown
+import nh3
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
-from django.utils import timezone
 from django.db.models import Q
-from .models import ReadingProgress, Bookmark, Note, Highlight, LibraryTag
-from .pages import get_all_pages, get_page, get_page_count, get_pages_by_slugs
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
 from vocabulary.models import Word
+
+from .models import Bookmark, Highlight, LibraryTag, Note, ReadingProgress
+from .pages import get_all_pages, get_page, get_page_count, get_pages_by_slugs
 
 KOREAN_RE = re.compile(r'[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f\ua960-\ua97c]+')
 HEADING_ID_RE = re.compile(r'<h([2-3])\s*[^>]*>(.*?)</h\1>', re.DOTALL)
@@ -536,7 +543,7 @@ def api_bookmark_delete(request, lang_code='ko'):
 def library_highlights(request, lang_code='ko'):
     highlights = Highlight.objects.filter(user=request.user, language=lang_code).order_by('-created_at').values(
         'id', 'slug', 'text', 'color', 'note', 'anchor', 'created_at')
-    page_slugs = set(h['slug'] for h in highlights)
+    page_slugs = {h['slug'] for h in highlights}
     pages = get_pages_by_slugs(lang_code, page_slugs)
     for h in highlights:
         page = pages.get(h['slug'])

@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
+
 from vocabulary.models import Category, Word, WordList
 
 
@@ -32,7 +33,7 @@ class TestCategory:
         assert category.words.count() == 1
 
     def test_ordering(self):
-        c1 = Category.objects.create(name='A', slug='a', order=2)
+        Category.objects.create(name='A', slug='a', order=2)
         c2 = Category.objects.create(name='B', slug='b', order=1)
         qs = Category.objects.all()
         assert qs[0] == c2  # lower order first
