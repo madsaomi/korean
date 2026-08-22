@@ -18,16 +18,17 @@
 ## Снимок репозитория
 
 - **Ветка:** main
-- **Последний коммит:** ea2bbbd "fix: resolve code audit findings"
-- **Незакоммичено:** да, крупный объём (см. «Готово, ждёт коммита»)
-- **Тесты (базовая линия):** 89 passed (`.\venv\Scripts\python.exe -m pytest -q`)
+- **Последний коммит:** 95d03d3 "chore: CI pipeline, ruff lint, lockfile..."
+- **Незакоммичено:** нет (всё из сессии 2026-08-23 закоммичено)
+- **Тесты (базовая линия):** 89 passed + `ruff check .` чистый
+  (`.\venv\Scripts\python.exe -m pytest -q` / `.\venv\Scripts\ruff.exe check .`)
 - **Миграции:** все применены, `makemigrations --check` чист
+- **CI:** GitHub Actions `.github/workflows/ci.yml` — ruff + миграции + pytest;
+  если твой коммит красный в CI — чини до передачи задачи.
 
-## Готово, ждёт коммита (пользователь ещё не просил коммитить)
+## Готово, ждёт коммита
 
-1. Фиксы полного аудита (запись [0002](history/0002-2026-08-23-audit-fixes.md)):
-   17 файлов изменено, новые: review/services.py, cleanup_tts.py, 4 миграции.
-2. Документация агентов: AGENTS.md + .agents/*.md (записи 0003, 0004, 0005).
+— (пусто; всё закоммичено, см. журнал 0006)
 
 ## Активная задача
 
@@ -42,5 +43,7 @@ ID:            —
 
 ## Очередь (кандидаты на следующую задачу)
 
-См. `.agents/known-issues.md` — там 10 LOW-пунктов и инфраструктурные заметки.
-Самые дешёвые для старта: self-XSS в builder.html (#1), редиректы на referer (#2).
+Из «что упускаю» (не закрыто): `.env.example` для деплой-переменных,
+CSRF_TRUSTED_ORIGINS/SECURE_PROXY_SSL_HEADER, staticfiles warning.
+Плюс `.agents/known-issues.md` — 10 LOW-пунктов; самые дешёвые:
+self-XSS в builder.html (#1), редиректы на referer (#2).
