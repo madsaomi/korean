@@ -27,6 +27,9 @@ class UserWordProgress(models.Model):
 
     class Meta:
         unique_together = ['user', 'word']
+        indexes = [
+            models.Index(fields=['user', 'learned', 'next_review']),
+        ]
 
     def __str__(self):
         return f'{self.user.username} — {self.word.korean}'

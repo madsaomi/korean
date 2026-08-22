@@ -29,13 +29,13 @@ class StreakMiddleware:
             if session is None:
                 return self.get_response(request)
 
-            today_str = timezone.now().date().isoformat()
+            today_str = timezone.localdate().isoformat()
             if session.get('streak_checked_date') == today_str:
                 return self.get_response(request)
 
             streak, _ = Streak.objects.get_or_create(user=request.user)
 
-            today = timezone.now().date()
+            today = timezone.localdate()
             last = streak.last_active_date
             if last is None or last != today:
                 was_streak = streak.current_streak

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Count, OuterRef, Subquery, Q
+from django.db.models import Count, Q
+from django.utils import timezone
 from django.contrib.auth.models import User
 from lessons.models import Course, Lesson
 from vocabulary.models import Category, Word
@@ -48,21 +49,19 @@ def index(request):
     word_count = Word.objects.count()
     if word_count:
         # Deterministic per-day selection so "word of the day" is stable within a day
-        day_index = (now.date().toordinal() - 1) % word_count
-        word_of_day = Word.objects.order_by('pk')[day_index]
+        day_index = (timezone.localdate().toordinal() - 1) % word_count
+        word_of_day = Word.objects.select_related('category').order_by('pk')[day_index]
         ctx['word_of_day'] = word_of_day
 
     if request.user.is_authenticated:
-        streak = getattr(request.user, 'streak', None)
-        if not streak:
-            streak = Streak.objects.create(user=request.user)
+        streak, _ = Streak.objects.get_or_create(user=request.user)
         lessons_done = UserLessonProgress.objects.filter(user=request.user, completed=True).count()
         words_learned = UserWordProgress.objects.filter(user=request.user, learned=True).count()
         quizzes_done = UserQuizResult.objects.filter(user=request.user).count()
         last_quiz = UserQuizResult.objects.filter(user=request.user).first()
         words_in_review = UserWordProgress.objects.filter(
             user=request.user, learned=False
-        ).exclude(next_review=None).count()
+        ).filter(next_review__lte=timezone.now()).count()
         total_lessons = Lesson.objects.count()
         ctx.update({
             'streak': streak,

@@ -28,6 +28,9 @@ class Word(models.Model):
     ], default='beginner')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['korean']
+
     def __str__(self):
         return f'{self.korean} — {self.russian}'
 

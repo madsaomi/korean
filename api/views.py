@@ -2,7 +2,7 @@ from rest_framework import viewsets, status, permissions, filters, generics, dec
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -13,20 +13,23 @@ from quiz.models import Quiz
 from progress.models import UserWordProgress, UserQuizResult, UserLessonProgress
 from library.models import ReadingProgress, Bookmark, Note, LibraryTag
 from accounts.models import UserProfile, Streak, Achievement, DailyGoal
-from accounts.utils import check_word_achievements
+from review.services import apply_review, InvalidReviewAction
 
 from . import serializers
 
 
-class IsOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if hasattr(obj, 'user'):
-            return obj.user == request.user
-        return True
+def _request_language(request):
+    """Return a valid library language from the request, or None."""
+    lang = (
+        request.data.get('language')
+        if hasattr(request, 'data')
+        else None
+    ) or request.query_params.get('language') or 'ko'
+    return lang if lang in ('ko', 'ja') else None
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.annotate(words_count=Count('words')).order_by('order', 'pk')
     serializer_class = serializers.CategorySerializer
     lookup_field = 'slug'
 
@@ -40,7 +43,11 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Course.objects.prefetch_related('lessons').all()
+    queryset = (
+        Course.objects.prefetch_related('lessons')
+        .annotate(lessons_count=Count('lessons'))
+        .order_by('order', 'pk')
+    )
     serializer_class = serializers.CourseSerializer
     filterset_fields = ['level']
     ordering_fields = ['order']
@@ -58,7 +65,11 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class GrammarTopicViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = GrammarTopic.objects.prefetch_related('rules').all()
+    queryset = (
+        GrammarTopic.objects.prefetch_related('rules')
+        .annotate(rules_count=Count('rules'))
+        .order_by('order', 'pk')
+    )
     serializer_class = serializers.GrammarTopicSerializer
     lookup_field = 'slug'
     filterset_fields = ['level']
@@ -72,7 +83,11 @@ class GrammarExerciseViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class QuizViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Quiz.objects.prefetch_related('questions__answers').all()
+    queryset = (
+        Quiz.objects.prefetch_related('questions__answers')
+        .annotate(questions_count=Count('questions'))
+        .order_by('order', 'pk')
+    )
     serializer_class = serializers.QuizSerializer
     filterset_fields = ['level', 'lesson']
 
@@ -170,28 +185,21 @@ class ReviewViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         word_id = serializer.validated_data['word_id']
         action = serializer.validated_data['action']
-        now = timezone.now()
 
-        prog = UserWordProgress.objects.filter(user=request.user, word_id=word_id).first()
-        if not prog:
+        try:
+            prog = apply_review(request.user, word_id, action)
+        except InvalidReviewAction:
+            return Response({'error': 'Invalid action'}, status=400)
+
+        if prog is None:
             return Response({'error': 'Word not found in review queue'}, status=404)
 
-        prog.review_count += 1
-        if action == 'easy':
-            prog.next_review = now + timezone.timedelta(days=7)
-            prog.learned = True
-            if not prog.learned_at:
-                prog.learned_at = now
-            check_word_achievements(request.user)
-        elif action == 'good':
-            base_days = [1, 3, 7, 14, 30]
-            days = base_days[min(prog.review_count - 1, len(base_days) - 1)]
-            prog.next_review = now + timezone.timedelta(days=days)
-        elif action == 'again':
-            prog.next_review = now + timezone.timedelta(hours=1)
-        prog.save(update_fields=['review_count', 'next_review', 'learned', 'learned_at'])
-
-        return Response({'success': True, 'action': action})
+        return Response({
+            'success': True,
+            'action': action,
+            'learned': prog.learned,
+            'next_review': prog.next_review,
+        })
 
 
 class LibraryViewSet(viewsets.GenericViewSet):
@@ -205,14 +213,22 @@ class LibraryViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['get', 'post'])
     def progress(self, request):
         if request.method == 'POST':
-            obj, _ = ReadingProgress.objects.get_or_create(
-                user=request.user,
-                slug=request.data.get('slug'),
-                defaults={'read': request.data.get('read', True)}
+            lang = _request_language(request)
+            slug = request.data.get('slug')
+            if not slug:
+                return Response({'error': 'slug required'}, status=400)
+            if lang is None:
+                return Response({'error': 'invalid language'}, status=400)
+            read_flag = bool(request.data.get('read', True))
+            now = timezone.now()
+            obj, created = ReadingProgress.objects.get_or_create(
+                user=request.user, language=lang, slug=slug,
+                defaults={'read': read_flag, 'read_at': now if read_flag else None},
             )
-            if not request.data.get('read', True):
-                obj.read = False
-                obj.save(update_fields=['read'])
+            if not created and obj.read != read_flag:
+                obj.read = read_flag
+                obj.read_at = now if read_flag else None
+                obj.save(update_fields=['read', 'read_at'])
             return Response(serializers.ReadingProgressSerializer(obj).data)
         qs = ReadingProgress.objects.filter(user=request.user)
         return Response(serializers.ReadingProgressSerializer(qs, many=True).data)
@@ -220,51 +236,82 @@ class LibraryViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['get', 'post', 'delete'])
     def bookmarks(self, request):
         if request.method == 'POST':
-            obj = Bookmark.objects.create(
-                user=request.user,
-                slug=request.data.get('slug'),
-                title=request.data.get('title', ''),
-                anchor=request.data.get('anchor', ''),
-                note=request.data.get('note', ''),
+            lang = _request_language(request)
+            slug = request.data.get('slug')
+            if not slug:
+                return Response({'error': 'slug required'}, status=400)
+            if lang is None:
+                return Response({'error': 'invalid language'}, status=400)
+            defaults = {
+                'title': request.data.get('title') or slug,
+                'anchor': request.data.get('anchor', ''),
+                'note': request.data.get('note', ''),
+            }
+            obj, created = Bookmark.objects.get_or_create(
+                user=request.user, language=lang, slug=slug,
+                defaults=defaults,
             )
-            return Response(serializers.BookmarkSerializer(obj).data, status=201)
+            return Response(
+                serializers.BookmarkSerializer(obj).data,
+                status=201 if created else 200,
+            )
         if request.method == 'DELETE':
             pk = request.data.get('id') or request.query_params.get('id')
-            if pk:
-                Bookmark.objects.filter(user=request.user, id=pk).delete()
-                return Response(status=204)
-            return Response({'error': 'id required'}, status=400)
+            try:
+                pk = int(pk)
+            except (TypeError, ValueError):
+                return Response({'error': 'id required'}, status=400)
+            deleted, _ = Bookmark.objects.filter(user=request.user, id=pk).delete()
+            return Response(status=204) if deleted else Response({'error': 'not found'}, status=404)
         qs = Bookmark.objects.filter(user=request.user)
         return Response(serializers.BookmarkSerializer(qs, many=True).data)
 
     @action(detail=False, methods=['get', 'post', 'delete'])
     def notes(self, request):
         if request.method == 'POST':
+            lang = _request_language(request)
+            slug = request.data.get('slug')
+            content = (request.data.get('content') or '').strip()
+            if not slug:
+                return Response({'error': 'slug required'}, status=400)
+            if lang is None:
+                return Response({'error': 'invalid language'}, status=400)
+            if not content:
+                return Response({'error': 'content required'}, status=400)
             obj = Note.objects.create(
                 user=request.user,
-                slug=request.data.get('slug'),
-                content=request.data.get('content'),
+                language=lang,
+                slug=slug,
+                content=content,
                 anchor=request.data.get('anchor', ''),
                 highlighted_text=request.data.get('highlighted_text', ''),
             )
             return Response(serializers.NoteSerializer(obj).data, status=201)
         if request.method == 'DELETE':
             pk = request.data.get('id') or request.query_params.get('id')
-            if pk:
-                Note.objects.filter(user=request.user, id=pk).delete()
-                return Response(status=204)
-            return Response({'error': 'id required'}, status=400)
+            try:
+                pk = int(pk)
+            except (TypeError, ValueError):
+                return Response({'error': 'id required'}, status=400)
+            deleted, _ = Note.objects.filter(user=request.user, id=pk).delete()
+            return Response(status=204) if deleted else Response({'error': 'not found'}, status=404)
         qs = Note.objects.filter(user=request.user)
         return Response(serializers.NoteSerializer(qs, many=True).data)
 
     @action(detail=False, methods=['get', 'post'])
     def tags(self, request):
         if request.method == 'POST':
-            obj = LibraryTag.objects.create(
-                user=request.user,
-                slug=request.data.get('slug'),
-                tag=request.data.get('tag'),
-            )
+            lang = _request_language(request)
+            slug = request.data.get('slug')
+            tag = (request.data.get('tag') or '').strip().lower()
+            if not slug:
+                return Response({'error': 'slug required'}, status=400)
+            if lang is None:
+                return Response({'error': 'invalid language'}, status=400)
+            if not tag:
+                return Response({'error': 'tag required'}, status=400)
+            obj, _ = LibraryTag.objects.get_or_create(
+                user=request.user, language=lang, slug=slug, tag=tag)
             return Response(serializers.LibraryTagSerializer(obj).data, status=201)
         qs = LibraryTag.objects.filter(user=request.user)
         return Response(serializers.LibraryTagSerializer(qs, many=True).data)

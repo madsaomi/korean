@@ -44,9 +44,9 @@
             <button class="btn-glass btn-sm dropdown-toggle" data-bs-toggle="dropdown">📋</button>
             <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
               <li><a class="dropdown-item" href="{% url 'word_list_create' %}">➕ Новая</a></li>
-              {% if user.word_lists.exists %}
+              {% if user_lists %}
               <li><hr class="dropdown-divider" style="border-color: var(--glass-border);"></li>
-              {% for wl in user.word_lists.all %}
+              {% for wl in user_lists %}
                <li>
                  <form method="POST" action="{% url 'word_list_add_word' wl.id word.id %}" style="display:inline;">
                    {% csrf_token %}

@@ -1,12 +1,17 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.utils import timezone
+from django.core.cache import cache
+from django.views.decorators.http import require_GET
 from gtts import gTTS
 import os
-import json
+import re
 import hmac
 import hashlib
+import tempfile
 from django.conf import settings
+from django.utils import timezone
+
+from vocabulary.models import Word
 
 CONSONANTS = [
     ('ㄱ', 'g/k'), ('ㄴ', 'n'), ('ㄷ', 'd/t'), ('ㄹ', 'r/l'), ('ㅁ', 'm'),
@@ -38,25 +43,36 @@ def hangul_page(request):
         'batchim': BATCHIM,
     })
 
-import re
-from vocabulary.models import Word
 
+TTS_MAX_TEXT_LEN = 200
+TTS_RATE_LIMIT = 30
+TTS_RATE_WINDOW = 60
+
+
+def _client_ip(request):
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', 'unknown')
+
+
+@require_GET
 def tts_audio(request):
-    text = request.GET.get('text', '')
+    text = request.GET.get('text', '').strip()
     if not text:
         return JsonResponse({'error': 'No text'}, status=400)
-    if len(text) > 200:
+    if len(text) > TTS_MAX_TEXT_LEN:
         return JsonResponse({'error': 'Text too long'}, status=400)
 
-    # Rate limit: 15 TTS requests per minute per session
-    now = timezone.now().timestamp()
-    ts_key = 'tts_timestamps'
-    timestamps = request.session.get(ts_key, [])
-    timestamps = [t for t in timestamps if now - t < 60]
-    if len(timestamps) >= 15:
+    # Rate limit: sliding window per IP, stored server-side in the cache
+    ip = _client_ip(request)
+    cache_key = f'tts_rl_{hmac.new(settings.SECRET_KEY.encode(), ip.encode(), hashlib.sha256).hexdigest()[:16]}'
+    now_ts = timezone.now().timestamp()
+    timestamps = [t for t in cache.get(cache_key, []) if now_ts - t < TTS_RATE_WINDOW]
+    if len(timestamps) >= TTS_RATE_LIMIT:
         return JsonResponse({'error': 'Rate limit. Try again later.'}, status=429)
-    timestamps.append(now)
-    request.session[ts_key] = timestamps
+    timestamps.append(now_ts)
+    cache.set(cache_key, timestamps, TTS_RATE_WINDOW)
 
     # Unguessable cache filename: keyed by text via HMAC-SECRET_KEY (not reversible)
     token = hmac.new(settings.SECRET_KEY.encode(), text.encode(), hashlib.sha256).hexdigest()[:32]
@@ -64,9 +80,21 @@ def tts_audio(request):
     tts_dir = os.path.join(settings.MEDIA_ROOT, 'tts')
     os.makedirs(tts_dir, exist_ok=True)
     filepath = os.path.join(tts_dir, filename)
+
     if not os.path.exists(filepath):
-        tts = gTTS(text=text, lang='ko')
-        tts.save(filepath)
+        try:
+            tts = gTTS(text=text, lang='ko')
+            fd, tmp_path = tempfile.mkstemp(suffix='.tmp', dir=tts_dir)
+            try:
+                with os.fdopen(fd, 'wb') as f:
+                    tts.write_to_fp(f)
+                os.replace(tmp_path, filepath)
+            except Exception:
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+                raise
+        except Exception:
+            return JsonResponse({'error': 'TTS generation failed'}, status=502)
     return JsonResponse({'url': f'{settings.MEDIA_URL}tts/{filename}'})
 
 def sentence_builder(request):
@@ -87,7 +115,6 @@ def sentence_builder(request):
     return render(request, 'hangul/builder.html', {
         'word_bank': word_bank,
         'categories': categories,
-        'word_bank_json': json.dumps(word_bank, ensure_ascii=False),
     })
 
 SAMPLE_SENTENCES = [
@@ -101,15 +128,21 @@ SAMPLE_SENTENCES = [
     ("겨울에 눈이 오면 스키를 타러 가요", "Зимой, когда идёт снег, еду кататься на лыжах", "intermediate"),
 ]
 
+BREAKDOWN_MAX_LEN = 300
+BREAKDOWN_MAX_WORDS = 50
+
+
 def sentence_breakdown(request):
     result = []
     input_sentence = ''
 
     if request.method == 'POST':
-        input_sentence = request.POST.get('sentence', '').strip()
+        input_sentence = request.POST.get('sentence', '').strip()[:BREAKDOWN_MAX_LEN]
         if input_sentence:
             words = re.split(r'[\s,.-]+', input_sentence)
-            for w in words:
+            for w in words[:BREAKDOWN_MAX_WORDS]:
+                # Strip LIKE wildcards so user input can't match everything
+                w = w.replace('%', '').replace('_', '')
                 if not w:
                     continue
                 matches = Word.objects.filter(korean__contains=w).select_related('category')[:3]

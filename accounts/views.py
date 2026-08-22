@@ -51,9 +51,7 @@ def register(request):
 @login_required
 def profile(request):
     profile = request.user.profile
-    streak = getattr(request.user, 'streak', None)
-    if not streak:
-        streak = Streak.objects.create(user=request.user)
+    streak, _ = Streak.objects.get_or_create(user=request.user)
     lessons_done = UserLessonProgress.objects.filter(user=request.user, completed=True).count()
     quizzes_done = UserQuizResult.objects.filter(user=request.user).count()
     words_learned = UserWordProgress.objects.filter(user=request.user, learned=True).count()
@@ -62,8 +60,7 @@ def profile(request):
         user=request.user, learned=False
     ).exclude(next_review=None).count()
 
-    now = timezone.now()
-    last_14 = [now.date() - timedelta(days=i) for i in range(13, -1, -1)]
+    last_14 = [timezone.localdate() - timedelta(days=i) for i in range(13, -1, -1)]
     agg = (
         UserQuizResult.objects
         .filter(user=request.user, completed_at__date__gte=last_14[0])
@@ -149,10 +146,9 @@ def achievements_page(request):
 
 @login_required
 def daily_goals_page(request):
-    from accounts.models import DailyGoal
     goal, _ = DailyGoal.objects.get_or_create(user=request.user)
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     lessons_today = UserLessonProgress.objects.filter(
         user=request.user, completed_at__date=today

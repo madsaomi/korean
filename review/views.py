@@ -1,10 +1,23 @@
 import json
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from vocabulary.models import Word
 from progress.models import UserWordProgress
-from accounts.utils import check_word_achievements
+from review.services import apply_review, pending_review_count, InvalidReviewAction
+
+
+def _parse_review_payload(request):
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return None, None
+    else:
+        data = request.POST
+    return data.get('word_id'), data.get('action')
+
 
 @login_required
 def review_page(request):
@@ -24,59 +37,49 @@ def review_page(request):
 
     due_words = UserWordProgress.objects.filter(
         user=request.user, next_review__lte=now, learned=False
-    ).select_related('word')[:20]
+    ).select_related('word__category')[:20]
 
     if request.method == 'POST':
-        word_id = None
-        action = None
-        is_ajax = (                request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
-                   request.content_type == 'application/json')
-        if request.content_type == 'application/json':
-            try:
-                data = json.loads(request.body)
-                word_id = data.get('word_id')
-                action = data.get('action')
-            except json.JSONDecodeError:
-                pass
-        else:
-            word_id = request.POST.get('word_id')
-            action = request.POST.get('action')
+        word_id, action = _parse_review_payload(request)
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+            request.content_type == 'application/json'
+        )
+        if not word_id or not action:
+            return JsonResponse({'success': False, 'error': 'missing fields'}, status=400) \
+                if is_ajax else HttpResponseBadRequest('Missing fields')
 
-        if word_id and action:
-            prog = UserWordProgress.objects.filter(
-                user=request.user, word_id=word_id
-            ).first()
-            if prog:
-                prog.review_count += 1
-                if action == 'easy':
-                    prog.next_review = now + timezone.timedelta(days=7)
-                    prog.learned = True
-                    if not prog.learned_at:
-                        prog.learned_at = now
-                    check_word_achievements(request.user, request)
-                elif action == 'good':
-                    base_days = [1, 3, 7, 14, 30]
-                    days = base_days[min(prog.review_count - 1, len(base_days) - 1)]
-                    prog.next_review = now + timezone.timedelta(days=days)
-                elif action == 'again':
-                    prog.next_review = now + timezone.timedelta(hours=1)
-                prog.save(update_fields=['review_count', 'next_review', 'learned', 'learned_at'])
-                session['completed'] += 1
-                session[action] = session.get(action, 0) + 1
-                request.session.modified = True
+        try:
+            prog = apply_review(request.user, word_id, action)
+        except (InvalidReviewAction, ValueError, TypeError):
+            return JsonResponse({'success': False, 'error': 'invalid action'}, status=400) \
+                if is_ajax else HttpResponseBadRequest('Invalid action')
+
+        if prog is None:
+            return JsonResponse({'success': False, 'error': 'word_not_found'}, status=404) \
+                if is_ajax else redirect('review')
+
+        session['completed'] += 1
+        session[action] = session.get(action, 0) + 1
+        request.session.modified = True
+
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'action': action,
+                'learned': prog.learned,
+                'next_review': prog.next_review.isoformat(),
+                'pending_count': pending_review_count(request.user),
+            })
         return redirect('review')
-
-    pending_count = UserWordProgress.objects.filter(
-        user=request.user, next_review__lte=now, learned=False
-    ).count()
 
     recent_words = Word.objects.filter(
         word_lists__user=request.user
-    ).distinct()[:5]
+    ).order_by('-created_at').distinct()[:5]
 
     ctx = {
         'due_words': due_words,
-        'pending_count': pending_count,
+        'pending_count': pending_review_count(request.user),
         'recent_words': recent_words,
     }
 
@@ -90,46 +93,37 @@ def flashcard_mode(request):
     now = timezone.now()
     cards = UserWordProgress.objects.filter(
         user=request.user, next_review__lte=now, learned=False
-    ).select_related('word')[:50]
+    ).select_related('word__category')[:50]
 
     if request.method == 'POST':
-        word_id = None
-        action = None
-        is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
-                   request.content_type == 'application/json')
-        if request.content_type == 'application/json':
-            try:
-                data = json.loads(request.body)
-                word_id = data.get('word_id')
-                action = data.get('action')
-            except json.JSONDecodeError:
-                pass
-        else:
-            word_id = request.POST.get('word_id')
-            action = request.POST.get('action')
+        word_id, action = _parse_review_payload(request)
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest' or
+            request.content_type == 'application/json'
+        )
 
-        if word_id and action:
-            prog = UserWordProgress.objects.filter(
-                user=request.user, word_id=word_id
-            ).first()
-            if prog:
-                prog.review_count += 1
-                if action == 'easy':
-                    prog.next_review = now + timezone.timedelta(days=7)
-                    prog.learned = True
-                    if not prog.learned_at:
-                        prog.learned_at = now
-                    check_word_achievements(request.user, request)
-                elif action == 'good':
-                    base_days = [1, 3, 7, 14, 30]
-                    days = base_days[min(prog.review_count - 1, len(base_days) - 1)]
-                    prog.next_review = now + timezone.timedelta(days=days)
-                elif action == 'again':
-                    prog.next_review = now + timezone.timedelta(hours=1)
-                prog.save(update_fields=['review_count', 'next_review', 'learned', 'learned_at'])
+        if not word_id or not action:
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': 'missing fields'}, status=400)
+            return HttpResponseBadRequest('Missing fields')
+
+        try:
+            prog = apply_review(request.user, word_id, action)
+        except (InvalidReviewAction, ValueError, TypeError):
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': 'invalid action'}, status=400)
+            return HttpResponseBadRequest('Invalid action')
+
+        if prog is None and is_ajax:
+            return JsonResponse({'success': False, 'error': 'word_not_found'}, status=404)
+
         if is_ajax:
-            from django.http import JsonResponse
-            return JsonResponse({'success': True})
+            return JsonResponse({
+                'success': True,
+                'action': action,
+                'learned': prog.learned,
+                'next_review': prog.next_review.isoformat(),
+            })
         return redirect('flashcard')
 
     cards_data = [

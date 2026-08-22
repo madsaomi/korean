@@ -34,6 +34,12 @@ class Bookmark(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'language', 'slug'],
+                name='uniq_bookmark_user_lang_slug',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.user.username} — {self.title}'
@@ -54,6 +60,12 @@ class Highlight(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'language', 'slug', 'text', 'start_offset', 'end_offset'],
+                name='uniq_highlight_user_position',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.user.username} — {self.text[:40]}'

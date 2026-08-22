@@ -98,7 +98,14 @@ def category_list(request):
 def category_detail(request, slug):
     category = get_object_or_404(Category.objects.annotate(word_count=Count('words')), slug=slug)
     words = category.words.all()
-    return render(request, 'vocabulary/detail.html', {'category': category, 'words': words})
+    user_lists = None
+    if request.user.is_authenticated:
+        user_lists = list(request.user.word_lists.all())
+    return render(request, 'vocabulary/detail.html', {
+        'category': category,
+        'words': words,
+        'user_lists': user_lists,
+    })
 
 def study_category(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -147,7 +154,7 @@ def word_search(request):
     query = request.GET.get('q', '')
     results = Word.objects.filter(
         Q(korean__icontains=query) | Q(russian__icontains=query) | Q(romanization__icontains=query)
-    ) if query else []
+    ).select_related('category')[:100] if query else []
     return render(request, 'vocabulary/search.html', {'query': query, 'results': results})
 
 @login_required
@@ -160,46 +167,56 @@ def add_to_review(request):
         import json
         try:
             data = json.loads(request.body)
-            word_id = data.get('word_id')
-            mark_learned = data.get('mark_learned')
         except json.JSONDecodeError:
-            pass
+            if is_ajax:
+                return JsonResponse({'success': False, 'message': 'Некорректный запрос'}, status=400)
+            messages.error(request, '❌ Некорректный запрос')
+            return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+        word_id = data.get('word_id')
+        mark_learned = data.get('mark_learned')
     else:
         word_id = request.POST.get('word_id')
         mark_learned = request.POST.get('mark_learned')
+    mark_learned = mark_learned in ('1', 'true', 'True', 'on')
 
     msg = ''
-    if word_id:
-        try:
-            word = Word.objects.get(id=word_id)
-        except (Word.DoesNotExist, ValueError, TypeError):
-            if is_ajax:
-                return JsonResponse({'success': False, 'message': 'Слово не найдено'}, status=400)
-            messages.error(request, '❌ Слово не найдено')
-            return redirect(request.META.get('HTTP_REFERER', 'category_list'))
-        prog, created = UserWordProgress.objects.get_or_create(
-            user=request.user, word=word,
-            defaults={'next_review': timezone.now()}
-        )
-        if mark_learned:
-            prog.learned = True
-            if not prog.learned_at:
-                prog.learned_at = timezone.now()
-            prog.save(update_fields=['learned', 'learned_at'])
-            msg = '✅ Слово отмечено как выученное!'
-            if not is_ajax:
-                messages.success(request, msg)
-        elif not created and prog.learned:
-            prog.learned = False
-            prog.next_review = timezone.now()
-            prog.save(update_fields=['learned', 'next_review'])
-            msg = '🔄 Слово добавлено в повторение'
-            if not is_ajax:
-                messages.success(request, msg)
-        elif created:
-            msg = '🔄 Слово добавлено в повторение'
-            if not is_ajax:
-                messages.success(request, msg)
+    if not word_id:
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': 'Не указано слово'}, status=400)
+        messages.error(request, '❌ Не указано слово')
+        return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+    try:
+        word = Word.objects.get(id=word_id)
+    except (Word.DoesNotExist, ValueError, TypeError):
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': 'Слово не найдено'}, status=400)
+        messages.error(request, '❌ Слово не найдено')
+        return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+    prog, created = UserWordProgress.objects.get_or_create(
+        user=request.user, word=word,
+        defaults={'next_review': timezone.now()}
+    )
+    if mark_learned:
+        prog.learned = True
+        if not prog.learned_at:
+            prog.learned_at = timezone.now()
+        prog.save(update_fields=['learned', 'learned_at'])
+        msg = '✅ Слово отмечено как выученное!'
+        if not is_ajax:
+            messages.success(request, msg)
+    elif not created and prog.learned:
+        prog.learned = False
+        prog.next_review = timezone.now()
+        prog.save(update_fields=['learned', 'next_review'])
+        msg = '🔄 Слово добавлено в повторение'
+        if not is_ajax:
+            messages.success(request, msg)
+    elif created:
+        msg = '🔄 Слово добавлено в повторение'
+        if not is_ajax:
+            messages.success(request, msg)
+    else:
+        msg = 'ℹ️ Слово уже в повторении'
 
     if is_ajax:
         return JsonResponse({'success': True, 'message': msg})
@@ -270,7 +287,7 @@ def word_list_export(request, pk):
     response.write('\ufeff')
     writer = csv.writer(response)
     writer.writerow(['Корейский', 'Русский', 'Романизация', 'Категория', 'Уровень', 'Пример'])
-    for word in wl.words.all():
+    for word in wl.words.select_related('category').all():
         writer.writerow([word.korean, word.russian, word.romanization, word.category.name, word.get_level_display(), word.example_sentence])
     return response
 

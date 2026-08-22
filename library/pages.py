@@ -1,7 +1,13 @@
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from django.conf import settings
+from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
+
+CACHE_TTL_SECONDS = 600
 
 ICONS = {
     'ko': {
@@ -79,7 +85,7 @@ def _parse_frontmatter(text):
                 fm = yaml.safe_load(parts[1]) or {}
                 return fm, parts[2].strip()
             except Exception:
-                pass
+                logger.warning('Broken YAML frontmatter in markdown file', exc_info=True)
     return {}, text
 
 
@@ -118,7 +124,7 @@ def _file_to_pageinfo(filepath, language, order):
     )
 
 
-def get_all_pages(language='ko'):
+def _build_all_pages(language):
     md_dir = _get_md_dir(language)
     if not md_dir.exists():
         return []
@@ -126,20 +132,26 @@ def get_all_pages(language='ko'):
     return [_file_to_pageinfo(f, language, i + 1) for i, f in enumerate(files)]
 
 
+def get_all_pages(language='ko'):
+    """Parse the whole textbook for a language, cached to avoid re-reading
+    every markdown file on each request."""
+    key = f'library_pages_{language}'
+    pages = cache.get(key)
+    if pages is None:
+        pages = _build_all_pages(language)
+        cache.set(key, pages, CACHE_TTL_SECONDS)
+    return pages
+
+
 def get_page(language, slug):
-    md_dir = _get_md_dir(language)
-    all_files = sorted(md_dir.rglob('*.md'))
-    for i, f in enumerate(all_files):
-        if f.stem == slug:
-            return _file_to_pageinfo(f, language, i + 1)
+    for page in get_all_pages(language):
+        if page.slug == slug:
+            return page
     return None
 
 
 def get_page_count(language='ko'):
-    md_dir = _get_md_dir(language)
-    if not md_dir.exists():
-        return 0
-    return len(list(md_dir.rglob('*.md')))
+    return len(get_all_pages(language))
 
 
 def get_pages_by_slugs(language, slugs):

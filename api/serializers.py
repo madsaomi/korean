@@ -49,7 +49,8 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'icon', 'order', 'word_count']
 
     def get_word_count(self, obj):
-        return obj.words.count()
+        count = getattr(obj, 'words_count', None)
+        return count if count is not None else obj.words.count()
 
 
 class WordSerializer(serializers.ModelSerializer):
@@ -74,7 +75,8 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'level', 'order', 'image', 'lesson_count']
 
     def get_lesson_count(self, obj):
-        return obj.lessons.count()
+        count = getattr(obj, 'lessons_count', None)
+        return count if count is not None else obj.lessons.count()
 
 
 class LessonStepSerializer(serializers.ModelSerializer):
@@ -112,7 +114,8 @@ class GrammarTopicSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'slug', 'icon', 'description', 'level', 'order', 'rules', 'rule_count']
 
     def get_rule_count(self, obj):
-        return obj.rules.count()
+        count = getattr(obj, 'rules_count', None)
+        return count if count is not None else obj.rules.count()
 
 
 class GrammarExerciseSerializer(serializers.ModelSerializer):
@@ -122,9 +125,11 @@ class GrammarExerciseSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+    # is_correct/explanation are deliberately excluded: quiz answers are
+    # served to unauthenticated clients and must not leak the key.
     class Meta:
         model = Answer
-        fields = ['id', 'text', 'is_correct', 'explanation']
+        fields = ['id', 'text']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -144,7 +149,8 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'level', 'time_limit', 'passing_score', 'order', 'questions', 'question_count']
 
     def get_question_count(self, obj):
-        return obj.questions.count()
+        count = getattr(obj, 'questions_count', None)
+        return count if count is not None else obj.questions.count()
 
 
 class QuizListSerializer(serializers.ModelSerializer):
@@ -155,7 +161,8 @@ class QuizListSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'level', 'time_limit', 'passing_score', 'order', 'question_count']
 
     def get_question_count(self, obj):
-        return obj.questions.count()
+        count = getattr(obj, 'questions_count', None)
+        return count if count is not None else obj.questions.count()
 
 
 class UserLessonProgressSerializer(serializers.ModelSerializer):

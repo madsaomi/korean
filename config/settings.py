@@ -7,11 +7,14 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
+    if not DEBUG:
+        raise RuntimeError(
+            'DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is False.'
+        )
     import secrets
     SECRET_KEY = secrets.token_urlsafe(50)
-    if DEBUG:
-        print('WARNING: DJANGO_SECRET_KEY not set — using a random key for this run. '
-              'Set DJANGO_SECRET_KEY before deploying to production.')
+    print('WARNING: DJANGO_SECRET_KEY not set — using a random key for this run. '
+          'Set DJANGO_SECRET_KEY before deploying to production.')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -116,7 +119,6 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -143,7 +145,7 @@ REST_FRAMEWORK = {
     },
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        *(['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
     ],
 }
 

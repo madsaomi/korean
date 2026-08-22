@@ -2,6 +2,7 @@ import json, re, random, markdown, nh3
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.db.models import Q
 from .models import ReadingProgress, Bookmark, Note, Highlight, LibraryTag
@@ -233,9 +234,15 @@ def library_detail(request, slug, lang_code='ko'):
             prog.save(update_fields=['read', 'read_at'])
             return JsonResponse({'read': prog.read})
         elif action == 'toggle_bookmark':
-            bm, created = Bookmark.objects.get_or_create(
-                user=request.user, language=lang_code, slug=slug,
-                defaults={'title': current.name, 'anchor': ''})
+            try:
+                with transaction.atomic():
+                    bm, created = Bookmark.objects.get_or_create(
+                        user=request.user, language=lang_code, slug=slug,
+                        defaults={'title': current.name, 'anchor': ''})
+            except IntegrityError:
+                Bookmark.objects.filter(
+                    user=request.user, language=lang_code, slug=slug).delete()
+                return JsonResponse({'bookmarked': False})
             if not created:
                 bm.delete()
                 return JsonResponse({'bookmarked': False})
@@ -430,16 +437,24 @@ def api_highlight_toggle(request, lang_code='ko'):
     if existing.exists():
         existing.delete()
         return JsonResponse({'highlighted': False, 'id': None})
-    hl = Highlight.objects.create(
-        user=request.user, language=lang_code,
-        slug=slug,
-        anchor=request.POST.get('anchor', ''),
-        text=text,
-        color=request.POST.get('color', 'yellow'),
-        note=request.POST.get('note', ''),
-        start_offset=start_off,
-        end_offset=end_off,
-    )
+    try:
+        with transaction.atomic():
+            hl = Highlight.objects.create(
+                user=request.user, language=lang_code,
+                slug=slug,
+                anchor=request.POST.get('anchor', ''),
+                text=text,
+                color=request.POST.get('color', 'yellow'),
+                note=request.POST.get('note', ''),
+                start_offset=start_off,
+                end_offset=end_off,
+            )
+    except IntegrityError:
+        # Concurrent request created the same highlight — treat as toggle-off
+        Highlight.objects.filter(
+            user=request.user, language=lang_code, slug=slug, text=text,
+            start_offset=start_off, end_offset=end_off).delete()
+        return JsonResponse({'highlighted': False, 'id': None})
     return JsonResponse({'highlighted': True, 'id': hl.id})
 
 
