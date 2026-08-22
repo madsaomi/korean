@@ -1,9 +1,11 @@
-from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
-from django.utils import timezone
-from .models import Course, Lesson, LessonStep
+from django.shortcuts import get_object_or_404, render
+
 from progress.models import UserLessonProgress
+
+from .models import Course, Lesson
+
 
 def lesson_list(request):
     courses = Course.objects.annotate(lesson_count=Count('lessons')).prefetch_related('lessons')

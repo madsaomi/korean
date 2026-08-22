@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import GrammarTopic, GrammarRule, GrammarExercise
+
+from .models import GrammarExercise, GrammarRule, GrammarTopic
+
 
 class GrammarRuleInline(admin.TabularInline):
     model = GrammarRule

@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 LANG_DISPLAY = {'korean': 'ko', 'japanese': 'ja'}

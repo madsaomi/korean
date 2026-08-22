@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
-from django.utils import timezone
-from core.middleware import StreakMiddleware
+
 from accounts.models import Streak
+from core.middleware import StreakMiddleware
 
 
 @pytest.fixture

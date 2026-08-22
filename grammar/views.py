@@ -1,8 +1,11 @@
 import random
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Count
+
 from django.contrib.auth.decorators import login_required
-from .models import GrammarTopic, GrammarExercise
+from django.db.models import Count
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .models import GrammarExercise, GrammarTopic
+
 
 def grammar_list(request):
     topics = GrammarTopic.objects.annotate(rule_count=Count('rules'))

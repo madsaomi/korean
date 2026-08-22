@@ -1,14 +1,17 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.views.decorators.http import require_POST
 from django.db.models import Count
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from datetime import datetime
-from .models import Quiz, Question, Answer
-from progress.models import UserLessonProgress, UserQuizResult
+from django.views.decorators.http import require_POST
+
 from accounts.utils import check_lesson_achievements, check_quiz_achievements
+from progress.models import UserLessonProgress, UserQuizResult
+
+from .models import Quiz
 
 TIMER_GRACE_SECONDS = 60
 SESSION_START_PREFIX = 'quiz_started_'

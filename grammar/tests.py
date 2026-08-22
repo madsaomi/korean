@@ -1,5 +1,6 @@
 import pytest
-from grammar.models import GrammarTopic, GrammarRule, GrammarExercise
+
+from grammar.models import GrammarExercise, GrammarRule, GrammarTopic
 
 
 @pytest.fixture

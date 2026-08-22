@@ -1,7 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import Path
+
 from django.conf import settings
 from django.core.cache import cache
 

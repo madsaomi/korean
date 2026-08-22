@@ -1,11 +1,14 @@
-from django.shortcuts import render
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+from django.shortcuts import render
 from django.utils import timezone
-from datetime import timedelta
-from progress.models import UserQuizResult, UserLessonProgress, UserWordProgress
+
 from accounts.models import Streak
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
+
 
 @login_required
 def progress_dashboard(request):

@@ -1,10 +1,11 @@
 import pytest
 from django.contrib.auth.models import User
 from django.utils import timezone
-from progress.models import UserLessonProgress, UserWordProgress, UserQuizResult
-from vocabulary.models import Category, Word
+
 from lessons.models import Course, Lesson
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 from quiz.models import Quiz
+from vocabulary.models import Category, Word
 
 
 @pytest.fixture

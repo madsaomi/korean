@@ -1,15 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse, HttpResponse
-from django.db.models import Q, Count
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from .models import Category, Word, WordList
-from progress.models import UserWordProgress
 import csv
 import re
 import urllib.parse
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+
+from progress.models import UserWordProgress
+
+from .models import Category, Word, WordList
+
 
 def study_custom(request):
     categories = Category.objects.all()

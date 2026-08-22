@@ -1,19 +1,17 @@
-from rest_framework import viewsets, status, permissions, filters, generics, decorators
+from django.db.models import Count, Sum
+from django.utils import timezone
+from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth.models import User
-from django.db.models import Sum, Count
-from django.utils import timezone
-from django_filters.rest_framework import DjangoFilterBackend
 
-from vocabulary.models import Category, Word
+from accounts.models import Achievement, DailyGoal, Streak, UserProfile
+from grammar.models import GrammarExercise, GrammarTopic
 from lessons.models import Course, Lesson
-from grammar.models import GrammarTopic, GrammarExercise
+from library.models import Bookmark, LibraryTag, Note, ReadingProgress
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 from quiz.models import Quiz
-from progress.models import UserWordProgress, UserQuizResult, UserLessonProgress
-from library.models import ReadingProgress, Bookmark, Note, LibraryTag
-from accounts.models import UserProfile, Streak, Achievement, DailyGoal
-from review.services import apply_review, InvalidReviewAction
+from review.services import InvalidReviewAction, apply_review
+from vocabulary.models import Category, Word
 
 from . import serializers
 

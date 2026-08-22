@@ -1,12 +1,13 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
-from vocabulary.models import Category, Word
+from rest_framework import serializers
+
+from accounts.models import Achievement, DailyGoal, Streak, UserProfile
+from grammar.models import GrammarExercise, GrammarRule, GrammarTopic
 from lessons.models import Course, Lesson, LessonStep
-from grammar.models import GrammarTopic, GrammarRule, GrammarExercise
-from quiz.models import Quiz, Question, Answer
-from progress.models import UserLessonProgress, UserWordProgress, UserQuizResult
-from library.models import ReadingProgress, Bookmark, Note, LibraryTag
-from accounts.models import UserProfile, Streak, Achievement, DailyGoal
+from library.models import Bookmark, LibraryTag, Note, ReadingProgress
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
+from quiz.models import Answer, Question, Quiz
+from vocabulary.models import Category, Word
 
 
 class UserSerializer(serializers.ModelSerializer):

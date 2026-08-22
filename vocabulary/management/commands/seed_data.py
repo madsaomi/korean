@@ -1,9 +1,10 @@
 from django.core.management.base import BaseCommand
-from vocabulary.models import Category, Word
+
+from grammar.models import GrammarRule, GrammarTopic
 from lessons.models import Course, Lesson, LessonStep
-from grammar.models import GrammarTopic, GrammarRule
-from quiz.models import Quiz, Question, Answer
-from django.utils import timezone
+from quiz.models import Answer, Question, Quiz
+from vocabulary.models import Category, Word
+
 
 class Command(BaseCommand):
     help = 'Seeds the database with initial Korean learning content'

@@ -2,9 +2,9 @@ import logging
 from datetime import timedelta
 
 from django.contrib import messages
-from django.shortcuts import render
-from django.http import Http404
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
+from django.shortcuts import render
 from django.utils import timezone
 
 from accounts.models import Streak
@@ -43,8 +43,7 @@ class StreakMiddleware:
                     streak.current_streak += 1
                 elif last is None or last < today - timedelta(days=1):
                     streak.current_streak = 1
-                if streak.current_streak > streak.longest_streak:
-                    streak.longest_streak = streak.current_streak
+                streak.longest_streak = max(streak.longest_streak, streak.current_streak)
                 streak.last_active_date = today
                 streak.save(update_fields=['current_streak', 'longest_streak', 'last_active_date'])
                 if streak.current_streak > was_streak and streak.current_streak > 1 and streak.current_streak % 7 == 0:

@@ -1,11 +1,12 @@
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
-from vocabulary.models import Category, Word
+
+from grammar.models import GrammarRule, GrammarTopic
 from lessons.models import Course, Lesson
-from grammar.models import GrammarTopic, GrammarRule
-from quiz.models import Quiz, Question, Answer
 from progress.models import UserWordProgress
+from quiz.models import Answer, Question, Quiz
+from vocabulary.models import Category, Word
 
 
 @pytest.fixture
@@ -173,14 +174,12 @@ class TestReviewAPI:
         assert resp.data == []
 
     def test_review_action(self, auth_client, user, word):
-        from progress.models import UserWordProgress
         UserWordProgress.objects.create(user=user, word=word)
         resp = auth_client.post('/api/review/', {'word_id': word.id, 'action': 'again'})
         assert resp.status_code == 200
         assert resp.data['success']
 
     def test_review_easy_marks_learned(self, auth_client, user, word):
-        from progress.models import UserWordProgress
         prog = UserWordProgress.objects.create(user=user, word=word)
         resp = auth_client.post('/api/review/', {'word_id': word.id, 'action': 'easy'})
         assert resp.status_code == 200

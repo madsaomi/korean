@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import UserProfile, Streak, Achievement, DailyGoal
+
+from .models import Achievement, DailyGoal, Streak, UserProfile
 
 
 class AchievementInline(admin.TabularInline):

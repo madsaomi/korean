@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class GrammarTopic(models.Model):
     LEVELS = [
         ('beginner', 'С нуля'),

@@ -1,11 +1,13 @@
 import json
-from django.http import JsonResponse, HttpResponseBadRequest
-from django.shortcuts import render, redirect
+
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseBadRequest, JsonResponse
+from django.shortcuts import redirect, render
 from django.utils import timezone
-from vocabulary.models import Word
+
 from progress.models import UserWordProgress
-from review.services import apply_review, pending_review_count, InvalidReviewAction
+from review.services import InvalidReviewAction, apply_review, pending_review_count
+from vocabulary.models import Word
 
 
 def _parse_review_payload(request):

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import ReadingProgress, Bookmark, Note, Highlight, LibraryTag
+
+from .models import Bookmark, Highlight, LibraryTag, Note, ReadingProgress
 
 
 @admin.register(ReadingProgress)

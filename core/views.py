@@ -1,14 +1,16 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.db.models import Count, Q
-from django.utils import timezone
 from django.contrib.auth.models import User
-from lessons.models import Course, Lesson
-from vocabulary.models import Category, Word
-from quiz.models import Quiz
-from progress.models import UserLessonProgress, UserWordProgress, UserQuizResult
+from django.db.models import Count, Q
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
+
 from accounts.models import Streak
 from grammar.models import GrammarTopic
+from lessons.models import Course, Lesson
+from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
+from quiz.models import Quiz
+from vocabulary.models import Category, Word
+
 
 def leaderboard(request):
     top_streak = Streak.objects.select_related('user').order_by('-current_streak')[:10]

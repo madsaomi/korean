@@ -1,8 +1,8 @@
 from django.db import transaction
 from django.utils import timezone
 
-from progress.models import UserWordProgress
 from accounts.utils import check_word_achievements
+from progress.models import UserWordProgress
 
 VALID_ACTIONS = ('again', 'good', 'easy')
 BASE_DAYS = [1, 3, 7, 14, 30]
