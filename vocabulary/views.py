@@ -1,4 +1,4 @@
-import csv
+﻿import csv
 import re
 import urllib.parse
 
@@ -8,11 +8,22 @@ from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from progress.models import UserWordProgress
 
 from .models import Category, Word, WordList
+
+
+def _safe_referer_redirect(request, fallback='category_list'):
+    """Redirect to the Referer only if it points to this host, else fallback."""
+    referer = request.META.get('HTTP_REFERER')
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(referer)
+    return redirect(fallback)
 
 
 def study_custom(request):
@@ -173,9 +184,9 @@ def add_to_review(request):
             data = json.loads(request.body)
         except json.JSONDecodeError:
             if is_ajax:
-                return JsonResponse({'success': False, 'message': 'Некорректный запрос'}, status=400)
-            messages.error(request, '❌ Некорректный запрос')
-            return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+                return JsonResponse({'success': False, 'message': 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ Р·Р°РїСЂРѕСЃ'}, status=400)
+            messages.error(request, 'вќЊ РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ Р·Р°РїСЂРѕСЃ')
+            return _safe_referer_redirect(request)
         word_id = data.get('word_id')
         mark_learned = data.get('mark_learned')
     else:
@@ -186,16 +197,16 @@ def add_to_review(request):
     msg = ''
     if not word_id:
         if is_ajax:
-            return JsonResponse({'success': False, 'message': 'Не указано слово'}, status=400)
-        messages.error(request, '❌ Не указано слово')
-        return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+            return JsonResponse({'success': False, 'message': 'РќРµ СѓРєР°Р·Р°РЅРѕ СЃР»РѕРІРѕ'}, status=400)
+        messages.error(request, 'вќЊ РќРµ СѓРєР°Р·Р°РЅРѕ СЃР»РѕРІРѕ')
+        return _safe_referer_redirect(request)
     try:
         word = Word.objects.get(id=word_id)
     except (Word.DoesNotExist, ValueError, TypeError):
         if is_ajax:
-            return JsonResponse({'success': False, 'message': 'Слово не найдено'}, status=400)
-        messages.error(request, '❌ Слово не найдено')
-        return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+            return JsonResponse({'success': False, 'message': 'РЎР»РѕРІРѕ РЅРµ РЅР°Р№РґРµРЅРѕ'}, status=400)
+        messages.error(request, 'вќЊ РЎР»РѕРІРѕ РЅРµ РЅР°Р№РґРµРЅРѕ')
+        return _safe_referer_redirect(request)
     prog, created = UserWordProgress.objects.get_or_create(
         user=request.user, word=word,
         defaults={'next_review': timezone.now()}
@@ -205,26 +216,26 @@ def add_to_review(request):
         if not prog.learned_at:
             prog.learned_at = timezone.now()
         prog.save(update_fields=['learned', 'learned_at'])
-        msg = '✅ Слово отмечено как выученное!'
+        msg = 'вњ… РЎР»РѕРІРѕ РѕС‚РјРµС‡РµРЅРѕ РєР°Рє РІС‹СѓС‡РµРЅРЅРѕРµ!'
         if not is_ajax:
             messages.success(request, msg)
     elif not created and prog.learned:
         prog.learned = False
         prog.next_review = timezone.now()
         prog.save(update_fields=['learned', 'next_review'])
-        msg = '🔄 Слово добавлено в повторение'
+        msg = 'рџ”„ РЎР»РѕРІРѕ РґРѕР±Р°РІР»РµРЅРѕ РІ РїРѕРІС‚РѕСЂРµРЅРёРµ'
         if not is_ajax:
             messages.success(request, msg)
     elif created:
-        msg = '🔄 Слово добавлено в повторение'
+        msg = 'рџ”„ РЎР»РѕРІРѕ РґРѕР±Р°РІР»РµРЅРѕ РІ РїРѕРІС‚РѕСЂРµРЅРёРµ'
         if not is_ajax:
             messages.success(request, msg)
     else:
-        msg = 'ℹ️ Слово уже в повторении'
+        msg = 'в„№пёЏ РЎР»РѕРІРѕ СѓР¶Рµ РІ РїРѕРІС‚РѕСЂРµРЅРёРё'
 
     if is_ajax:
         return JsonResponse({'success': True, 'message': msg})
-    return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+    return _safe_referer_redirect(request)
 
 @login_required
 def word_list_list(request):
@@ -237,7 +248,7 @@ def word_list_create(request):
         name = request.POST.get('name', '').strip()
         if name:
             WordList.objects.create(user=request.user, name=name)
-            messages.success(request, f'📋 Коллекция "{name}" создана')
+            messages.success(request, f'рџ“‹ РљРѕР»Р»РµРєС†РёСЏ "{name}" СЃРѕР·РґР°РЅР°')
             return redirect('word_list_list')
     return render(request, 'vocabulary/list_create.html')
 
@@ -290,7 +301,7 @@ def word_list_export(request, pk):
     response['Content-Disposition'] = f'attachment; filename="{safe_name}.csv"'
     response.write('\ufeff')
     writer = csv.writer(response)
-    writer.writerow(['Корейский', 'Русский', 'Романизация', 'Категория', 'Уровень', 'Пример'])
+    writer.writerow(['РљРѕСЂРµР№СЃРєРёР№', 'Р СѓСЃСЃРєРёР№', 'Р РѕРјР°РЅРёР·Р°С†РёСЏ', 'РљР°С‚РµРіРѕСЂРёСЏ', 'РЈСЂРѕРІРµРЅСЊ', 'РџСЂРёРјРµСЂ'])
     for word in wl.words.select_related('category').all():
         writer.writerow([word.korean, word.russian, word.romanization, word.category.name, word.get_level_display(), word.example_sentence])
     return response
@@ -301,12 +312,12 @@ def word_list_add_word(request, pk, word_id):
     wl = get_object_or_404(WordList, pk=pk, user=request.user)
     word = get_object_or_404(Word, pk=word_id)
     wl.words.add(word)
-    msg = f'✅ {word.korean} добавлен в "{wl.name}"'
+    msg = f'вњ… {word.korean} РґРѕР±Р°РІР»РµРЅ РІ "{wl.name}"'
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     if is_ajax:
         return JsonResponse({'success': True, 'message': msg})
     messages.success(request, msg)
-    return redirect(request.META.get('HTTP_REFERER', 'word_list_list'))
+    return _safe_referer_redirect(request, fallback='word_list_list')
 
 @login_required
 @require_POST
@@ -318,8 +329,8 @@ def save_word_note(request, pk):
     )
     prog.notes = notes
     prog.save(update_fields=['notes'])
-    messages.success(request, '📝 Заметка сохранена')
-    return redirect(request.META.get('HTTP_REFERER', 'category_list'))
+    messages.success(request, 'рџ“ќ Р—Р°РјРµС‚РєР° СЃРѕС…СЂР°РЅРµРЅР°')
+    return _safe_referer_redirect(request)
 
 @login_required
 @require_POST

@@ -31,12 +31,22 @@ class Streak(models.Model):
         return f'{self.user.username} — {self.current_streak} дней'
 
 class Achievement(models.Model):
-    ALL_CODES = {
-        'streak_3', 'streak_7', 'streak_30',
-        'first_lesson', 'five_lessons', 'ten_lessons',
-        'first_quiz', 'five_quizzes',
-        'ten_words', 'fifty_words', 'hundred_words',
+    # Single source of truth for all achievements: code -> (icon, title, description)
+    CATALOG = {
+        'streak_3': ('🔥', '3 дня подряд', 'Три дня занятий без перерыва!'),
+        'streak_7': ('🔥🔥', 'Неделя без пропусков', 'Целая неделя ежедневных занятий!'),
+        'streak_30': ('💪', 'Месяц силы', '30 дней подряд — ты легенда!'),
+        'first_lesson': ('📚', 'Первый урок', 'Пройди свой первый урок'),
+        'five_lessons': ('📚📚', '5 уроков', 'Пройди 5 уроков'),
+        'ten_lessons': ('📚📚📚', '10 уроков', 'Пройди 10 уроков — серьёзный подход!'),
+        'first_quiz': ('🎯', 'Первый тест', 'Пройди свой первый тест'),
+        'five_quizzes': ('🎯🎯', '5 тестов', 'Пройди 5 тестов'),
+        'ten_words': ('📖', '10 слов', 'Выучи 10 слов'),
+        'fifty_words': ('📖📖', '50 слов', 'Выучи 50 слов'),
+        'hundred_words': ('💯', '100 слов', 'Выучи 100 слов — отлично!'),
     }
+    ALL_CODES = frozenset(CATALOG)
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
     code = models.CharField(max_length=50)
     title = models.CharField(max_length=200)

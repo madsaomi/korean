@@ -219,7 +219,15 @@
     chip.dataset.korean = korean;
     chip.dataset.russian = russian;
     chip.dataset.category = categorySlug || '';
-    chip.innerHTML = korean + ` <small class="translation" style="color:var(--text-secondary);display:block;font-size:.6rem;${showTranslations?'':'display:none;'}">${russian}</small>`;
+    chip.appendChild(document.createTextNode(korean));
+
+    const translation = document.createElement('small');
+    translation.className = 'translation';
+    translation.style.color = 'var(--text-secondary)';
+    translation.style.display = showTranslations ? 'block' : 'none';
+    translation.style.fontSize = '.6rem';
+    translation.textContent = russian;
+    chip.appendChild(translation);
 
     const moves = document.createElement('span');
     moves.className = 'move-group';
@@ -372,15 +380,24 @@
     historyEmpty.style.display = 'none';
     historyList.style.display = 'block';
     clearHistoryBtn.style.display = 'inline-block';
-    historyList.innerHTML = h.map((text, idx) => `
-      <li class="history-item" data-idx="${idx}">
-        <span class="history-text">${text}</span>
-        <span class="history-del" title="Удалить">✕</span>
-      </li>
-    `).join('');
-    historyList.querySelectorAll('.history-item').forEach(item => {
-      const text = h[parseInt(item.dataset.idx)];
-      item.addEventListener('click', (e) => {
+    historyList.innerHTML = '';
+    h.forEach((text, idx) => {
+      const li = document.createElement('li');
+      li.className = 'history-item';
+      li.dataset.idx = idx;
+
+      const textEl = document.createElement('span');
+      textEl.className = 'history-text';
+      textEl.textContent = text;
+
+      const del = document.createElement('span');
+      del.className = 'history-del';
+      del.title = 'Удалить';
+      del.textContent = '✕';
+
+      li.appendChild(textEl);
+      li.appendChild(del);
+      li.addEventListener('click', (e) => {
         if (e.target.closest('.history-del')) {
           let hh = JSON.parse(localStorage.getItem('sentence_history') || '[]');
           hh = hh.filter(s => s !== text);
@@ -390,6 +407,7 @@
         }
         speakText(text);
       });
+      historyList.appendChild(li);
     });
   }
 

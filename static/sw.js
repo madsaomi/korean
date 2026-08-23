@@ -69,6 +69,19 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  if (path.startsWith('/media/')) {
+    e.respondWith(
+      caches.match(request).then(cached => cached || fetch(request).then(r => {
+        if (r.ok) {
+          const rClone = r.clone();
+          caches.open(CACHE).then(cache => cache.put(request, rClone));
+        }
+        return r;
+      }))
+    );
+    return;
+  }
+
   if (request.destination === 'document') {
     e.respondWith(
       fetch(request)

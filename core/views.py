@@ -1,3 +1,5 @@
+import random
+
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
 from django.http import JsonResponse
@@ -27,9 +29,10 @@ def leaderboard(request):
     })
 
 def random_word_api(request):
-    word = Word.objects.order_by('?').first()
-    if not word:
+    word_count = Word.objects.count()
+    if not word_count:
         return JsonResponse({'error': 'no words'}, status=404)
+    word = Word.objects.order_by('pk')[random.randrange(word_count)]
     return JsonResponse({
         'id': word.id,
         'korean': word.korean,

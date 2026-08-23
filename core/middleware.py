@@ -53,14 +53,11 @@ class StreakMiddleware:
 
                 # --- Achievement checks: streak-based (run once per day) ---
                 if streak.current_streak >= 3:
-                    grant_achievement(request.user, 'streak_3',
-                                     '\U0001f525 3 дня подряд', 'Три дня занятий без перерыва!', '\U0001f525', request)
+                    grant_achievement(request.user, 'streak_3', request)
                 if streak.current_streak >= 7:
-                    grant_achievement(request.user, 'streak_7',
-                                     '\U0001f525\U0001f525 Неделя без пропусков', 'Целая неделя ежедневных занятий!', '\U0001f525', request)
+                    grant_achievement(request.user, 'streak_7', request)
                 if streak.current_streak >= 30:
-                    grant_achievement(request.user, 'streak_30',
-                                     '\U0001f525\U0001f525\U0001f525 Месяц силы', '30 дней подряд — ты легенда!', '\U0001f4aa', request)
+                    grant_achievement(request.user, 'streak_30', request)
 
                 # Other achievement checks (lessons, quizzes, words) — delegated to utils
                 check_lesson_achievements(request.user, request)

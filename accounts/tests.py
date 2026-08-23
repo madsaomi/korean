@@ -92,3 +92,43 @@ class TestRegistration:
         resp = client.post('/accounts/register/', {'username': '', 'password1': '', 'password2': ''})
         assert resp.status_code == 200
         assert resp.context['form'].errors
+
+
+@pytest.mark.django_db
+class TestDailyGoalsPage:
+    def test_page_get_creates_goal(self, client, user):
+        client.force_login(user)
+        resp = client.get('/accounts/goals/')
+        assert resp.status_code == 200
+        assert DailyGoal.objects.filter(user=user).exists()
+
+    def test_update_targets(self, client, user):
+        client.force_login(user)
+        resp = client.post('/accounts/goals/', {
+            'words_target': '20',
+            'lessons_target': '3',
+            'quizzes_target': '2',
+        })
+        assert resp.status_code == 302
+        goal = DailyGoal.objects.get(user=user)
+        assert (goal.words_target, goal.lessons_target, goal.quizzes_target) == (20, 3, 2)
+
+    def test_invalid_input_rejected(self, client, user):
+        client.force_login(user)
+        resp = client.post('/accounts/goals/', {'words_target': 'abc'})
+        assert resp.status_code == 302
+        goal = DailyGoal.objects.get(user=user)
+        assert goal.words_target == 5
+
+
+@pytest.mark.django_db
+class TestAchievementsPage:
+    def test_catalog_matches_all_codes(self, client, user):
+        from accounts.models import Achievement
+
+        assert set(Achievement.CATALOG) == Achievement.ALL_CODES
+        client.force_login(user)
+        resp = client.get('/accounts/achievements/')
+        assert resp.status_code == 200
+        codes = {a['code'] for a in resp.context['all_achievements']}
+        assert codes == Achievement.ALL_CODES

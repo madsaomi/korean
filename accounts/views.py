@@ -128,17 +128,8 @@ def achievements_page(request):
     achievements = request.user.achievements.all()
     earned_codes = set(achievements.values_list('code', flat=True))
     all_achievements = [
-        {'code': 'streak_3', 'icon': '🔥', 'title': '3 дня подряд'},
-        {'code': 'streak_7', 'icon': '🔥🔥', 'title': 'Неделя без пропусков'},
-        {'code': 'streak_30', 'icon': '💪', 'title': 'Месяц силы (30д)'},
-        {'code': 'first_lesson', 'icon': '📚', 'title': 'Первый урок'},
-        {'code': 'five_lessons', 'icon': '📚📚', 'title': '5 уроков'},
-        {'code': 'ten_lessons', 'icon': '📚📚📚', 'title': '10 уроков'},
-        {'code': 'first_quiz', 'icon': '🎯', 'title': 'Первый тест'},
-        {'code': 'five_quizzes', 'icon': '🎯🎯', 'title': '5 тестов'},
-        {'code': 'ten_words', 'icon': '📖', 'title': '10 слов'},
-        {'code': 'fifty_words', 'icon': '📖📖', 'title': '50 слов'},
-        {'code': 'hundred_words', 'icon': '💯', 'title': '100 слов'},
+        {'code': code, 'icon': icon, 'title': title}
+        for code, (icon, title, _description) in Achievement.CATALOG.items()
     ]
     return render(request, 'accounts/achievements.html', {
         'achievements': achievements,

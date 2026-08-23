@@ -1,8 +1,13 @@
+from datetime import timedelta
+
 import pytest
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from progress.models import UserQuizResult
 from quiz.models import Answer, Question, Quiz
+
+SESSION_START_PREFIX = 'quiz_started_'
 
 
 @pytest.fixture
@@ -91,3 +96,83 @@ class TestQuizViews:
     def test_quiz_submit_requires_login(self, client, quiz):
         resp = client.post(f'/quiz/{quiz.id}/submit/', {'answers': '{}'})
         assert resp.status_code in (302, 403)
+
+
+@pytest.mark.django_db
+class TestQuizServerTimer:
+    def _correct_answer(self, question):
+        return question.answers.get(is_correct=True)
+
+    def test_submit_without_start_rejected(self, client, user, quiz):
+        client.force_login(user)
+        resp = client.post(f'/quiz/{quiz.id}/submit/', {})
+        assert resp.status_code == 302
+        assert UserQuizResult.objects.filter(user=user).count() == 0
+
+    def test_submit_after_visit_accepted(self, client, user, quiz):
+        client.force_login(user)
+        client.get(f'/quiz/{quiz.id}/')
+        first = quiz.questions.order_by('id').first()
+        resp = client.post(
+            f'/quiz/{quiz.id}/submit/',
+            {f'q_{first.id}': str(self._correct_answer(first).id)},
+        )
+        assert resp.status_code == 200
+        result = UserQuizResult.objects.get(user=user)
+        assert result.score == 1
+        assert result.total == 2
+
+    def test_expired_attempt_rejected(self, client, user, quiz):
+        client.force_login(user)
+        client.get(f'/quiz/{quiz.id}/')
+
+        session = client.session
+        session[SESSION_START_PREFIX + str(quiz.pk)] = (
+            timezone.now() - timedelta(hours=2)
+        ).isoformat()
+        session.save()
+
+        resp = client.post(f'/quiz/{quiz.id}/submit/', {})
+        assert resp.status_code == 302
+        assert UserQuizResult.objects.filter(user=user).count() == 0
+
+    def test_no_limit_quiz_needs_no_start(self, client, user):
+        quiz = Quiz.objects.create(title='Без лимита', time_limit=0)
+        q = Question.objects.create(quiz=quiz, question_russian='Q?')
+        Answer.objects.create(question=q, text='да', is_correct=True)
+
+        client.force_login(user)
+        resp = client.post(f'/quiz/{quiz.id}/submit/', {f'q_{q.id}': 'да'})
+        assert resp.status_code == 200
+        assert UserQuizResult.objects.get(user=user).score == 1
+
+
+@pytest.mark.django_db
+class TestWritingAnswers:
+    def test_numeric_writing_answer_compared_as_text(self, client, user):
+        quiz = Quiz.objects.create(title='Writing', time_limit=0)
+        q = Question.objects.create(
+            quiz=quiz, question_type='writing', question_russian='Сколько?'
+        )
+        Answer.objects.create(question=q, text='4', is_correct=True)
+
+        client.force_login(user)
+        client.get(f'/quiz/{quiz.id}/')
+        resp = client.post(f'/quiz/{quiz.id}/submit/', {f'q_{q.id}': '4'})
+
+        assert resp.status_code == 200
+        assert UserQuizResult.objects.get(user=user).score == 1
+
+    def test_text_answer_case_and_spaces_normalized(self, client, user):
+        quiz = Quiz.objects.create(title='Text', time_limit=0)
+        q = Question.objects.create(
+            quiz=quiz, question_type='writing', question_russian='Перевод'
+        )
+        Answer.objects.create(question=q, text='рис', is_correct=True)
+
+        client.force_login(user)
+        client.get(f'/quiz/{quiz.id}/')
+        resp = client.post(f'/quiz/{quiz.id}/submit/', {f'q_{q.id}': '  РИС '})
+
+        assert resp.status_code == 200
+        assert UserQuizResult.objects.get(user=user).score == 1
