@@ -10,7 +10,7 @@ from lessons.models import Course, Lesson
 from library.models import Bookmark, LibraryTag, Note, ReadingProgress
 from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 from quiz.models import Quiz
-from review.services import InvalidReviewAction, apply_review
+from review.services import InvalidReviewAction, WordNotDue, apply_review
 from vocabulary.models import Category, Word
 
 from . import serializers
@@ -188,6 +188,8 @@ class ReviewViewSet(viewsets.GenericViewSet):
             prog = apply_review(request.user, word_id, action)
         except InvalidReviewAction:
             return Response({'error': 'Invalid action'}, status=400)
+        except WordNotDue:
+            return Response({'error': 'Word is not due for review yet'}, status=400)
 
         if prog is None:
             return Response({'error': 'Word not found in review queue'}, status=404)

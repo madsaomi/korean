@@ -21,25 +21,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = '__all__'
+        fields = ['id', 'user', 'native_language', 'level', 'avatar', 'created_at']
 
 
 class StreakSerializer(serializers.ModelSerializer):
     class Meta:
         model = Streak
-        fields = '__all__'
+        fields = ['id', 'user', 'current_streak', 'longest_streak', 'last_active_date']
 
 
 class AchievementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achievement
-        fields = '__all__'
+        fields = ['id', 'user', 'code', 'title', 'description', 'icon', 'earned_at']
 
 
 class DailyGoalSerializer(serializers.ModelSerializer):
     class Meta:
         model = DailyGoal
-        fields = '__all__'
+        fields = ['id', 'user', 'words_target', 'lessons_target', 'quizzes_target', 'updated_at']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -59,7 +59,11 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = '__all__'
+        fields = [
+            'id', 'category', 'category_name', 'korean', 'russian',
+            'romanization', 'example_sentence', 'example_translation',
+            'audio_url', 'level', 'created_at',
+        ]
 
 
 class WordListSerializer(serializers.ModelSerializer):
@@ -83,7 +87,10 @@ class CourseSerializer(serializers.ModelSerializer):
 class LessonStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonStep
-        fields = '__all__'
+        fields = [
+            'id', 'lesson', 'step_type', 'title', 'content_korean',
+            'content_russian', 'image', 'audio_url', 'order',
+        ]
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -91,7 +98,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = '__all__'
+        fields = ['id', 'course', 'title', 'description', 'order', 'created_at', 'steps']
 
 
 class LessonListSerializer(serializers.ModelSerializer):
@@ -103,7 +110,10 @@ class LessonListSerializer(serializers.ModelSerializer):
 class GrammarRuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrammarRule
-        fields = '__all__'
+        fields = [
+            'id', 'topic', 'title', 'explanation', 'formula',
+            'examples', 'korean_examples', 'russian_examples', 'order',
+        ]
 
 
 class GrammarTopicSerializer(serializers.ModelSerializer):
@@ -122,7 +132,11 @@ class GrammarTopicSerializer(serializers.ModelSerializer):
 class GrammarExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = GrammarExercise
-        fields = '__all__'
+        fields = [
+            'id', 'topic', 'question', 'correct_answer',
+            'option_a', 'option_b', 'option_c', 'option_d',
+            'explanation', 'difficulty', 'order',
+        ]
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -138,7 +152,10 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = '__all__'
+        fields = [
+            'id', 'quiz', 'question_type', 'question_korean',
+            'question_russian', 'order', 'answers',
+        ]
 
 
 class QuizSerializer(serializers.ModelSerializer):
@@ -171,7 +188,10 @@ class UserLessonProgressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserLessonProgress
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'lesson', 'completed', 'score',
+            'completed_at', 'lesson_title',
+        ]
 
 
 class UserWordProgressSerializer(serializers.ModelSerializer):
@@ -188,31 +208,40 @@ class UserQuizResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserQuizResult
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'quiz', 'score', 'total',
+            'completed_at', 'quiz_title', 'percentage',
+        ]
 
 
 class ReadingProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReadingProgress
-        fields = '__all__'
+        fields = ['id', 'user', 'language', 'slug', 'read', 'read_at']
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'language', 'slug', 'title', 'anchor',
+            'note', 'color', 'section', 'created_at',
+        ]
 
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'language', 'slug', 'anchor',
+            'highlighted_text', 'content', 'created_at', 'updated_at',
+        ]
 
 
 class LibraryTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = LibraryTag
-        fields = '__all__'
+        fields = ['id', 'user', 'language', 'slug', 'tag']
 
 
 class ReviewActionSerializer(serializers.Serializer):

@@ -28,7 +28,8 @@
 - `GET /api/review/` — очередь до 20 due-слов
 - `POST /api/review/` `{word_id: int, action: "again"|"good"|"easy"}` → 200
   `{success, action, learned, next_review}`; 404 если слова нет в прогрессе;
-  400 при невалидном action. Логика — только через `review/services.py::apply_review`.
+  400 при невалидном action или если слово ещё не due (антифарминг,
+  грейс 5 сек). Логика — только через `review/services.py::apply_review`.
 
 ### `/api/library/`
 Пагинации нет (сознательно). Все записи скоупятся по request.user.
@@ -47,8 +48,8 @@
 - `GET profile/` — профиль (+get_or_create)
 - `/api/auth/login/`, `/api/auth/logout/` из rest_framework.urls (сессионная форма)
 
-Внимание: `TokenAuthentication` включён в settings, но эндпоинт выдачи токена
-(`obtain_auth_token`) **не подключён** — см. known-issues.
+Токены: `POST /api/token-auth/` с `{username, password}` → `{token}`.
+Дальше заголовок `Authorization: Token <token>`.
 
 ## Правила при изменении API
 

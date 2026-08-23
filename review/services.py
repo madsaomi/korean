@@ -14,6 +14,13 @@ class InvalidReviewAction(ValueError):
     pass
 
 
+class WordNotDue(ValueError):
+    pass
+
+
+DUE_GRACE_SECONDS = 5
+
+
 @transaction.atomic
 def apply_review(user, word_id, action):
     """Apply a review action to a word in the user's queue.
@@ -36,6 +43,10 @@ def apply_review(user, word_id, action):
         return None
 
     now = timezone.now()
+    if prog.next_review > now + timezone.timedelta(seconds=DUE_GRACE_SECONDS):
+        # Anti-farming: the word is not scheduled for review yet
+        raise WordNotDue(prog.word_id)
+
     if action == 'again':
         # A lapse resets the interval ladder instead of advancing it
         prog.review_count = 0

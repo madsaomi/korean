@@ -15,6 +15,7 @@ from .models import Quiz
 
 TIMER_GRACE_SECONDS = 60
 SESSION_START_PREFIX = 'quiz_started_'
+RESUBMIT_COOLDOWN_SECONDS = 30
 
 
 def _normalize_text(value):
@@ -68,6 +69,14 @@ def quiz_submit(request, pk):
     start_key = SESSION_START_PREFIX + str(pk)
     exceeded = _time_limit_exceeded(request, quiz)
     request.session.pop(start_key, None)
+
+    last_attempt = (
+        UserQuizResult.objects.filter(user=request.user, quiz=quiz)
+        .order_by('-completed_at').first()
+    )
+    if last_attempt and (timezone.now() - last_attempt.completed_at).total_seconds() < RESUBMIT_COOLDOWN_SECONDS:
+        messages.warning(request, '⏳ Слишком часто — подожди немного перед следующей попыткой.')
+        return redirect('quiz_detail', pk=pk)
 
     if exceeded:
         messages.warning(request, '⏰ Время вышло — попытка не засчитана. Пройдите тест заново.')

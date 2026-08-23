@@ -34,7 +34,8 @@
   {% if exercises %}
   <div class="glass p-4 mb-4">
     <h5 class="mb-3">🎯 Начать тренировку</h5>
-    <form action="{% url 'grammar:start_exercise' %}" method="get" class="row g-3 align-items-end">
+    <form action="{% url 'grammar:start_exercise' %}" method="post" class="row g-3 align-items-end">
+      {% csrf_token %}
       <div class="col-md-4">
         <label class="form-label">Количество вопросов</label>
         <input type="number" name="count" value="10" min="1" max="50" class="form-control glass-input">

@@ -3,6 +3,7 @@ import random
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from .models import GrammarExercise, GrammarTopic
 
@@ -44,10 +45,11 @@ def exercise_list(request):
     })
 
 @login_required
+@require_POST
 def start_exercise(request):
-    topic = request.GET.get('topic', '')
-    difficulty = request.GET.get('difficulty', '')
-    count = request.GET.get('count', '10')
+    topic = request.POST.get('topic', '')
+    difficulty = request.POST.get('difficulty', '')
+    count = request.POST.get('count', '10')
 
     try:
         count = max(1, min(50, int(count)))
@@ -68,6 +70,7 @@ def start_exercise(request):
     request.session['grammar_exercise_index'] = 0
     request.session['grammar_exercise_correct'] = 0
     request.session['grammar_exercise_total'] = len(exercises)
+    request.session['grammar_last_answered_index'] = None
 
     return redirect('grammar:do_exercise')
 
@@ -83,6 +86,13 @@ def do_exercise(request):
     total = len(exercise_ids)
 
     if request.method == 'POST':
+        # Duplicate submit guard: the same position must not be scored twice
+        # (double click, second tab sharing the session).
+        if request.session.get('grammar_last_answered_index') == index:
+            if index + 1 >= total:
+                return redirect('grammar:exercise_result')
+            return redirect('grammar:do_exercise')
+
         selected = request.POST.get('answer', '')
         if selected == exercise.correct_answer:
             request.session['grammar_exercise_correct'] = request.session.get('grammar_exercise_correct', 0) + 1
@@ -93,6 +103,7 @@ def do_exercise(request):
         request.session['grammar_exercise_last_correct'] = exercise.correct_answer
         request.session['grammar_exercise_last_explanation'] = exercise.explanation
         request.session['grammar_exercise_index'] = index + 1
+        request.session['grammar_last_answered_index'] = index
 
         if index + 1 >= total:
             return redirect('grammar:exercise_result')
@@ -118,6 +129,13 @@ def do_exercise(request):
 def exercise_result(request):
     correct = request.session.get('grammar_exercise_correct', 0)
     total = request.session.get('grammar_exercise_total', 0)
+
+    # Snapshot then wipe: a finished run should not leak into the next one
+    for key in ('grammar_exercise_ids', 'grammar_exercise_index',
+                'grammar_exercise_correct', 'grammar_exercise_total',
+                'grammar_last_answered_index'):
+        request.session.pop(key, None)
+
     return render(request, 'grammar/exercise_result.html', {
         'correct': correct,
         'total': total,

@@ -8,6 +8,7 @@ from progress.models import UserWordProgress
 from review.services import (
     AGAIN_INTERVAL_MINUTES,
     InvalidReviewAction,
+    WordNotDue,
     apply_review,
     pending_review_count,
 )
@@ -36,7 +37,7 @@ def prog(user, word):
 class TestApplyReview:
     def test_again_resets_ladder(self, prog):
         prog.review_count = 4
-        prog.next_review = timezone.now() + timezone.timedelta(days=30)
+        prog.next_review = timezone.now() - timezone.timedelta(minutes=1)
         prog.save()
 
         result = apply_review(prog.user, prog.word_id, 'again')
@@ -44,6 +45,13 @@ class TestApplyReview:
         assert result.review_count == 0
         delta = (result.next_review - timezone.now()).total_seconds()
         assert 0 < delta <= AGAIN_INTERVAL_MINUTES * 60 + 5
+
+    def test_not_due_word_rejected(self, prog):
+        prog.next_review = timezone.now() + timezone.timedelta(hours=1)
+        prog.save()
+
+        with pytest.raises(WordNotDue):
+            apply_review(prog.user, prog.word_id, 'good')
 
     def test_good_advances_step_by_step(self, prog):
         apply_review(prog.user, prog.word_id, 'good')

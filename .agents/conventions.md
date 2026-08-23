@@ -28,7 +28,7 @@
 - Код и комментарии — английский; строки UI, сообщения messages/JsonResponse — русский.
 - Views тонкие; переиспользуемая бизнес-логика — в `services.py` приложения.
 - Мутации — `@require_POST` / `methods=['post']`; GET не меняет состояние
-  (исключение сейчас: grammar start_exercise, см. known-issues).
+  (старт grammar-упражнений и таймера квиза тоже POST/GET-разделены корректно).
 - Модели: у пользовательских таблиц — unique_together/constraints; под частые фильтры
   — составные индексы (пример: `UserWordProgress(user, learned, next_review)`).
 - Тесты: pytest-фикстуры рядом с тестируемым кодом в `tests.py`.
