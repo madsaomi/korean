@@ -18,17 +18,16 @@
 ## Снимок репозитория
 
 - **Ветка:** main
-- **Последний коммит:** 95d03d3 "chore: CI pipeline, ruff lint, lockfile..."
-- **Незакоммичено:** нет (всё из сессии 2026-08-23 закоммичено)
-- **Тесты (базовая линия):** 89 passed + `ruff check .` чистый
-  (`.\venv\Scripts\python.exe -m pytest -q` / `.\venv\Scripts\ruff.exe check .`)
+- **Последний коммит:** ea5e640 "feat: hardening batch..."
+- **Незакоммичено:** нет
+- **Тесты (базовая линия):** 107 passed, warnings 0 + `ruff check .` чистый
 - **Миграции:** все применены, `makemigrations --check` чист
-- **CI:** GitHub Actions `.github/workflows/ci.yml` — ruff + миграции + pytest;
-  если твой коммит красный в CI — чини до передачи задачи.
+- **CI:** GitHub Actions — ruff + миграции + pytest; красный CI у твоего
+  коммита = чини до передачи задачи.
 
 ## Готово, ждёт коммита
 
-— (пусто; всё закоммичено, см. журнал 0006)
+— (пусто)
 
 ## Активная задача
 
@@ -43,7 +42,7 @@ ID:            —
 
 ## Очередь (кандидаты на следующую задачу)
 
-Из «что упускаю» (не закрыто): `.env.example` для деплой-переменных,
-CSRF_TRUSTED_ORIGINS/SECURE_PROXY_SSL_HEADER, staticfiles warning.
-Плюс `.agents/known-issues.md` — 10 LOW-пунктов; самые дешёвые:
-self-XSS в builder.html (#1), редиректы на referer (#2).
+`.agents/known-issues.md`: составные индексы library, гонки grammar-сессий,
+лимиты фарминга (пересдачи квиза / досрочные повторения), fields='__all__'
+в старых сериализаторах, пустой lessons/tests.py; инфра: token-endpoint,
+Redis/CACHES/logging перед продом.
