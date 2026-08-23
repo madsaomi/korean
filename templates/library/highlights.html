@@ -81,12 +81,12 @@
       <div class="flex-grow-1" style="min-width:0;">
         <div class="hl-text">“{{ h.text }}”</div>
         {% if h.note %}
-        <div class="hl-note">📝 {{ h.note }}</div>
+        <div class="hl-note"><i class="bi bi-pencil"></i> {{ h.note }}</div>
         {% endif %}
         <div class="d-flex gap-2 mt-2 align-items-center">
           <small style="color:var(--text-secondary);font-size:0.75rem;">{{ h.created_at|date:"d.m.Y H:i" }}</small>
-          <button class="action-btn hl-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ h.id }}" data-text="{{ h.text|escapejs }}">📝</button>
-          <button class="action-btn hl-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ h.id }}">✕</button>
+          <button class="action-btn hl-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ h.id }}" data-text="{{ h.text|escapejs }}"><i class="bi bi-pencil"></i></button>
+          <button class="action-btn hl-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ h.id }}"><i class="bi bi-x-lg"></i></button>
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@
   {% endwith %}
   {% empty %}
   <div class="library-card p-4 text-center">
-    <p class="mb-0" style="color:var(--text-secondary);">У тебя пока нет выделений. Открой материал и выдели текст → выбери цвет 🟡🟢🔵🩷🟠🟣</p>
+    <p class="mb-0" style="color:var(--text-secondary);">У тебя пока нет выделений. Открой материал и выдели текст → выбери цвет 🟡<i class="bi bi-phone"></i>🔵🩷🟠🟣</p>
   </div>
   {% endfor %}
 </div>

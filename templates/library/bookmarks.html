@@ -47,19 +47,19 @@
       <div class="small" style="color:var(--text-secondary);">{{ bm.section }}</div>
       {% endif %}
       {% if bm.note %}
-      <p class="small mb-0 mt-1" style="color:var(--text-secondary);">📝 {{ bm.note|truncatechars:80 }}</p>
+      <p class="small mb-0 mt-1" style="color:var(--text-secondary);"><i class="bi bi-pencil"></i> {{ bm.note|truncatechars:80 }}</p>
       {% endif %}
       <div class="d-flex gap-1 mt-2">
         <select class="bm-color-select" data-id="{{ bm.id }}" style="font-size:0.75rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;padding:0.15rem 0.3rem;color:var(--text-primary);">
           <option value="yellow" {% if bm.color == 'yellow' %}selected{% endif %}>🟡</option>
-          <option value="green" {% if bm.color == 'green' %}selected{% endif %}>🟢</option>
+          <option value="green" {% if bm.color == 'green' %}selected{% endif %}><i class="bi bi-phone"></i></option>
           <option value="blue" {% if bm.color == 'blue' %}selected{% endif %}>🔵</option>
           <option value="pink" {% if bm.color == 'pink' %}selected{% endif %}>🩷</option>
           <option value="orange" {% if bm.color == 'orange' %}selected{% endif %}>🟠</option>
           <option value="purple" {% if bm.color == 'purple' %}selected{% endif %}>🟣</option>
         </select>
-        <button class="action-btn bm-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ bm.id }}">📝</button>
-        <button class="action-btn bm-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ bm.id }}">✕</button>
+        <button class="action-btn bm-note-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-id="{{ bm.id }}"><i class="bi bi-pencil"></i></button>
+        <button class="action-btn bm-delete-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;color:var(--danger,#ef4444);" data-id="{{ bm.id }}"><i class="bi bi-x-lg"></i></button>
       </div>
     </div>
   </div>

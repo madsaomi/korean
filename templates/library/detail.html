@@ -25,7 +25,7 @@
     border-bottom-color: var(--accent);
   }
   .korean-tts::after {
-    content: '🔊';
+    content: '<i class="bi bi-volume-up-fill"></i>';
     font-size: 0.65rem;
     position: absolute;
     top: -0.4rem;
@@ -105,7 +105,7 @@
 
 {% block content %}
 <div class="d-flex align-items-center gap-2 mb-3">
-  <a href="{% url 'library_home' %}" class="library-nav-btn text-decoration-none" style="font-size:0.85rem;">📚</a>
+  <a href="{% url 'library_home' %}" class="library-nav-btn text-decoration-none" style="font-size:0.85rem;"><i class="bi bi-journal-bookmark-fill"></i></a>
   <div class="btn-group btn-group-sm" role="group">
     <a href="{% url 'library_ko_index' %}" class="btn {% if current_lang_code == 'ko' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:50px 0 0 50px;{% if current_lang_code == 'ko' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇰🇷 Корейский</a>
     <a href="{% url 'library_ja_index' %}" class="btn {% if current_lang_code == 'ja' %}btn-accent{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 50px 50px 0;{% if current_lang_code == 'ja' %}background:var(--accent);color:#fff;border-color:var(--accent);{% else %}border-color:var(--glass-border);color:var(--text-secondary);{% endif %}">🇯🇵 Японский</a>
@@ -118,13 +118,13 @@
     <div class="d-flex align-items-center gap-2">
       {% if user.is_authenticated %}
       <button class="action-btn {% if is_read %}active{% endif %}" id="btn-toggle-read" data-action="toggle_read" title="Отметить прочитанным">
-        {% if is_read %}✅ Прочитано{% else %}📖 Не прочитано{% endif %}
+        {% if is_read %}<i class="bi bi-check-lg"></i> Прочитано{% else %}<i class="bi bi-book-half"></i> Не прочитано{% endif %}
       </button>
       <button class="action-btn {% if is_bookmarked %}active{% endif %}" id="btn-toggle-bookmark" data-action="toggle_bookmark" title="Закладка">
         {% if is_bookmarked %}🔖 {% else %}🔖 {% endif %}
       </button>
-      <a href="{% url url_reader file.slug %}" class="action-btn text-decoration-none" title="Режим чтения">📖 Читать</a>
-      <a href="{% url url_generate_quiz file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу">🎯 Тест</a>
+      <a href="{% url url_reader file.slug %}" class="action-btn text-decoration-none" title="Режим чтения"><i class="bi bi-book-half"></i> Читать</a>
+      <a href="{% url url_generate_quiz file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу"><i class="bi bi-bullseye"></i> Тест</a>
       {% endif %}
       <div class="d-flex gap-1">
         {% if prev_file %}
@@ -164,19 +164,19 @@
 </div>
 
 {% if user.is_authenticated %}
-<div class="highlight-hint">✨ Выдели текст → выбери цвет 🟡🟢🔵🩷🟠🟣 или создай заметку/закладку</div>
+<div class="highlight-hint">✨ Выдели текст → выбери цвет 🟡<i class="bi bi-phone"></i>🔵🩷🟠🟣 или создай заметку/закладку</div>
 {% endif %}
 
 {% if user.is_authenticated and notes %}
 <div class="mb-3">
   <details>
-    <summary style="color:var(--text-secondary);cursor:pointer;font-size:0.9rem;">📝 Заметки ({{ notes|length }})</summary>
+    <summary style="color:var(--text-secondary);cursor:pointer;font-size:0.9rem;"><i class="bi bi-pencil"></i> Заметки ({{ notes|length }})</summary>
     <div class="mt-2" id="notes-list">
       {% for note in notes %}
       <div class="note-chip" data-note-id="{{ note.id }}">
         <div class="d-flex justify-content-between">
           <small style="color:var(--text-secondary);">{{ note.highlighted_text|truncatechars:60 }}</small>
-          <button class="btn-delete-note action-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-note-id="{{ note.id }}">✕</button>
+          <button class="btn-delete-note action-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-note-id="{{ note.id }}"><i class="bi bi-x-lg"></i></button>
         </div>
         <p class="mb-0 mt-1">{{ note.content }}</p>
       </div>
@@ -231,7 +231,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold">📝 Заметка</h5>
+        <h5 class="modal-title fw-bold"><i class="bi bi-pencil"></i> Заметка</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">

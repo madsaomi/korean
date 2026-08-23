@@ -18,8 +18,8 @@
     <div class="text-center mb-3" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
       <button class="btn-glass" id="clear-btn">🗑️ Очистить</button>
       <button class="btn-glass" id="undo-btn" disabled>↩️ Отменить</button>
-      <button class="btn-glass btn-accent" id="speak-btn" style="display: none;">🔊 Прослушать</button>
-      <button class="btn-glass" id="copy-btn" style="display: none;" title="Копировать в буфер">📋 Копировать</button>
+      <button class="btn-glass btn-accent" id="speak-btn" style="display: none;"><i class="bi bi-volume-up-fill"></i> Прослушать</button>
+      <button class="btn-glass" id="copy-btn" style="display: none;" title="Копировать в буфер"><i class="bi bi-collection"></i> Копировать</button>
       <span id="word-count" class="btn-glass" style="opacity: 0.7; cursor: default;"></span>
     </div>
 
@@ -43,7 +43,7 @@
 
     <div class="glass-card p-4">
       <div class="mb-3">
-        <h5 class="fw-bold mb-2">🔍 Фильтры</h5>
+        <h5 class="fw-bold mb-2"><i class="bi bi-search"></i> Фильтры</h5>
         <div class="d-flex gap-2 flex-wrap mb-2">
           <input type="text" id="search-input" class="form-control" placeholder="Поиск слов..." style="flex: 1; min-width: 140px; background: var(--bg-primary); border: 1px solid var(--border-glass); color: var(--text-primary);">
           <select id="sort-select" class="form-select" style="width: auto; background: var(--bg-primary); border: 1px solid var(--border-glass); color: var(--text-primary);">
@@ -85,10 +85,10 @@
       <ul class="small" style="color: var(--text-secondary); padding-left: 1rem;">
         <li class="mb-1">Нажимай на слова из банка</li>
         <li class="mb-1">Используй 🔧 <strong>частицы</strong> для связи слов</li>
-        <li class="mb-1">Стрелки ◀ ▶ меняют порядок слов</li>
+        <li class="mb-1">Стрелки <i class="bi bi-caret-left-fill"></i> <i class="bi bi-caret-right-fill"></i> меняют порядок слов</li>
         <li class="mb-1">Можно <strong>перетаскивать</strong> слова</li>
         <li class="mb-1">Нажми на слово в предложении, чтобы убрать</li>
-        <li class="mb-1">🔊 — прослушать · ↩️ — отменить удаление</li>
+        <li class="mb-1"><i class="bi bi-volume-up-fill"></i> — прослушать · ↩️ — отменить удаление</li>
         <li class="mb-1"><kbd>Space</kbd> — озвучить · <kbd>Esc</kbd> — очистить · <kbd>Z</kbd> — отменить</li>
       </ul>
     </div>
@@ -189,7 +189,7 @@
 
   function updateWordCount() {
     const count = sentenceWords.children.length;
-    wordCount.textContent = `📝 ${count} ${declOfNum(count, ['слово', 'слова', 'слов'])}`;
+    wordCount.textContent = `<i class="bi bi-pencil"></i> ${count} ${declOfNum(count, ['слово', 'слова', 'слов'])}`;
     speakBtn.style.display = count ? 'inline-block' : 'none';
     copyBtn.style.display = count ? 'inline-block' : 'none';
     particlesBar.style.display = count ? 'block' : 'none';
@@ -231,7 +231,7 @@
 
     const moves = document.createElement('span');
     moves.className = 'move-group';
-    moves.innerHTML = '<span class="word-move-btn" data-dir="left">◀</span><span class="word-move-btn" data-dir="right">▶</span>';
+    moves.innerHTML = '<span class="word-move-btn" data-dir="left"><i class="bi bi-caret-left-fill"></i></span><span class="word-move-btn" data-dir="right"><i class="bi bi-caret-right-fill"></i></span>';
 
     moves.querySelectorAll('.word-move-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -393,7 +393,7 @@
       const del = document.createElement('span');
       del.className = 'history-del';
       del.title = 'Удалить';
-      del.textContent = '✕';
+      del.innerHTML = '<i class="bi bi-x-lg"></i>';
 
       li.appendChild(textEl);
       li.appendChild(del);
@@ -500,11 +500,11 @@
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      copyBtn.textContent = '✅ Скопировано';
-      setTimeout(() => { copyBtn.textContent = '📋 Копировать'; }, 2000);
+      copyBtn.innerHTML = '<i class="bi bi-check-lg"></i> Скопировано';
+      setTimeout(() => { copyBtn.innerHTML = '<i class="bi bi-collection"></i> Копировать'; }, 2000);
     } catch (e) {
-      copyBtn.textContent = '❌ Ошибка';
-      setTimeout(() => { copyBtn.textContent = '📋 Копировать'; }, 2000);
+      copyBtn.textContent = '<i class="bi bi-x-circle"></i> Ошибка';
+      setTimeout(() => { copyBtn.innerHTML = '<i class="bi bi-collection"></i> Копировать'; }, 2000);
     }
   });
 

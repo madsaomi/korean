@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 {% block title %}Повторение слов{% endblock %}
 {% block content %}
-<h1 class="section-title">🔄 Повторение</h1>
+<h1 class="section-title"><i class="bi bi-arrow-repeat"></i> Повторение</h1>
 
 {% if session_summary %}
 <div class="glass p-3 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-left: 4px solid var(--accent); border-radius: 20px;">
   <div>
-    <small style="color: var(--text-secondary);">📊 Сессия</small>
+    <small style="color: var(--text-secondary);"><i class="bi bi-bar-chart-fill"></i> Сессия</small>
     <div class="d-flex gap-3 mt-1 flex-wrap">
-      <span>✅ <strong>{{ session_summary.completed }}</strong></span>
+      <span><i class="bi bi-check-lg"></i> <strong>{{ session_summary.completed }}</strong></span>
       <span style="color: #e17055;">🔴 <strong>{{ session_summary.again }}</strong></span>
       <span style="color: #fdcb6e;">🟡 <strong>{{ session_summary.good }}</strong></span>
-      <span style="color: #00b894;">🟢 <strong>{{ session_summary.easy }}</strong></span>
+      <span style="color: #00b894;"><i class="bi bi-phone"></i> <strong>{{ session_summary.easy }}</strong></span>
     </div>
   </div>
-  <a href="?reset_session=1" class="btn-glass btn-sm text-decoration-none">🔄 Сброс</a>
+  <a href="?reset_session=1" class="btn-glass btn-sm text-decoration-none"><i class="bi bi-arrow-repeat"></i> Сброс</a>
 </div>
 {% endif %}
 
@@ -31,7 +31,7 @@
       <div class="flip-card-front">
         <div class="fs-1 fw-bold" style="font-family: 'Noto Sans KR', sans-serif;">{{ prog.word.korean }}</div>
         <small style="color: var(--text-secondary);">{{ prog.word.romanization }}</small>
-        <button class="btn-glass btn-sm tts-btn mt-2" data-text="{{ prog.word.korean }}">🔊</button>
+        <button class="btn-glass btn-sm tts-btn mt-2" data-text="{{ prog.word.korean }}"><i class="bi bi-volume-up-fill"></i></button>
         <small class="mt-1 badge" style="background: var(--accent);">{{ prog.word.category.name }}</small>
         <small class="mt-1" style="color: var(--text-secondary); font-size: 0.6rem;">🔁 {{ prog.next_review|timeuntil }}</small>
       </div>
@@ -57,7 +57,7 @@
             {% csrf_token %}
             <input type="hidden" name="word_id" value="{{ prog.word.id }}">
             <input type="hidden" name="action" value="easy">
-            <button type="submit" class="btn-glass btn-sm" style="border-color: #00b894;">🟢 Легко</button>
+            <button type="submit" class="btn-glass btn-sm" style="border-color: #00b894;"><i class="bi bi-phone"></i> Легко</button>
           </form>
         </div>
       </div>

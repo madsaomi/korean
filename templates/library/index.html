@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}📚 {{ current_lang_display }} — Учебные материалы{% endblock %}
+{% block title %}<i class="bi bi-journal-bookmark-fill"></i> {{ current_lang_display }} — Учебные материалы{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between gap-2 mb-4">
   <div>
@@ -30,7 +30,7 @@
      <a href="{% url url_random %}" class="btn-glass btn-sm px-3 text-decoration-none">🎲 Случайная</a>
      <a href="{% url url_bookmarks %}" class="btn-glass btn-sm px-3 text-decoration-none">🔖 Закладки</a>
      <a href="{% url url_highlights %}" class="btn-glass btn-sm px-3 text-decoration-none">🎨 Выделения</a>
-     <a href="{% url url_search %}" class="btn-glass btn-sm px-3 text-decoration-none">🔍 Поиск</a>
+     <a href="{% url url_search %}" class="btn-glass btn-sm px-3 text-decoration-none"><i class="bi bi-search"></i> Поиск</a>
   </div>
 </div>
 {% endif %}
@@ -38,7 +38,7 @@
 {% if not user.is_authenticated %}
 <div class="glass-card p-3 mb-4">
   <div class="d-flex align-items-center gap-3 flex-wrap">
-    <span style="color:var(--text-secondary);">🔑 Войди, чтобы отмечать прочитанное, делать заметки и сохранять закладки</span>
+    <span style="color:var(--text-secondary);"><i class="bi bi-box-arrow-in-right"></i> Войди, чтобы отмечать прочитанное, делать заметки и сохранять закладки</span>
     <a href="{% url 'login' %}" class="btn-glass btn-accent btn-sm px-3 text-decoration-none ms-auto">Войти</a>
   </div>
 </div>

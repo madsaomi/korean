@@ -125,6 +125,13 @@ button.dropdown-item {
   font-size: 1.3rem;
 }
 
+.nav-link-glass .bi:not(:only-child),
+.dropdown-item .bi:not(:only-child),
+.btn-glass .bi:not(:only-child),
+.btn .bi:not(:only-child) {
+  margin-right: 0.4em;
+}
+
 ::selection {
   background: var(--accent);
   color: white;

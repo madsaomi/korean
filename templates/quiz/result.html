@@ -15,16 +15,16 @@
 
 <div class="glass-card p-4">
   <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="fw-bold mb-0">📋 Детали</h4>
+    <h4 class="fw-bold mb-0"><i class="bi bi-collection"></i> Детали</h4>
     <div class="d-flex gap-2">
-      <span class="badge" style="background: rgba(0,184,148,0.2); color: #00b894;">✅ {{ score }} верно</span>
-      <span class="badge" style="background: rgba(225,112,85,0.2); color: #e17055;">❌ {{ wrong }} неверно</span>
+      <span class="badge" style="background: rgba(0,184,148,0.2); color: #00b894;"><i class="bi bi-check-lg"></i> {{ score }} верно</span>
+      <span class="badge" style="background: rgba(225,112,85,0.2); color: #e17055;"><i class="bi bi-x-circle"></i> {{ wrong }} неверно</span>
     </div>
   </div>
 
   {% for r in results %}
   <div class="d-flex align-items-start gap-3 mb-3 p-3 rounded-3 {% if r.is_correct %}quiz-option correct{% else %}quiz-option wrong{% endif %}" style="background: var(--glass-bg);">
-    <span class="fs-5">{{ r.is_correct|yesno:'✅,❌' }}</span>
+    <span class="fs-5">{{ r.is_correct|yesno:'<i class="bi bi-check-lg"></i>,<i class="bi bi-x-circle"></i>' }}</span>
     <div class="flex-grow-1">
       <p class="fw-medium mb-1">{{ r.question.question_russian }}</p>
       {% if r.question.question_korean %}
@@ -47,10 +47,10 @@
 </div>
 
 <div class="text-center mt-4 d-flex justify-content-center gap-2 flex-wrap">
-  <a href="{% url 'quiz_detail' quiz.id %}" class="btn-glass px-4 text-decoration-none">🔄 Пройти заново</a>
-  <a href="{% url 'quiz_list' %}" class="btn-glass btn-accent px-4 text-decoration-none">📋 Все тесты</a>
+  <a href="{% url 'quiz_detail' quiz.id %}" class="btn-glass px-4 text-decoration-none"><i class="bi bi-arrow-repeat"></i> Пройти заново</a>
+  <a href="{% url 'quiz_list' %}" class="btn-glass btn-accent px-4 text-decoration-none"><i class="bi bi-collection"></i> Все тесты</a>
   {% if quiz.lesson %}
-  <a href="{% url 'lesson_detail_with_id' quiz.lesson.course.id quiz.lesson.id %}" class="btn-glass text-decoration-none">📖 К уроку</a>
+  <a href="{% url 'lesson_detail_with_id' quiz.lesson.course.id quiz.lesson.id %}" class="btn-glass text-decoration-none"><i class="bi bi-book-half"></i> К уроку</a>
   {% endif %}
 </div>
 {% endblock %}

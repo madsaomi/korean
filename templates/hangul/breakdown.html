@@ -4,7 +4,7 @@
 <a href="{% url 'hangul' %}" class="btn-glass text-decoration-none mb-3 d-inline-block">← Назад</a>
 
 <div class="glass-card p-4 mb-4">
-  <h1 class="fw-bold mb-2">🔍 Разбор предложений</h1>
+  <h1 class="fw-bold mb-2"><i class="bi bi-search"></i> Разбор предложений</h1>
   <p style="color: var(--text-secondary);">Вставь корейское предложение — получишь разбор по словам</p>
 </div>
 
@@ -14,13 +14,13 @@
     <label class="fw-medium mb-2">Корейское предложение:</label>
     <input type="text" name="sentence" class="glass-input mb-2" value="{{ input_sentence }}"
            placeholder="예: 저는 한국어를 공부해요" style="font-family: 'Noto Sans KR', sans-serif;">
-    <button type="submit" class="btn-glass btn-accent w-100">🔍 Разобрать</button>
+    <button type="submit" class="btn-glass btn-accent w-100"><i class="bi bi-search"></i> Разобрать</button>
   </form>
 </div>
 
 {% if result %}
 <div class="glass-card p-4 mb-4" style="max-width: 600px; margin: 0 auto;">
-  <h4 class="fw-bold mb-3">📖 Разбор:</h4>
+  <h4 class="fw-bold mb-3"><i class="bi bi-book-half"></i> Разбор:</h4>
   <div class="d-flex flex-wrap gap-2 mb-4">
     {% for item in result %}
     <div class="glass p-2 text-center" style="min-width: 80px;">
@@ -38,7 +38,7 @@
   </div>
   <div class="glass p-3 text-center">
     <p class="fs-5 mb-1" style="font-family: 'Noto Sans KR', sans-serif;">{{ input_sentence }}</p>
-    <button class="btn-glass btn-sm tts-btn" data-text="{{ input_sentence }}">🔊 Прослушать</button>
+    <button class="btn-glass btn-sm tts-btn" data-text="{{ input_sentence }}"><i class="bi bi-volume-up-fill"></i> Прослушать</button>
   </div>
 </div>
 {% endif %}

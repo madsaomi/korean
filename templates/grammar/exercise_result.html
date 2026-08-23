@@ -6,7 +6,7 @@
     <div class="col-lg-6 text-center">
       <div class="glass p-5">
         <div class="display-1 mb-3">
-          {% if percentage >= 80 %}🎉{% elif percentage >= 50 %}👍{% else %}💪{% endif %}
+          {% if percentage >= 80 %}<i class="bi bi-emoji-laughing-fill"></i>{% elif percentage >= 50 %}<i class="bi bi-emoji-smile-fill"></i>{% else %}<i class="bi bi-emoji-frown-fill"></i>{% endif %}
         </div>
         <h3 class="mb-3">Результат</h3>
 
@@ -32,8 +32,8 @@
         </p>
 
         <div class="d-flex justify-content-center gap-3">
-          <a href="{% url 'grammar:exercise_list' %}" class="btn btn-glass">📝 К упражнениям</a>
-          <a href="{% url 'grammar:grammar_list' %}" class="btn btn-outline-light">📖 К грамматике</a>
+          <a href="{% url 'grammar:exercise_list' %}" class="btn btn-glass"><i class="bi bi-pencil"></i> К упражнениям</a>
+          <a href="{% url 'grammar:grammar_list' %}" class="btn btn-outline-light"><i class="bi bi-book-half"></i> К грамматике</a>
         </div>
       </div>
     </div>

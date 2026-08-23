@@ -5,8 +5,8 @@
 
 {% if user.is_authenticated %}
 <div class="mb-3 d-flex gap-2 flex-wrap">
-  <a href="{% url 'word_list_list' %}" class="btn-glass text-decoration-none">📋 Мои коллекции</a>
-  <a href="{% url 'study_custom' %}" class="btn-glass btn-accent text-decoration-none">🎯 Своя тренировка</a>
+  <a href="{% url 'word_list_list' %}" class="btn-glass text-decoration-none"><i class="bi bi-collection"></i> Мои коллекции</a>
+  <a href="{% url 'study_custom' %}" class="btn-glass btn-accent text-decoration-none"><i class="bi bi-bullseye"></i> Своя тренировка</a>
 </div>
 {% endif %}
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Достижения{% endblock %}
 {% block content %}
-<h1 class="section-title">🏆 Достижения</h1>
+<h1 class="section-title"><i class="bi bi-trophy"></i> Достижения</h1>
 
 {% if achievements %}
 <div class="bento-grid">
@@ -16,12 +16,12 @@
 </div>
 {% else %}
 <div class="glass-card p-5 text-center" style="max-width: 500px; margin: 0 auto;">
-  <div class="fs-1 mb-3">🏆</div>
+  <div class="fs-1 mb-3"><i class="bi bi-trophy"></i></div>
   <h3 class="fw-bold mb-2">Пока нет достижений</h3>
   <p style="color: var(--text-secondary);">Проходи уроки, тесты и учи слова, чтобы разблокировать ачивки!</p>
   <div class="d-flex gap-2 justify-content-center flex-wrap mt-3">
-    <a href="{% url 'lesson_list' %}" class="btn-glass btn-accent text-decoration-none">📚 Уроки</a>
-    <a href="{% url 'category_list' %}" class="btn-glass text-decoration-none">📖 Словарь</a>
+    <a href="{% url 'lesson_list' %}" class="btn-glass btn-accent text-decoration-none"><i class="bi bi-journal-bookmark-fill"></i> Уроки</a>
+    <a href="{% url 'category_list' %}" class="btn-glass text-decoration-none"><i class="bi bi-book-half"></i> Словарь</a>
   </div>
 </div>
 {% endif %}
@@ -33,7 +33,7 @@
     <div class="glass text-center p-3" style="opacity: {% if a.code in earned_codes %}1{% else %}0.5{% endif %};">
       <div class="fs-2">{{ a.icon }}</div>
       <div>{{ a.title }}</div>
-      {% if a.code in earned_codes %}<div class="small" style="color: var(--success);">✅</div>{% endif %}
+      {% if a.code in earned_codes %}<div class="small" style="color: var(--success);"><i class="bi bi-check-lg"></i></div>{% endif %}
     </div>
     {% endfor %}
   </div>

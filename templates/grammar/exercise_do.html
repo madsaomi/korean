@@ -21,7 +21,7 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">📝 Упражнение {{ index }} / {{ total }}</h4>
+        <h4 class="mb-0"><i class="bi bi-pencil"></i> Упражнение {{ index }} / {{ total }}</h4>
         <span class="badge {% if exercise.difficulty == 'beginner' %}bg-success{% elif exercise.difficulty == 'elementary' %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">{{ exercise.get_difficulty_display }}</span>
       </div>
 
@@ -32,9 +32,9 @@
       {% if last_result is not None %}
       <div class="alert {% if last_result %}alert-success{% else %}alert-danger{% endif %} glass mb-3">
         {% if last_result %}
-        ✅ <strong>Верно!</strong>
+        <i class="bi bi-check-lg"></i> <strong>Верно!</strong>
         {% else %}
-        ❌ <strong>Неверно.</strong> Правильный ответ: <strong>{{ last_correct }}</strong>
+        <i class="bi bi-x-circle"></i> <strong>Неверно.</strong> Правильный ответ: <strong>{{ last_correct }}</strong>
         {% endif %}
         {% if last_explanation %}<br><small class="mt-1 d-block">{{ last_explanation }}</small>{% endif %}
       </div>
@@ -55,7 +55,7 @@
           {% endfor %}
 
           <div class="mt-4">
-            <button type="submit" class="btn btn-glass btn-lg w-100">✅ Ответить</button>
+            <button type="submit" class="btn btn-glass btn-lg w-100"><i class="bi bi-check-lg"></i> Ответить</button>
           </div>
         </form>
       </div>

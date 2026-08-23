@@ -10,22 +10,22 @@
   <p class="fs-3 fw-medium">{{ word.russian }}</p>
 
   <div class="d-flex justify-content-center gap-3 mt-3 flex-wrap">
-    <button class="btn-glass tts-btn" data-text="{{ word.korean }}">🔊 Слушать</button>
+    <button class="btn-glass tts-btn" data-text="{{ word.korean }}"><i class="bi bi-volume-up-fill"></i> Слушать</button>
     {% if user.is_authenticated %}
     <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
       {% csrf_token %}
       <input type="hidden" name="word_id" value="{{ word.id }}">
-      <button type="submit" class="btn-glass">📚 Повторять</button>
+      <button type="submit" class="btn-glass"><i class="bi bi-journal-bookmark-fill"></i> Повторять</button>
     </form>
     <form method="POST" action="{% url 'add_to_review' %}" class="ajax-form" style="display:inline;">
       {% csrf_token %}
       <input type="hidden" name="word_id" value="{{ word.id }}">
       <input type="hidden" name="mark_learned" value="1">
-      <button type="submit" class="btn-glass" style="border-color: #00b894;">✅ Выучено</button>
+      <button type="submit" class="btn-glass" style="border-color: #00b894;"><i class="bi bi-check-lg"></i> Выучено</button>
     </form>
     {% if user.word_lists.exists %}
     <div class="dropdown d-inline">
-      <button class="btn-glass dropdown-toggle" data-bs-toggle="dropdown">📋 В коллекцию</button>
+      <button class="btn-glass dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-collection"></i> В коллекцию</button>
         <ul class="dropdown-menu">
         {% for wl in user.word_lists.all %}
          <li>
@@ -38,7 +38,7 @@
       </ul>
     </div>
     {% endif %}
-    <button class="btn-glass" onclick="navigator.clipboard.writeText('{{ word.korean|escapejs }} — {{ word.russian|escapejs }}').then(()=>{this.textContent='✅ Скопировано';setTimeout(()=>this.textContent='📋 Поделиться',2000)})">📋 Поделиться</button>
+    <button class="btn-glass" onclick="navigator.clipboard.writeText('{{ word.korean|escapejs }} — {{ word.russian|escapejs }}').then(()=>{this.textContent='<i class="bi bi-check-lg"></i> Скопировано';setTimeout(()=>this.textContent='<i class="bi bi-collection"></i> Поделиться',2000)})"><i class="bi bi-collection"></i> Поделиться</button>
     {% endif %}
   </div>
 
@@ -57,7 +57,7 @@
 
 {% if user.is_authenticated %}
 <div class="glass-card p-4 mt-4" style="max-width: 500px; margin: 0 auto;">
-  <h5 class="fw-bold mb-3">📝 Мои заметки</h5>
+  <h5 class="fw-bold mb-3"><i class="bi bi-pencil"></i> Мои заметки</h5>
   <form method="POST" action="{% url 'save_word_note' word.id %}">
     {% csrf_token %}
     <textarea name="notes" class="glass-input" rows="3" placeholder="Напиши свои заметки к этому слову...">{{ word_note }}</textarea>

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Тесты{% endblock %}
 {% block content %}
-<h1 class="section-title">🎯 Тесты</h1>
+<h1 class="section-title"><i class="bi bi-bullseye"></i> Тесты</h1>
 
 <div class="mb-4">
   <div class="d-flex gap-2 flex-wrap" id="quiz-filters">
-    <button class="btn-glass btn-sm active-filter" data-filter="all" onclick="filterQuiz('all')">📋 Все</button>
-    <button class="btn-glass btn-sm" data-filter="beginner" onclick="filterQuiz('beginner')">🟢 С нуля</button>
+    <button class="btn-glass btn-sm active-filter" data-filter="all" onclick="filterQuiz('all')"><i class="bi bi-collection"></i> Все</button>
+    <button class="btn-glass btn-sm" data-filter="beginner" onclick="filterQuiz('beginner')"><i class="bi bi-phone"></i> С нуля</button>
     <button class="btn-glass btn-sm" data-filter="elementary" onclick="filterQuiz('elementary')">🟡 Начальный</button>
     <button class="btn-glass btn-sm" data-filter="intermediate" onclick="filterQuiz('intermediate')">🔴 Средний</button>
   </div>

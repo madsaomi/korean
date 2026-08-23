@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Поиск{% endblock %}
 {% block content %}
-<h1 class="section-title">🔍 Поиск</h1>
+<h1 class="section-title"><i class="bi bi-search"></i> Поиск</h1>
 
 <div class="glass-card p-4 mb-4" style="max-width: 600px; margin: 0 auto;">
   <form method="GET" action="{% url 'unified_search' %}">
     <div class="d-flex gap-2 mb-3">
       <input type="text" name="q" class="glass-input" value="{{ query }}" placeholder="Слово, грамматика, урок..." autofocus>
-      <button type="submit" class="btn-glass btn-accent">🔍</button>
+      <button type="submit" class="btn-glass btn-accent"><i class="bi bi-search"></i></button>
     </div>
     <div class="d-flex gap-2 flex-wrap">
       <select name="cat" class="glass-input" style="width: auto; min-width: 140px;">
@@ -17,13 +17,13 @@
         {% endfor %}
       </select>
       <select name="level" class="glass-input" style="width: auto; min-width: 120px;">
-        <option value="">🎯 Все уровни</option>
-        <option value="beginner" {% if selected_level == 'beginner' %}selected{% endif %}>🟢 С нуля</option>
+        <option value=""><i class="bi bi-bullseye"></i> Все уровни</option>
+        <option value="beginner" {% if selected_level == 'beginner' %}selected{% endif %}><i class="bi bi-phone"></i> С нуля</option>
         <option value="elementary" {% if selected_level == 'elementary' %}selected{% endif %}>🟡 Начальный</option>
         <option value="intermediate" {% if selected_level == 'intermediate' %}selected{% endif %}>🔴 Средний</option>
       </select>
       {% if query %}
-      <button type="button" class="btn-glass btn-sm" onclick="window.location='{% url 'unified_search' %}'">✕ Сброс</button>
+      <button type="button" class="btn-glass btn-sm" onclick="window.location='{% url 'unified_search' %}'"><i class="bi bi-x-lg"></i> Сброс</button>
       {% endif %}
     </div>
   </form>
@@ -31,7 +31,7 @@
 
 {% if query %}
 <div class="glass-card p-4 mb-4">
-  <h5 class="fw-bold mb-3">📖 Слова ({{ words|length }})</h5>
+  <h5 class="fw-bold mb-3"><i class="bi bi-book-half"></i> Слова ({{ words|length }})</h5>
   {% if words %}
   <div class="row g-2">
     {% for w in words %}
@@ -52,7 +52,7 @@
 </div>
 
 <div class="glass-card p-4 mb-4">
-  <h5 class="fw-bold mb-3">📝 Грамматика ({{ grammar|length }})</h5>
+  <h5 class="fw-bold mb-3"><i class="bi bi-pencil"></i> Грамматика ({{ grammar|length }})</h5>
   {% if grammar %}
   <div class="d-flex flex-wrap gap-2">
     {% for g in grammar %}
@@ -65,7 +65,7 @@
 </div>
 
 <div class="glass-card p-4">
-  <h5 class="fw-bold mb-3">📚 Уроки ({{ lessons|length }})</h5>
+  <h5 class="fw-bold mb-3"><i class="bi bi-journal-bookmark-fill"></i> Уроки ({{ lessons|length }})</h5>
   {% if lessons %}
   <div class="d-flex flex-wrap gap-2">
     {% for l in lessons %}

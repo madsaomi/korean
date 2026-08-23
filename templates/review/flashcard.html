@@ -36,7 +36,7 @@
   <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
     <button class="btn-glass" id="btn-again" style="border-color: #e17055;">🔴 Снова <small>↑</small></button>
     <button class="btn-glass" id="btn-good" style="border-color: #fdcb6e;">🟡 Нормально <small>↓</small></button>
-    <button class="btn-glass" id="btn-easy" style="border-color: #00b894;">🟢 Легко <small>Enter</small></button>
+    <button class="btn-glass" id="btn-easy" style="border-color: #00b894;"><i class="bi bi-phone"></i> Легко <small>Enter</small></button>
   </div>
 </div>
 {% else %}
@@ -44,7 +44,7 @@
   <div class="fs-1 mb-3">🎉</div>
   <h2 class="fw-bold mb-2">Нет слов для повторения!</h2>
   <p style="color: var(--text-secondary);">Добавь слова в словаре, чтобы начать.</p>
-  <a href="{% url 'category_list' %}" class="btn-glass btn-accent text-decoration-none mt-2">📖 Словарь</a>
+  <a href="{% url 'category_list' %}" class="btn-glass btn-accent text-decoration-none mt-2"><i class="bi bi-book-half"></i> Словарь</a>
 </div>
 {% endif %}
 {% endblock %}

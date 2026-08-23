@@ -1,33 +1,33 @@
 {% extends 'base.html' %}
 {% block title %}Прогресс{% endblock %}
 {% block content %}
-<h1 class="section-title">📊 Прогресс</h1>
+<h1 class="section-title"><i class="bi bi-bar-chart-fill"></i> Прогресс</h1>
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
     <div class="stat-card">
-      <div class="stat-icon">📚</div>
+      <div class="stat-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
       <div class="stat-value">{{ lesson_progress }}</div>
       <div class="stat-label">Уроков</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card">
-      <div class="stat-icon">📖</div>
+      <div class="stat-icon"><i class="bi bi-book-half"></i></div>
       <div class="stat-value">{{ words_learned }}</div>
       <div class="stat-label">Слов</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card">
-      <div class="stat-icon">🎯</div>
+      <div class="stat-icon"><i class="bi bi-bullseye"></i></div>
       <div class="stat-value">{{ total_quizzes }}</div>
       <div class="stat-label">Тестов</div>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card">
-      <div class="stat-icon streak-fire">🔥</div>
+      <div class="stat-icon streak-fire"><i class="bi bi-fire"></i></div>
       <div class="stat-value">{{ streak.current_streak }}</div>
       <div class="stat-label">Streak</div>
     </div>
@@ -40,7 +40,7 @@
       <h5 class="fw-bold mb-3">🏃 Streak (30 дней)</h5>
       <div class="streak-heatmap">
         {% for day in streak_days %}
-        <div class="streak-cell" title="{{ day.date }}: {% if day.active %}✅{% else %}❌{% endif %}"
+        <div class="streak-cell" title="{{ day.date }}: {% if day.active %}<i class="bi bi-check-lg"></i>{% else %}<i class="bi bi-x-circle"></i>{% endif %}"
              style="background: {% if day.active %}var(--accent){% else %}var(--glass-bg){% endif %};">
         </div>
         {% endfor %}
@@ -56,7 +56,7 @@
 
   <div class="col-md-5">
     <div class="glass-card p-4">
-      <h5 class="fw-bold mb-3">🏆 Статистика</h5>
+      <h5 class="fw-bold mb-3"><i class="bi bi-trophy"></i> Статистика</h5>
       <div class="d-flex justify-content-between mb-2">
         <span style="color: var(--text-secondary);">Текущая серия</span>
         <span class="fw-bold">{{ streak.current_streak }} дней</span>

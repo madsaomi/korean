@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Ежедневные цели{% endblock %}
 {% block content %}
-<h1 class="section-title">🎯 Ежедневные цели</h1>
+<h1 class="section-title"><i class="bi bi-bullseye"></i> Ежедневные цели</h1>
 
 <div class="row g-4">
   <div class="col-lg-6">
     <div class="glass-card p-4 text-center">
-      <h4 class="fw-bold mb-4">📊 Прогресс сегодня</h4>
+      <h4 class="fw-bold mb-4"><i class="bi bi-bar-chart-fill"></i> Прогресс сегодня</h4>
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span>📚 Уроки</span>
+          <span><i class="bi bi-journal-bookmark-fill"></i> Уроки</span>
           <span>{{ lessons_today }} / {{ goal.lessons_target }}</span>
         </div>
         <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
@@ -18,7 +18,7 @@
       </div>
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span>📖 Слова</span>
+          <span><i class="bi bi-book-half"></i> Слова</span>
           <span>{{ words_today }} / {{ goal.words_target }}</span>
         </div>
         <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
@@ -27,7 +27,7 @@
       </div>
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span>🎯 Тесты</span>
+          <span><i class="bi bi-bullseye"></i> Тесты</span>
           <span>{{ quizzes_today }} / {{ goal.quizzes_target }}</span>
         </div>
         <div class="progress" style="height: 12px; background: var(--glass-bg); border-radius: 6px;">
@@ -43,15 +43,15 @@
       <form method="POST">
         {% csrf_token %}
         <div class="mb-3">
-          <label class="fw-medium mb-1">📖 Слов в день</label>
+          <label class="fw-medium mb-1"><i class="bi bi-book-half"></i> Слов в день</label>
           <input type="number" name="words_target" class="glass-input" value="{{ goal.words_target }}" min="1" max="100">
         </div>
         <div class="mb-3">
-          <label class="fw-medium mb-1">📚 Уроков в день</label>
+          <label class="fw-medium mb-1"><i class="bi bi-journal-bookmark-fill"></i> Уроков в день</label>
           <input type="number" name="lessons_target" class="glass-input" value="{{ goal.lessons_target }}" min="1" max="20">
         </div>
         <div class="mb-3">
-          <label class="fw-medium mb-1">🎯 Тестов в день</label>
+          <label class="fw-medium mb-1"><i class="bi bi-bullseye"></i> Тестов в день</label>
           <input type="number" name="quizzes_target" class="glass-input" value="{{ goal.quizzes_target }}" min="1" max="20">
         </div>
         <button type="submit" class="btn-glass btn-accent w-100">Сохранить</button>

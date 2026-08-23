@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}🔍 Поиск — {{ current_lang_display }}{% endblock %}
+{% block title %}<i class="bi bi-search"></i> Поиск — {{ current_lang_display }}{% endblock %}
 {% block content %}
 <div class="mb-4">
-  <h1 class="fw-bold mb-2"><span class="gradient-text">🔍 Поиск</span></h1>
+  <h1 class="fw-bold mb-2"><span class="gradient-text"><i class="bi bi-search"></i> Поиск</span></h1>
   <p style="color:var(--text-secondary);">Полнотекстовый поиск по {{ current_lang_display|lower }}</p>
 </div>
 
 <form method="get" class="mb-4">
   <div class="input-group">
     <input type="text" name="q" class="form-control" placeholder="Введите запрос..." value="{{ query }}" style="background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);">
-    <button class="btn-glass btn-accent px-4" type="submit">🔍 Найти</button>
+    <button class="btn-glass btn-accent px-4" type="submit"><i class="bi bi-search"></i> Найти</button>
   </div>
 </form>
 
