@@ -198,6 +198,38 @@ button.dropdown-item {
   color: var(--text-primary);
 }
 
+.btn-again { border-color: #e17055; }
+.btn-good { border-color: #fdcb6e; }
+.btn-easy { border-color: #00b894; }
+
+.stat-again { color: #e17055; }
+.stat-good { color: #fdcb6e; }
+.stat-easy { color: #00b894; }
+
+.session-progress {
+  height: 6px;
+  background: var(--glass-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.session-progress .bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.korean-text {
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.glass-chip {
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+
 ::selection {
   background: var(--accent);
   color: white;
