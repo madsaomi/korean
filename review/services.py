@@ -50,6 +50,9 @@ def apply_review(user, word_id, action):
     if action == 'again':
         # A lapse resets the interval ladder instead of advancing it
         prog.review_count = 0
+        if prog.learned:
+            # Relearning: a failed learned word goes back into active rotation
+            prog.learned = False
         prog.next_review = now + timezone.timedelta(minutes=AGAIN_INTERVAL_MINUTES)
     elif action == 'good':
         prog.review_count += 1
@@ -71,8 +74,8 @@ def apply_review(user, word_id, action):
 
 
 def pending_review_count(user):
+    # Includes learned words whose review date has arrived (retention loop)
     return UserWordProgress.objects.filter(
         user=user,
-        learned=False,
         next_review__lte=timezone.now(),
     ).count()

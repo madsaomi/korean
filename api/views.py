@@ -173,7 +173,7 @@ class ReviewViewSet(viewsets.GenericViewSet):
     def list(self, request):
         now = timezone.now()
         due = UserWordProgress.objects.filter(
-            user=request.user, next_review__lte=now, learned=False
+            user=request.user, next_review__lte=now
         ).select_related('word__category')[:20]
         serializer = serializers.UserWordProgressSerializer(due, many=True)
         return Response(serializer.data)

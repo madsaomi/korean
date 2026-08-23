@@ -46,6 +46,28 @@ class TestApplyReview:
         delta = (result.next_review - timezone.now()).total_seconds()
         assert 0 < delta <= AGAIN_INTERVAL_MINUTES * 60 + 5
 
+    def test_again_unlearns_learned_word(self, prog):
+        prog.learned = True
+        prog.learned_at = timezone.now() - timezone.timedelta(days=8)
+        prog.review_count = 3
+        prog.next_review = timezone.now() - timezone.timedelta(minutes=1)
+        prog.save()
+
+        result = apply_review(prog.user, prog.word_id, 'again')
+
+        assert result.learned is False
+        assert result.review_count == 0
+
+    def test_good_keeps_learned_status(self, prog):
+        prog.learned = True
+        prog.next_review = timezone.now() - timezone.timedelta(minutes=1)
+        prog.save()
+
+        result = apply_review(prog.user, prog.word_id, 'good')
+
+        assert result.learned is True
+        assert result.review_count == 1
+
     def test_not_due_word_rejected(self, prog):
         prog.next_review = timezone.now() + timezone.timedelta(hours=1)
         prog.save()
@@ -112,7 +134,7 @@ class TestApplyReview:
 
 @pytest.mark.django_db
 class TestPendingCount:
-    def test_counts_only_due_unlearned(self, user, word):
+    def test_counts_only_due(self, user, word):
         future_prog = UserWordProgress.objects.create(
             user=user, word=word,
             next_review=timezone.now() + timezone.timedelta(hours=1),
@@ -124,4 +146,15 @@ class TestPendingCount:
         assert pending_review_count(user) == 1
 
         apply_review(user, word.id, 'easy')
+        # easy pushes the review a week out — not pending anymore
         assert pending_review_count(user) == 0
+
+    def test_counts_learned_words_when_due(self, user, word):
+        UserWordProgress.objects.create(
+            user=user, word=word,
+            learned=True,
+            learned_at=timezone.now(),
+            next_review=timezone.now() - timezone.timedelta(minutes=1),
+        )
+        # Retention loop: a learned word whose date arrived is pending again
+        assert pending_review_count(user) == 1

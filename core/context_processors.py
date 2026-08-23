@@ -13,7 +13,7 @@ def pending_review_count(request):
         if now - last_check < 60:
             return {'pending_review_count': session.get('review_count_cache', 0)}
         count = UserWordProgress.objects.filter(
-            user=request.user, next_review__lte=timezone.now(), learned=False
+            user=request.user, next_review__lte=timezone.now()
         ).count()
         session['review_check_ts'] = now
         session['review_count_cache'] = count

@@ -20,7 +20,8 @@ def leaderboard(request):
         cnt=Count('lesson_progress', filter=Q(lesson_progress__completed=True))
     ).order_by('-cnt')[:10]
     top_quizzes = User.objects.annotate(
-        cnt=Count('quiz_results')
+        # Distinct quizzes taken, not raw attempts: resubmits don't farm the board
+        cnt=Count('quiz_results__quiz', distinct=True)
     ).order_by('-cnt')[:10]
     return render(request, 'leaderboard.html', {
         'top_streak': top_streak,
@@ -65,8 +66,8 @@ def index(request):
         quizzes_done = UserQuizResult.objects.filter(user=request.user).count()
         last_quiz = UserQuizResult.objects.filter(user=request.user).first()
         words_in_review = UserWordProgress.objects.filter(
-            user=request.user, learned=False
-        ).filter(next_review__lte=timezone.now()).count()
+            user=request.user, next_review__lte=timezone.now()
+        ).count()
         total_lessons = Lesson.objects.count()
         ctx.update({
             'streak': streak,

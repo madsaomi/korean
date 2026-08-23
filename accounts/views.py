@@ -59,8 +59,8 @@ def profile(request):
     words_learned = UserWordProgress.objects.filter(user=request.user, learned=True).count()
     quiz_history = UserQuizResult.objects.filter(user=request.user)[:10]
     words_in_review = UserWordProgress.objects.filter(
-        user=request.user, learned=False
-    ).exclude(next_review=None).count()
+        user=request.user, next_review__lte=timezone.now()
+    ).count()
 
     last_14 = [timezone.localdate() - timedelta(days=i) for i in range(13, -1, -1)]
     agg = (

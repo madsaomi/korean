@@ -27,9 +27,14 @@ review/views.py → review/services.py::apply_review()
   └─ UserWordProgress (user+word unique): review_count, next_review, learned
   └─ после save → accounts/utils.py::check_word_achievements()
 ```
-Лестница интервалов: again → сброс счётчика + 10 мин; good → [1, 3, 7, 14, 30] дней;
-easy → learned=True + 7 дней. Логика живёт ТОЛЬКО в `apply_review` — HTML-вьюхи
-и API её переиспользуют, дублировать нельзя.
+Лестница интервалов: again → сброс счётчика + 10 мин (learned слово при провале
+снимается с learned — возврат в активную ротацию); good → [1, 3, 7, 14, 30] дней
+(learned статус сохраняется); easy → learned=True + 7 дней. Очереди повторения
+фильтруются только по `next_review <= now` БЕЗ фильтра learned — выученные слова
+возвращаются на повторение по расписанию (retention loop). Антифарминг:
+apply_review отклоняет слово раньше срока (WordNotDue, грейс 5 сек).
+Логика живёт ТОЛЬКО в `apply_review` — HTML-вьюхи и API её переиспользуют,
+дублировать нельзя.
 
 ### Учебник (library)
 Markdown-файлы лежат в `Корейский/` и `Японский/` (frontmatter YAML + body).

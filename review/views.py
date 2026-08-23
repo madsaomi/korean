@@ -38,7 +38,7 @@ def review_page(request):
     session = request.session[session_key]
 
     due_words = UserWordProgress.objects.filter(
-        user=request.user, next_review__lte=now, learned=False
+        user=request.user, next_review__lte=now
     ).select_related('word__category')[:20]
 
     if request.method == 'POST':
@@ -94,7 +94,7 @@ def review_page(request):
 def flashcard_mode(request):
     now = timezone.now()
     cards = UserWordProgress.objects.filter(
-        user=request.user, next_review__lte=now, learned=False
+        user=request.user, next_review__lte=now
     ).select_related('word__category')[:50]
 
     if request.method == 'POST':

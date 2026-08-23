@@ -19,7 +19,7 @@ def progress_dashboard(request):
     words_learned = UserWordProgress.objects.filter(user=request.user, learned=True).count()
     total_quizzes = UserQuizResult.objects.filter(user=request.user).count()
     words_in_review = UserWordProgress.objects.filter(
-        user=request.user, learned=False, next_review__lte=now
+        user=request.user, next_review__lte=now
     ).count()
 
     streak, _ = Streak.objects.get_or_create(user=request.user)
