@@ -146,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.querySelectorAll('.alert.achievement-unlock').forEach(el => {
-    if (typeof confetti === 'function') {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof confetti === 'function' && !reduceMotion) {
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#6C5CE7', '#00b894', '#fdcb6e', '#e17055'] });
       setTimeout(() => confetti({ particleCount: 60, spread: 100, origin: { y: 0.4 } }), 300);
     }

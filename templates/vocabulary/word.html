@@ -26,12 +26,12 @@
     {% if user.word_lists.exists %}
     <div class="dropdown d-inline">
       <button class="btn-glass dropdown-toggle" data-bs-toggle="dropdown">📋 В коллекцию</button>
-      <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+        <ul class="dropdown-menu">
         {% for wl in user.word_lists.all %}
          <li>
            <form method="POST" action="{% url 'word_list_add_word' wl.id word.id %}" style="display:inline;">
              {% csrf_token %}
-             <button type="submit" class="dropdown-item" style="background:none;border:none;color:inherit;padding:0.25rem 1rem;">{{ wl.name }}</button>
+                  <button type="submit" class="dropdown-item">{{ wl.name }}</button>
            </form>
          </li>
          {% endfor %}

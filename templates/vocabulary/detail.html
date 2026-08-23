@@ -42,15 +42,15 @@
           <a href="{% url 'word_detail' word.id %}" class="btn-glass btn-sm">🔍</a>
           <div class="dropdown d-inline">
             <button class="btn-glass btn-sm dropdown-toggle" data-bs-toggle="dropdown">📋</button>
-            <ul class="dropdown-menu" style="background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+            <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'word_list_create' %}">➕ Новая</a></li>
               {% if user_lists %}
-              <li><hr class="dropdown-divider" style="border-color: var(--glass-border);"></li>
+              <li><hr class="dropdown-divider"></li>
               {% for wl in user_lists %}
                <li>
                  <form method="POST" action="{% url 'word_list_add_word' wl.id word.id %}" style="display:inline;">
                    {% csrf_token %}
-                   <button type="submit" class="dropdown-item" style="background:none;border:none;color:inherit;padding:0.25rem 1rem;">{{ wl.name }}</button>
+                    <button type="submit" class="dropdown-item">{{ wl.name }}</button>
                  </form>
                </li>
                {% endfor %}

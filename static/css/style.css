@@ -28,6 +28,15 @@
 
 html { scroll-behavior: smooth; }
 
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .animate-badge {
   animation: badge-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -82,6 +91,38 @@ html { scroll-behavior: smooth; }
 
 .alert {
   animation: slide-down 0.3s ease;
+}
+
+main .alert.glass-card {
+  border-left: 4px solid var(--accent);
+}
+
+.dropdown-divider {
+  border-color: var(--glass-border);
+}
+
+button.dropdown-item {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0.25rem 1rem;
+}
+
+.modal-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 999;
+  display: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.3rem;
 }
 
 ::selection {
