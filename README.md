@@ -1,12 +1,19 @@
 <div align="center">
 
-# 🇰🇷 한글 K-lab
+<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PGNpcmNsZSBjeD00MCBjeT00MCByPTM4IGZpbGw9IiM3ZjVhZjAiLz48dGV4dCB4PSI1MCIgeT0iNTQiIGZvbnQtc2l6ZT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+SGFuPC90ZXh0Pjwvc3ZnPg==" width="80" alt="한글 K-lab">
 
-**Изучай корейский и японский язык с нуля — бесплатно и в удобном темпе**
+# 한글 K-lab
 
-[![Python](https://img.shields.io/badge/Python-3.14+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Django](https://img.shields.io/badge/Django-5.x-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+**Учим корейский и японский с нуля — бесплатно и в своём темпе**
+
+Интерактивная платформа: алфавит с озвучкой, словарь с интервальным повторением,
+тесты, учебник из двух языков — в одном glassmorphism-интерфейсе.
+
+[![CI](https://github.com/madsaomi/korean/actions/workflows/ci.yml/badge.svg)](https://github.com/madsaomi/korean/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.14-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-5.x-092E20?style=flat&logo=django&logoColor=white)](https://djangoproject.com)
+[![Tests](https://img.shields.io/badge/tests-125%20passing-00b894)](#-запуск)
+[![License](https://img.shields.io/badge/License-MIT-fdcb6e)](LICENSE)
 
 </div>
 
@@ -14,105 +21,104 @@
 
 ## ✨ Возможности
 
-| Раздел | Описание |
-|--------|----------|
-| **ㅎㅇ Хангыль** | Интерактивный алфавит с озвучкой и разбором предложений |
-| **📚 Уроки** | Пошаговые курсы с прогрессом |
-| **📖 Словарь** | Категории слов, флеш-карты, коллекции |
-| **📝 Грамматика** | Правила с упражнениями |
-| **📘 Учебник 🇰🇷🇯🇵** | 8 глав корейского + 17 глав японского, закладки, выделения 6 цветов, поиск |
-| **🎯 Тесты** | Квизы с таймером и статистикой |
-| **🔄 Повторение** | Система интервального повторения (SRS) |
-| **🏆 Лидерборд** | Соревнуйся с другими учениками |
-| **📊 Прогресс** | Heatmap стрика, графики результатов |
-| **🎯 Дневные цели** | Отслеживай ежедневные задачи |
+| | Раздел | Что внутри |
+|---|--------|-----------|
+| 🔤 | **Алфавит** | Интерактивный хангыль с TTS-озвучкой, разбор предложений, конструктор фраз |
+| 📚 | **Словарь** | Категории слов, режим заучивания, личные коллекции, CSV-экспорт |
+| 🔄 | **Повторение (SRS)** | Интервальное повторение: лестница интервалов, заморозки серии ❄️, флеш-режим с горячими клавишами |
+| 🎯 | **Тесты** | Квизы с серверным таймером, разбор ошибок с объяснениями, уровни сложности |
+| 📖 | **Грамматика** | Темы → правила с формулами и примерами + тренажёр упражнений |
+| 📘 | **Учебник** | Корейский 🇰🇷 и японский 🇯🇵 курсы: оглавление, закладки, выделения 6 цветов, заметки, теги, поиск по тексту |
+| 🏆 | **Мотивация** | Стрики, ачивки, дневные цели, лидерборд, heatmap активности |
+| 📊 | **Прогресс** | Статистика уроков/слов/тестов, графики результатов |
+| 📱 | **PWA** | Установка на устройство, офлайн-режим, тёмная тема |
 
-## 🚀 Быстрый старт
-
-### Требования
-
-- Python 3.12+ (проверено на 3.14)
-- pip
-
-### Установка
+## 🚀 Запуск
 
 ```bash
-# Клонируй репозиторий
-git clone https://github.com/your-username/k-lab.git
-cd k-lab
+git clone https://github.com/madsaomi/korean.git
+cd korean
 
-# Создай виртуальное окружение
 python -m venv venv
-venv\Scripts\activate          # Windows
-# source venv/bin/activate    # macOS/Linux
+venv\Scripts\activate            # Windows
+# source venv/bin/activate       # macOS/Linux
 
-# Установи зависимости
 pip install -r requirements.txt
-
-# Примени миграции
 python manage.py migrate
-
-# Создай суперпользователя
 python manage.py createsuperuser
-
-# Запусти сервер
 python manage.py runserver
 ```
 
-Открой http://127.0.0.1:8000 в браузере.
+Открой <http://127.0.0.1:8000> — готово.
 
-### Или одним скриптом
+> 💡 Тесты: `pytest -q` · Линтер: `ruff check .` · Полная установка скриптом: `seed.bat`
 
-```
-seed.bat
+## ⚙️ Конфигурация
+
+Все переменные окружения — необязательные, см. [`.env.example`](.env.example):
+
+```ini
+DJANGO_DEBUG=False                    # прод-режим (HSTS, secure cookies, SSL redirect)
+DJANGO_SECRET_KEY=...                 # обязателен при DEBUG=False
+DB_ENGINE=postgres                    # PostgreSQL вместо SQLite
+REDIS_URL=redis://localhost:6379/1    # общий кэш между воркерами
 ```
 
 ## 🛠 Технологии
 
-- **Backend:** Django 5.x, Python 3.14
-- **Frontend:** Bootstrap 5.3, Custom Glassmorphism CSS
-- **БД:** SQLite (разработка) / PostgreSQL (продакшн)
-- **Дополнительно:** DRF, Chart.js, Canvas Confetti, PWA (Service Worker)
+| Слой | Стек |
+|------|------|
+| Backend | Python 3.14, Django 5.x, DRF |
+| Frontend | Bootstrap 5.3, Bootstrap Icons, glassmorphism-CSS, Chart.js |
+| Данные | SQLite / PostgreSQL, Redis (кэш) |
+| Инфраструктура | WhiteNoise, gunicorn, GitHub Actions (ruff + pytest) |
+| Контент | Markdown-учебники с YAML-frontmatter + nh3-санитизация |
 
-## 🤖 Для ИИ-агентов
-
-Инструкции для агентов (opencode, Codex, Claude Code, Cursor, Gemini CLI):
-[AGENTS.md](AGENTS.md) → `.agents/` — архитектура, команды, конвенции,
-журнал работ и доска хэндоффа.
-
-## 📁 Структура проекта
+## 📁 Структура
 
 ```
-k-lab/
-├── accounts/       # Профиль, ачивки, дневные цели
-├── api/            # REST API (DRF)
-├── config/         # Настройки Django, ASGI/WSGI
-├── core/           # Главная страница, поиск, middleware
-├── grammar/        # Грамматика и упражнения
-├── hangul/         # Алфавит, разбор предложений, TTS-озвучка
-├── lessons/        # Уроки и курсы
-├── library/        # Учебник (корейский + японский), закладки, выделения
-├── progress/       # Прогресс и статистика
-├── quiz/           # Тесты и квизы
-├── review/         # Повторение слов (SRS)
-├── vocabulary/     # Словарь, категории, коллекции
-├── templates/      # HTML-шаблоны (включая кастомные страницы ошибок)
-├── static/         # CSS, JS, медиа
-├── Корейский/      # Исходные markdown-файлы корейского учебника
-├── Японский/       # Исходные markdown-файлы японского учебника
-├── AGENTS.md       # Инструкции для ИИ-агентов (+ .agents/)
-├── manage.py
-└── requirements.txt
+korean/
+├── accounts/       # Профиль, ачивки, стрики, заморозки ❄
+├── api/            # REST API (DRF): слова, квизы, прогресс, закладки
+├── config/         # Settings, .env-лоадер, WSGI/ASGI
+├── core/           # Главная, поиск, лидерборд, streak-middleware
+├── grammar/        # Темы, правила, упражнения
+├── hangul/         # Алфавит, TTS-озвучка, разбор предложений
+├── lessons/        # Курсы и уроки
+├── library/        # Учебники ko+ja: чтение, закладки, выделения
+├── progress/       # Статистика и дашборд прогресса
+├── quiz/           # Тесты с серверным таймером
+├── review/         # SRS-движок (services.py — единая точка логики)
+├── vocabulary/     # Слова, категории, коллекции
+├── templates/      # Шаблоны (glassmorphism + тёмная тема)
+├── static/         # CSS/JS, service worker, manifest
+├── Корейский/      # Исходники учебника 🇰🇷 (markdown)
+└── Японский/       # Исходники учебника 🇯🇵 (markdown)
 ```
+
+## 🧪 Для ИИ-агентов
+
+Репозиторий настроен для работы любых ИИ-агентов (opencode, Codex,
+Claude Code, Cursor, Gemini CLI):
+
+- [`AGENTS.md`](AGENTS.md) — точка входа: правила, команды, индекс документации
+- [`.agents/HANDOFF.md`](.agents/HANDOFF.md) — живое состояние проекта
+- [`.agents/history/`](.agents/history/INDEX.md) — журнал работ агентов (18 записей)
+
+## 📦 Деплой
+
+Пошаговый чеклист — [`DEPLOY.md`](DEPLOY.md):
+gunicorn + nginx, PostgreSQL и Redis через переменные окружения,
+`manage.py check --deploy` проходит без замечаний.
 
 ## 📝 Лицензия
 
-MIT License — используй свободно.
+MIT — см. [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-Сделано с ❤️ для изучающих корейский и японский
+Сделано с ❤️ для изучающих 한국어 и 日本語
 
 </div>
