@@ -8,22 +8,22 @@
 
 <div class="bento-grid">
   {% for topic in topics %}
-  <a href="{% url 'grammar:grammar_detail' topic.slug %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
+  <a href="{% url 'grammar:grammar_detail' topic.slug %}" class="text-decoration-none glass-card card-link">
     <div class="d-flex align-items-center gap-3">
       <span class="fs-2">{{ topic.icon }}</span>
       <div>
         <h5 class="fw-bold mb-1">{{ topic.title }}</h5>
-        <small style="color: var(--text-secondary);">{{ topic.description|truncatewords:10 }}</small>
+        <small class="muted">{{ topic.description|truncatewords:10 }}</small>
         <div>
-          <span class="badge mt-2" style="background: var(--accent);">{{ topic.get_level_display }}</span>
-          <span class="badge mt-2" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">{{ topic.rule_count }} правил</span>
+          <span class="badge mt-2 badge-accent">{{ topic.get_level_display }}</span>
+          <span class="badge mt-2 badge-soft">{{ topic.rule_count }} правил</span>
         </div>
       </div>
     </div>
   </a>
   {% empty %}
   <div class="glass-card empty-state">
-    <p style="color: var(--text-secondary);">Грамматика пока не добавлена.</p>
+    <p class="muted">Грамматика пока не добавлена.</p>
   </div>
   {% endfor %}
 </div>

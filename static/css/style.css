@@ -159,6 +159,18 @@ button.dropdown-item {
   color: var(--text-primary);
 }
 
+.badge-gradient {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+}
+
+.badge-pass {
+  background: #00b894;
+}
+
+.badge-fail {
+  background: #e17055;
+}
+
 .word-of-day {
   max-width: 800px;
   margin-left: auto;
