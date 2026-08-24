@@ -8,17 +8,17 @@
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
       <h1 class="fw-bold mb-1"><i class="bi bi-bullseye"></i> {{ quiz.title }}</h1>
-      <p style="color: var(--text-secondary);">{{ quiz.description }}</p>
-      <div class="d-flex gap-2">
-        <span class="badge" style="background: var(--accent);">{{ quiz.get_level_display }}</span>
-        <span class="badge" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">{{ questions.count }} вопросов</span>
-        <span class="badge" style="background: rgba(0, 184, 148, 0.2); color: var(--text-primary);">Проходной: {{ quiz.passing_score }}%</span>
+      <p class="muted">{{ quiz.description }}</p>
+      <div class="d-flex gap-2 flex-wrap">
+        <span class="badge badge-accent">{{ quiz.get_level_display }}</span>
+        <span class="badge badge-soft">{{ questions.count }} вопросов</span>
+        <span class="badge badge-soft-green">Проходной: {{ quiz.passing_score }}%</span>
       </div>
     </div>
     {% if timer > 0 %}
     <div class="glass text-center px-3 py-2" id="timer" data-seconds="{{ timer }}">
       <div class="fs-3 fw-bold" id="timer-display">{{ timer_min }}:{{ timer_sec|stringformat:"02d" }}</div>
-      <small style="color: var(--text-secondary);">осталось</small>
+      <small class="muted">осталось</small>
     </div>
     {% endif %}
   </div>
@@ -33,7 +33,7 @@
   <div class="glass-card p-4 mb-3" data-question="{{ q.id }}">
     <h5 class="fw-bold mb-3">{{ forloop.counter }}. {{ q.question_russian }}</h5>
     {% if q.question_korean %}
-    <p class="fs-5 mb-3" style="font-family: 'Noto Sans KR', sans-serif;">{{ q.question_korean }}</p>
+    <p class="fs-5 mb-3 korean-text">{{ q.question_korean }}</p>
     {% endif %}
 
     {% if q.question_type == 'writing' %}
@@ -44,7 +44,7 @@
       <label class="quiz-option d-flex align-items-center gap-3">
         <input type="radio" name="q_{{ q.id }}" value="{{ answer.id }}" class="form-check-input">
         <span>{{ answer.text }}</span>
-        <small class="ms-auto" style="color: var(--text-secondary); opacity: 0.5;">{{ forloop.counter }}</small>
+        <small class="ms-auto muted" style="opacity: 0.5;">{{ forloop.counter }}</small>
       </label>
       {% endfor %}
     </div>
@@ -54,8 +54,8 @@
 
   {% if user.is_authenticated %}
   <div class="text-center mt-4">
-    <button type="submit" class="btn-glass btn-accent px-5 py-2 fs-5">📨 Отправить</button>
-    <span id="answered-count" class="ms-3" style="color: var(--text-secondary);">0/{{ questions.count }} отвечено</span>
+    <button type="submit" class="btn-glass btn-accent px-5 py-2 fs-5"><i class="bi bi-send-fill"></i> Отправить</button>
+    <span id="answered-count" class="ms-3 muted">0/{{ questions.count }} отвечено</span>
   </div>
   {% else %}
   <div class="glass-card p-4 text-center">

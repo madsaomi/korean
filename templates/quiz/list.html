@@ -6,9 +6,9 @@
 <div class="mb-4">
   <div class="d-flex gap-2 flex-wrap" id="quiz-filters">
     <button class="btn-glass btn-sm active-filter" data-filter="all" onclick="filterQuiz('all')"><i class="bi bi-collection"></i> Все</button>
-    <button class="btn-glass btn-sm" data-filter="beginner" onclick="filterQuiz('beginner')"><i class="bi bi-phone"></i> С нуля</button>
-    <button class="btn-glass btn-sm" data-filter="elementary" onclick="filterQuiz('elementary')">🟡 Начальный</button>
-    <button class="btn-glass btn-sm" data-filter="intermediate" onclick="filterQuiz('intermediate')">🔴 Средний</button>
+    <button class="btn-glass btn-sm" data-filter="beginner" onclick="filterQuiz('beginner')"><i class="bi bi-1-circle"></i> С нуля</button>
+    <button class="btn-glass btn-sm" data-filter="elementary" onclick="filterQuiz('elementary')"><i class="bi bi-2-circle"></i> Начальный</button>
+    <button class="btn-glass btn-sm" data-filter="intermediate" onclick="filterQuiz('intermediate')"><i class="bi bi-3-circle"></i> Средний</button>
   </div>
 </div>
 
@@ -24,24 +24,24 @@ function filterQuiz(level) {
 
 <div class="bento-grid">
   {% for quiz in quizzes %}
-  <a href="{% url 'quiz_detail' quiz.id %}" class="text-decoration-none glass-card quiz-card" data-level="{{ quiz.level }}" style="color: var(--text-primary);">
+  <a href="{% url 'quiz_detail' quiz.id %}" class="text-decoration-none glass-card quiz-card card-link" data-level="{{ quiz.level }}">
     <h4 class="fw-bold mb-1">{{ quiz.title }}</h4>
-    <p style="color: var(--text-secondary);">{{ quiz.description|truncatewords:15 }}</p>
-    <div class="d-flex gap-2">
-      <span class="badge" style="background: var(--accent);">{{ quiz.get_level_display }}</span>
-      <span class="badge" style="background: rgba(108, 92, 231, 0.2); color: var(--text-primary);">
+    <p class="muted">{{ quiz.description|truncatewords:15 }}</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="badge badge-accent">{{ quiz.get_level_display }}</span>
+      <span class="badge badge-soft">
         {{ quiz.q_count }} вопросов
       </span>
       {% if quiz.time_limit > 0 %}
-      <span class="badge" style="background: rgba(231, 76, 60, 0.2); color: var(--text-primary);">
-        ⏱ {{ quiz.time_limit }}с
+      <span class="badge badge-soft-red">
+        <i class="bi bi-stopwatch"></i> {{ quiz.time_limit }}с
       </span>
       {% endif %}
     </div>
   </a>
   {% empty %}
   <div class="glass-card empty-state">
-    <p style="color: var(--text-secondary);">Тесты пока не добавлены.</p>
+    <p class="muted">Тесты пока не добавлены.</p>
   </div>
   {% endfor %}
 </div>

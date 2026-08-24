@@ -2,7 +2,7 @@
 {% block title %}Результат{% endblock %}
 {% block content %}
 <div class="glass-card p-5 text-center mb-4">
-  <div class="fs-1 mb-3">{{ passed|yesno:'🎉,😅' }}</div>
+  <div class="fs-1 mb-3">{% if passed %}<i class="bi bi-emoji-laughing-fill"></i>{% else %}<i class="bi bi-emoji-neutral-fill"></i>{% endif %}</div>
   <h1 class="fw-bold">{{ passed|yesno:'Отлично!,Попробуй ещё раз' }}</h1>
   <p class="fs-4 mb-0">{{ quiz.title }}</p>
 
@@ -10,15 +10,15 @@
     <span>{{ percentage }}%</span>
   </div>
 
-  <p class="mt-2" style="color: var(--text-secondary);">{{ score }} из {{ total }}</p>
+  <p class="mt-2 muted">{{ score }} из {{ total }}</p>
 </div>
 
 <div class="glass-card p-4">
   <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="fw-bold mb-0"><i class="bi bi-collection"></i> Детали</h4>
     <div class="d-flex gap-2">
-      <span class="badge" style="background: rgba(0,184,148,0.2); color: #00b894;"><i class="bi bi-check-lg"></i> {{ score }} верно</span>
-      <span class="badge" style="background: rgba(225,112,85,0.2); color: #e17055;"><i class="bi bi-x-circle"></i> {{ wrong }} неверно</span>
+      <span class="badge badge-soft-green" style="color: #00b894;"><i class="bi bi-check-lg"></i> {{ score }} верно</span>
+      <span class="badge badge-soft-red" style="color: #e17055;"><i class="bi bi-x-circle"></i> {{ wrong }} неверно</span>
     </div>
   </div>
 
@@ -28,7 +28,7 @@
     <div class="flex-grow-1">
       <p class="fw-medium mb-1">{{ r.question.question_russian }}</p>
       {% if r.question.question_korean %}
-      <p class="small" style="font-family: 'Noto Sans KR', sans-serif; color: var(--text-secondary);">{{ r.question.question_korean }}</p>
+      <p class="small korean-text muted">{{ r.question.question_korean }}</p>
       {% endif %}
       <small>
         Твой ответ: <span style="color: {{ r.is_correct|yesno:'#00b894,#e17055' }}; font-weight: 600;">{{ r.selected|default:'—' }}</span><br>
@@ -37,7 +37,7 @@
         {% endif %}
         {% if r.explanation %}
         <div class="mt-2 p-2 rounded-2" style="background: var(--glass-bg); border-left: 3px solid var(--accent);">
-          <span style="color: var(--text-secondary);">{{ r.explanation }}</span>
+          <span class="muted">{{ r.explanation }}</span>
         </div>
         {% endif %}
       </small>
