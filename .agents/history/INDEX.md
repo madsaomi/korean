@@ -9,6 +9,7 @@
 
 | ID | Дата | Агент | Задача | Статус | Запись |
 |----|------|-------|--------|--------|--------|
+| 0017 | 2026-08-23 | ox-alpha | Library: фикс иконок в title (head-бага), тулбар/действия → bi-иконки | done (118 passed) | [запись](0017-2026-08-23-library-design.md) |
 | 0016 | 2026-08-23 | ox-alpha | Дизайн quiz/grammar/profile + фикс дублей class-атрибутов | done (118 passed) | [запись](0016-2026-08-23-design-quiz-grammar-profile.md) |
 | 0015 | 2026-08-23 | ox-alpha | Прод-подготовка: .env-лоадер, Redis/PostgreSQL, DEPLOY.md, check --deploy чист | done (123 passed) | [запись](0015-2026-08-23-prod-readiness.md) |
 | 0014 | 2026-08-23 | ox-alpha | Дизайн-проход по словарю (pill, иконки, korean-text) | done (118 passed) | [запись](0014-2026-08-23-vocabulary-design.md) |
