@@ -18,9 +18,9 @@
 ## Снимок репозитория
 
 - **Ветка:** main
-- **Последний коммит:** d339695 "feat: SRS retention loop..."
+- **Последний коммит:** 3b53c67 "feat(deploy): .env loader, Redis/PostgreSQL..."
 - **Незакоммичено:** нет
-- **Тесты (базовая линия):** 118 passed + `ruff check .` чистый
+- **Тесты (базовая линия):** 123 passed + `ruff check .` чистый
 - **Миграции:** все применены, `makemigrations --check` чист
 - **CI:** GitHub Actions — ruff + миграции + pytest; красный CI у твоего
   коммита = чини до передачи задачи.
@@ -44,7 +44,7 @@ ID:            —
 
 ## Очередь (кандидаты на следующую задачу)
 
-- Прод: Redis CACHES, django-environ, PostgreSQL, nginx/S3 для media,
-  CSRF_TRUSTED_ORIGINS на реальный домен (см. known-issues.md).
-- Контент: наполнение словаря/квизов, тесты на seed_data.
-- UX-идеи: streak-freeze (сохранение серии), экспорт прогресса в JSON.
+- Дизайн оставшихся разделов: quiz, library (учебник), grammar, accounts.
+- UX: streak-freeze (сохранение серии за пропущенный день), экспорт прогресса в JSON.
+- Контент: тесты на seed_data, наполнение словаря/квизов.
+- Прод: реальный деплой по DEPLOY.md (вне репозитория).
