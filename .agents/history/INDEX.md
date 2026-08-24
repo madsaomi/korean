@@ -9,6 +9,7 @@
 
 | ID | Дата | Агент | Задача | Статус | Запись |
 |----|------|-------|--------|--------|--------|
+| 0018 | 2026-08-23 | ox-alpha | Streak-freeze: мост через пропущенный день, грант за 7 дней (+7 тестов) | done (125 passed) | [запись](0018-2026-08-23-streak-freeze.md) |
 | 0017 | 2026-08-23 | ox-alpha | Library: фикс иконок в title (head-бага), тулбар/действия → bi-иконки | done (118 passed) | [запись](0017-2026-08-23-library-design.md) |
 | 0016 | 2026-08-23 | ox-alpha | Дизайн quiz/grammar/profile + фикс дублей class-атрибутов | done (118 passed) | [запись](0016-2026-08-23-design-quiz-grammar-profile.md) |
 | 0015 | 2026-08-23 | ox-alpha | Прод-подготовка: .env-лоадер, Redis/PostgreSQL, DEPLOY.md, check --deploy чист | done (123 passed) | [запись](0015-2026-08-23-prod-readiness.md) |
