@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}<i class="bi bi-journal-bookmark-fill"></i> {{ current_lang_display }} — Учебные материалы{% endblock %}
+{% block title %}{{ current_lang_display }} — Учебные материалы{% endblock %}
 {% block content %}
 <div class="d-flex align-items-center justify-content-between gap-2 mb-4">
   <div>
@@ -27,9 +27,9 @@
         <div class="progress-bar" style="width:{% widthratio total_read total_files 100 %}%;background:linear-gradient(135deg,var(--accent),#a78bfa);border-radius:10px;"></div>
       </div>
     </div>
-     <a href="{% url url_random %}" class="btn-glass btn-sm px-3 text-decoration-none">🎲 Случайная</a>
-     <a href="{% url url_bookmarks %}" class="btn-glass btn-sm px-3 text-decoration-none">🔖 Закладки</a>
-     <a href="{% url url_highlights %}" class="btn-glass btn-sm px-3 text-decoration-none">🎨 Выделения</a>
+     <a href="{% url url_random %}" class="btn-glass btn-sm px-3 text-decoration-none"><i class="bi bi-dice-5-fill"></i> Случайная</a>
+     <a href="{% url url_bookmarks %}" class="btn-glass btn-sm px-3 text-decoration-none"><i class="bi bi-bookmark-fill"></i> Закладки</a>
+     <a href="{% url url_highlights %}" class="btn-glass btn-sm px-3 text-decoration-none"><i class="bi bi-brush"></i> Выделения</a>
      <a href="{% url url_search %}" class="btn-glass btn-sm px-3 text-decoration-none"><i class="bi bi-search"></i> Поиск</a>
   </div>
 </div>
@@ -54,13 +54,13 @@
           <div class="flex-grow-1" style="min-width:0;">
             <div class="d-flex align-items-center gap-2 mb-1">
               <h5 class="fw-bold mb-0" style="color:var(--text-primary);">{{ f.name }}</h5>
-              {% if f.is_read %}<span class="badge" style="background:var(--success);font-size:0.6rem;">✓</span>{% endif %}
-              {% if f.is_bookmarked %}<span style="color:var(--accent);font-size:0.8rem;">🔖</span>{% endif %}
+              {% if f.is_read %}<span class="badge badge-pass" style="font-size:0.6rem;"><i class="bi bi-check-lg"></i></span>{% endif %}
+              {% if f.is_bookmarked %}<span style="color:var(--accent);font-size:0.8rem;"><i class="bi bi-bookmark-fill"></i></span>{% endif %}
             </div>
             <p class="mb-2 small" style="color:var(--text-secondary);">{{ f.description }}</p>
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <span class="library-badge">{{ f.size_kb }} KB</span>
-              <span class="library-badge" style="background:var(--glass-border);">⏱ {{ f.read_time }} мин</span>
+              <span class="library-badge" style="background:var(--glass-border);"><i class="bi bi-stopwatch"></i> {{ f.read_time }} мин</span>
               {% for tag in f.tags %}
               <span class="library-badge" style="background:rgba(var(--accent-rgb,127,90,240),0.15);color:var(--accent);">#{{ tag }}</span>
               {% endfor %}
@@ -73,7 +73,7 @@
   {% empty %}
   <div class="col-12">
     <div class="library-card p-5 text-center">
-      <p class="fs-4 mb-2">📭</p>
+      <p class="fs-4 mb-2"><i class="bi bi-inbox"></i></p>
       <p style="color:var(--text-secondary);">
         {% if current_lang_code == 'ko' %}Папка «Корейский» пуста или не найдена
         {% else %}Папка «Японский» пуста или не найдена{% endif %}

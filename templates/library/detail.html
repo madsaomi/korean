@@ -121,7 +121,7 @@
         {% if is_read %}<i class="bi bi-check-lg"></i> Прочитано{% else %}<i class="bi bi-book-half"></i> Не прочитано{% endif %}
       </button>
       <button class="action-btn {% if is_bookmarked %}active{% endif %}" id="btn-toggle-bookmark" data-action="toggle_bookmark" title="Закладка">
-        {% if is_bookmarked %}🔖 {% else %}🔖 {% endif %}
+        <i class="bi bi-bookmark-fill"></i>
       </button>
       <a href="{% url url_reader file.slug %}" class="action-btn text-decoration-none" title="Режим чтения"><i class="bi bi-book-half"></i> Читать</a>
       <a href="{% url url_generate_quiz file.slug %}" class="action-btn text-decoration-none" title="Тест по материалу"><i class="bi bi-bullseye"></i> Тест</a>
@@ -145,9 +145,9 @@
       <p class="mb-0" style="color:var(--text-secondary);">{{ file.description }}</p>
     </div>
     <div class="ms-auto d-flex gap-2 align-items-center">
-      <a href="{% url url_highlights %}" class="action-btn text-decoration-none" style="font-size:0.75rem;">🎨 Выделения</a>
+      <a href="{% url url_highlights %}" class="action-btn text-decoration-none" style="font-size:0.75rem;"><i class="bi bi-brush"></i> Выделения</a>
       <span class="library-badge">{{ file.size_kb }} KB</span>
-      <span class="library-badge" style="background:var(--glass-border);">⏱ {{ file.read_time }} мин</span>
+      <span class="library-badge" style="background:var(--glass-border);"><i class="bi bi-stopwatch"></i> {{ file.read_time }} мин</span>
       {% for tag in tags %}
       <span class="library-badge" style="background:rgba(var(--accent-rgb,127,90,240),0.15);color:var(--accent);">#{{ tag }}</span>
       {% endfor %}
@@ -164,7 +164,7 @@
 </div>
 
 {% if user.is_authenticated %}
-<div class="highlight-hint">✨ Выдели текст → выбери цвет 🟡<i class="bi bi-phone"></i>🔵🩷🟠🟣 или создай заметку/закладку</div>
+<div class="highlight-hint"><i class="bi bi-stars"></i> Выдели текст → выбери цвет 🟡<i class="bi bi-phone"></i>🔵🩷🟠🟣 или создай заметку/закладку</div>
 {% endif %}
 
 {% if user.is_authenticated and notes %}

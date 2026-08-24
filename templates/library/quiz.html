@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}<i class="bi bi-bullseye"></i> Тест — {{ file.name }}{% endblock %}
+{% block title %}Тест — {{ file.name }}{% endblock %}
 {% block content %}
 <div class="mb-4">
   <a href="{% url url_detail file.slug %}" class="library-nav-btn text-decoration-none">← {{ file.name }}</a>
