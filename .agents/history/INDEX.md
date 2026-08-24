@@ -9,6 +9,7 @@
 
 | ID | Дата | Агент | Задача | Статус | Запись |
 |----|------|-------|--------|--------|--------|
+| 0016 | 2026-08-23 | ox-alpha | Дизайн quiz/grammar/profile + фикс дублей class-атрибутов | done (118 passed) | [запись](0016-2026-08-23-design-quiz-grammar-profile.md) |
 | 0015 | 2026-08-23 | ox-alpha | Прод-подготовка: .env-лоадер, Redis/PostgreSQL, DEPLOY.md, check --deploy чист | done (123 passed) | [запись](0015-2026-08-23-prod-readiness.md) |
 | 0014 | 2026-08-23 | ox-alpha | Дизайн-проход по словарю (pill, иконки, korean-text) | done (118 passed) | [запись](0014-2026-08-23-vocabulary-design.md) |
 | 0013 | 2026-08-23 | ox-alpha | Редизайн review-страниц: семантичные иконки, прогресс-бары | done (118 passed) | [запись](0013-2026-08-23-review-redesign.md) |
