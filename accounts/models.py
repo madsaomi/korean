@@ -22,10 +22,13 @@ class UserProfile(models.Model):
         return f'{self.user.username} ({self.get_level_display()})'
 
 class Streak(models.Model):
+    MAX_FREEZES = 3
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='streak')
     current_streak = models.IntegerField(default=0)
     longest_streak = models.IntegerField(default=0)
     last_active_date = models.DateField(null=True, blank=True, default=None)
+    freezes = models.IntegerField(default=1)
 
     def __str__(self):
         return f'{self.user.username} — {self.current_streak} дней'

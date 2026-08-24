@@ -39,14 +39,38 @@ class StreakMiddleware:
             last = streak.last_active_date
             if last is None or last != today:
                 was_streak = streak.current_streak
-                if last == today - timedelta(days=1):
+                used_freeze = False
+                if last is None or last == today - timedelta(days=1):
                     streak.current_streak += 1
-                elif last is None or last < today - timedelta(days=1):
-                    streak.current_streak = 1
+                else:
+                    missed_days = (today - last).days - 1
+                    if missed_days == 1 and streak.freezes > 0:
+                        # Streak freeze: one fully missed day is bridged
+                        streak.freezes -= 1
+                        streak.current_streak += 1
+                        used_freeze = True
+                    else:
+                        streak.current_streak = 1
                 streak.longest_streak = max(streak.longest_streak, streak.current_streak)
                 streak.last_active_date = today
-                streak.save(update_fields=['current_streak', 'longest_streak', 'last_active_date'])
-                if streak.current_streak > was_streak and streak.current_streak > 1 and streak.current_streak % 7 == 0:
+                # Every 7-day milestone grants a freeze (up to the cap)
+                if (
+                    streak.current_streak > was_streak
+                    and streak.current_streak % 7 == 0
+                    and streak.freezes < Streak.MAX_FREEZES
+                ):
+                    streak.freezes += 1
+                    messages.success(request, f'\u2744\ufe0f +1 заморозка серии (всего: {streak.freezes})')
+                streak.save(update_fields=[
+                    'current_streak', 'longest_streak', 'last_active_date', 'freezes',
+                ])
+                if used_freeze:
+                    messages.info(
+                        request,
+                        f'\u2744\ufe0f Заморозка использована — серия {streak.current_streak} сохранена! '
+                        f'Осталось: {streak.freezes}',
+                    )
+                elif streak.current_streak > was_streak and streak.current_streak > 1 and streak.current_streak % 7 == 0:
                     messages.success(request, f'\U0001f525\U0001f525\U0001f525 {streak.current_streak} дней подряд! Не останавливайся!')
                 elif streak.current_streak > was_streak and streak.current_streak > 1:
                     messages.success(request, f'\U0001f525 Уже {streak.current_streak} дней подряд! Молодец!')

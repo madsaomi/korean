@@ -82,6 +82,10 @@
         <span class="fw-bold">{{ streak.longest_streak }}<i class="bi bi-fire"></i></span>
       </div>
       <div class="d-flex justify-content-between mb-2">
+        <small class="muted">Заморозки серии</small>
+        <span class="fw-bold"><i class="bi bi-snow"></i> {{ streak.freezes }}/{{ streak.MAX_FREEZES }}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
         <small class="muted">Уровень</small>
         <span class="fw-bold">{{ profile.get_level_display }}</span>
       </div>
