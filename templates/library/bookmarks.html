@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}🔖 Закладки — {{ current_lang_display }}{% endblock %}
+{% block title %}Закладки — {{ current_lang_display }}{% endblock %}
 {% block extra_head %}
 <style>
   .bookmark-color-dot {
@@ -24,11 +24,11 @@
 <div class="mb-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
-      <h1 class="fw-bold mb-1"><span class="gradient-text">🔖 Мои закладки</span></h1>
-      <p style="color:var(--text-secondary);">{{ bookmarks|length }} закладок</p>
+      <h1 class="fw-bold mb-1"><span class="gradient-text"><i class="bi bi-bookmark-fill"></i> Мои закладки</span></h1>
+      <p class="muted">{{ bookmarks|length }} закладок</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{% url url_highlights %}" class="library-nav-btn text-decoration-none">🎨 Выделения</a>
+      <a href="{% url url_highlights %}" class="library-nav-btn text-decoration-none"><i class="bi bi-brush"></i> Выделения</a>
       <a href="{% url url_index %}" class="library-nav-btn text-decoration-none">← {{ current_lang_display }}</a>
     </div>
   </div>
@@ -52,7 +52,7 @@
       <div class="d-flex gap-1 mt-2">
         <select class="bm-color-select" data-id="{{ bm.id }}" style="font-size:0.75rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;padding:0.15rem 0.3rem;color:var(--text-primary);">
           <option value="yellow" {% if bm.color == 'yellow' %}selected{% endif %}>🟡</option>
-          <option value="green" {% if bm.color == 'green' %}selected{% endif %}><i class="bi bi-phone"></i></option>
+          <option value="green" {% if bm.color == 'green' %}selected{% endif %}>🟢</option>
           <option value="blue" {% if bm.color == 'blue' %}selected{% endif %}>🔵</option>
           <option value="pink" {% if bm.color == 'pink' %}selected{% endif %}>🩷</option>
           <option value="orange" {% if bm.color == 'orange' %}selected{% endif %}>🟠</option>
@@ -66,7 +66,7 @@
   {% empty %}
   <div class="col-12">
     <div class="library-card p-4 text-center">
-      <p class="mb-0" style="color:var(--text-secondary);">У тебя пока нет закладок. Открой материал, выдели текст → 🔖</p>
+      <p class="mb-0 muted">У тебя пока нет закладок. Открой материал, выдели текст → <i class="bi bi-bookmark-fill"></i></p>
     </div>
   </div>
   {% endfor %}
