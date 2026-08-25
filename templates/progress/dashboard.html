@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Прогресс{% endblock %}
 {% block content %}
-<h1 class="section-title"><i class="bi bi-bar-chart-fill"></i> Прогресс</h1>
+<h1 class="section-title"><i class="bi bi-bar-chart-fill"></i> Прогресс
+  <a href="{% url 'progress_export' %}" class="btn-glass btn-sm ms-2 text-decoration-none" style="font-size:0.85rem;" title="Скачать весь прогресс в JSON">
+    <i class="bi bi-download"></i> Экспорт JSON
+  </a>
+</h1>
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-3">

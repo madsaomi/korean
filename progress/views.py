@@ -3,10 +3,12 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.encoding import force_str
 
-from accounts.models import Streak
+from accounts.models import DailyGoal, Streak
 from progress.models import UserLessonProgress, UserQuizResult, UserWordProgress
 
 
@@ -59,3 +61,74 @@ def progress_dashboard(request):
         'quiz_scores': quiz_scores,
         'streak': streak,
     })
+
+
+@login_required
+def progress_export(request):
+    """Full personal-progress dump as a downloadable JSON file."""
+    user = request.user
+    streak, _ = Streak.objects.get_or_create(user=user)
+    goal, _ = DailyGoal.objects.get_or_create(user=user)
+
+    words = UserWordProgress.objects.filter(user=user).select_related('word__category')
+    lessons = UserLessonProgress.objects.filter(user=user).select_related('lesson')
+    quizzes = UserQuizResult.objects.filter(user=user).select_related('quiz')
+
+    payload = {
+        'exported_at': timezone.now().isoformat(),
+        'user': {
+            'username': user.username,
+            'level': user.profile.level,
+            'native_language': user.profile.native_language,
+            'streak': {
+                'current': streak.current_streak,
+                'longest': streak.longest_streak,
+                'last_active_date': force_str(streak.last_active_date or ''),
+                'freezes': streak.freezes,
+            },
+            'daily_goal': {
+                'words': goal.words_target,
+                'lessons': goal.lessons_target,
+                'quizzes': goal.quizzes_target,
+            },
+        },
+        'achievements': list(user.achievements.values('code', 'title', 'earned_at')),
+        'words': [
+            {
+                'korean': p.word.korean,
+                'russian': p.word.russian,
+                'category': p.word.category.name if p.word.category else '',
+                'level': p.word.level,
+                'learned': p.learned,
+                'review_count': p.review_count,
+                'next_review': p.next_review.isoformat(),
+                'learned_at': p.learned_at.isoformat() if p.learned_at else None,
+                'notes': p.notes,
+            }
+            for p in words
+        ],
+        'lessons': [
+            {
+                'course': l.lesson.course.title,
+                'lesson': l.lesson.title,
+                'completed': l.completed,
+                'score': l.score,
+                'completed_at': l.completed_at.isoformat() if l.completed_at else None,
+            }
+            for l in lessons
+        ],
+        'quizzes': [
+            {
+                'quiz': q.quiz.title,
+                'score': q.score,
+                'total': q.total,
+                'percentage': q.percentage(),
+                'completed_at': q.completed_at.isoformat(),
+            }
+            for q in quizzes
+        ],
+    }
+
+    response = JsonResponse(payload, json_dumps_params={'ensure_ascii': False, 'indent': 2})
+    response['Content-Disposition'] = f'attachment; filename="klab-progress-{timezone.localdate()}.json"'
+    return response

@@ -38,7 +38,7 @@
     <div class="col-md-6 col-lg-4">
       <div class="glass p-3 text-center">
         <a href="{% url 'word_detail' w.id %}" class="text-decoration-none" style="color: var(--text-primary);">
-          <div class="fw-bold" style="font-family: 'Noto Sans KR', sans-serif;">{{ w.korean }}</div>
+          <div class="fw-bold korean-text">{{ w.korean }}</div>
           <small class="muted">{{ w.russian }}</small>
           <span class="badge d-block mt-1" style="background: var(--accent); font-size: 0.55rem;">{{ w.category.name }} · {{ w.get_level_display }}</span>
         </a>

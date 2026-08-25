@@ -25,7 +25,7 @@
     {% endif %}
     {% if word.example_sentence %}
     <div class="glass p-3 mt-3">
-      <p class="fs-5 mb-1" style="font-family: 'Noto Sans KR', sans-serif;">{{ word.example_sentence }}</p>
+      <p class="fs-5 mb-1 korean-text">{{ word.example_sentence }}</p>
       <small class="muted">{{ word.example_translation }}</small>
     </div>
     {% endif %}
@@ -42,7 +42,7 @@
   </div>
   {% else %}
   <div id="study-front">
-    <div class="fs-1 fw-bold" style="font-family: 'Noto Sans KR', sans-serif; font-size: 3rem;" id="study-word">{{ word.korean }}</div>
+    <div  param($m) 'class="' + $m.Groups[1].Value.Trim() + ' korean-text display-4"'  id="study-word">{{ word.korean }}</div>
     <p class="mt-2 muted">👆 Нажми, чтобы узнать перевод</p>
   </div>
   {% endif %}
