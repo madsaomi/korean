@@ -51,8 +51,8 @@
 <div class="mb-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
-      <h1 class="fw-bold mb-1"><span class="gradient-text">🎨 Мои выделения</span></h1>
-      <p style="color:var(--text-secondary);">{{ highlights|length }} выделений</p>
+      <h1 class="fw-bold mb-1"><span class="gradient-text"><i class="bi bi-brush"></i> Мои выделения</span></h1>
+      <p class="muted">{{ highlights|length }} выделений</p>
     </div>
     <a href="{% url url_index %}" class="library-nav-btn text-decoration-none">← {{ current_lang_display }}</a>
   </div>
