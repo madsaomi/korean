@@ -10,6 +10,7 @@
 | ID | Дата | Агент | Задача | Статус | Запись |
 |----|------|-------|--------|--------|--------|
 | 0018 | 2026-08-23 | ox-alpha | Streak-freeze: мост через пропущенный день, грант за 7 дней (+7 тестов) | done (125 passed) | [запись](0018-2026-08-23-streak-freeze.md) |
+| 0021 | 2026-08-23 | ox-alpha | Bulk muted/badge — 25 шаблонов, ~50 инлайнов | done (125 passed) | [запись](0021-2026-08-23-bulk-muted.md) |
 | 0020 | 2026-08-23 | ox-alpha | Библиотека — bookmarks/search/highlights иконки и muted | done (125 passed) | [запись](0020-2026-08-23-library-second-pass.md) |
 | 0019 | 2026-08-23 | ox-alpha | Уроки и страницы ошибок: badge/muted, иконки ошибок | done (125 passed) | [запись](0019-2026-08-23-lessons-errors-ui.md) |
 | 0017 | 2026-08-23 | ox-alpha | Library: фикс иконок в title (head-бага), тулбар/действия → bi-иконки | done (118 passed) | [запись](0017-2026-08-23-library-design.md) |
