@@ -41,13 +41,13 @@
       <div class="d-flex align-items-center gap-2">
         <span class="bookmark-color-dot" id="bm-dot-{{ bm.id }}" style="background:{% if bm.color == 'green' %}#22c55e{% elif bm.color == 'blue' %}#3b82f6{% elif bm.color == 'pink' %}#ec4899{% elif bm.color == 'orange' %}#f97316{% elif bm.color == 'purple' %}#a855f7{% else %}#facc15{% endif %};"></span>
         <a href="{% url url_detail bm.slug %}" class="fw-bold text-decoration-none flex-grow-1" style="color:var(--accent);">{{ bm.title }}</a>
-        <small style="color:var(--text-secondary);">{{ bm.created_at|date:"d.m.Y" }}</small>
+        <small class="muted">{{ bm.created_at|date:"d.m.Y" }}</small>
       </div>
       {% if bm.section %}
-      <div class="small" style="color:var(--text-secondary);">{{ bm.section }}</div>
+      <div class="small muted">{{ bm.section }}</div>
       {% endif %}
       {% if bm.note %}
-      <p class="small mb-0 mt-1" style="color:var(--text-secondary);"><i class="bi bi-pencil"></i> {{ bm.note|truncatechars:80 }}</p>
+      <p class="small mb-0 mt-1 muted"><i class="bi bi-pencil"></i> {{ bm.note|truncatechars:80 }}</p>
       {% endif %}
       <div class="d-flex gap-1 mt-2">
         <select class="bm-color-select" data-id="{{ bm.id }}" style="font-size:0.75rem;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:6px;padding:0.15rem 0.3rem;color:var(--text-primary);">

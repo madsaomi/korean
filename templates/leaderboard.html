@@ -17,11 +17,11 @@
         <div class="flex-grow-1">
           <span class="fw-medium">{{ s.user.username }}</span>
         </div>
-        <span class="badge" style="background: var(--accent);">{{ s.current_streak }}<i class="bi bi-fire"></i></span>
+        <span class="badge badge-accent">{{ s.current_streak }}<i class="bi bi-fire"></i></span>
       </div>
       {% empty %}
       <div class="empty-state py-3">
-        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+        <p class="mb-0 muted">Нет данных</p>
       </div>
       {% endfor %}
     </div>
@@ -38,11 +38,11 @@
         <div class="flex-grow-1">
           <span class="fw-medium">{{ u.username }}</span>
         </div>
-        <span class="badge" style="background: var(--accent);">{{ u.cnt }}<i class="bi bi-journal-bookmark-fill"></i></span>
+        <span class="badge badge-accent">{{ u.cnt }}<i class="bi bi-journal-bookmark-fill"></i></span>
       </div>
       {% empty %}
       <div class="empty-state py-3">
-        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+        <p class="mb-0 muted">Нет данных</p>
       </div>
       {% endfor %}
     </div>
@@ -59,11 +59,11 @@
         <div class="flex-grow-1">
           <span class="fw-medium">{{ u.username }}</span>
         </div>
-        <span class="badge" style="background: var(--accent);">{{ u.cnt }}<i class="bi bi-bullseye"></i></span>
+        <span class="badge badge-accent">{{ u.cnt }}<i class="bi bi-bullseye"></i></span>
       </div>
       {% empty %}
       <div class="empty-state py-3">
-        <p class="mb-0" style="color: var(--text-secondary);">Нет данных</p>
+        <p class="mb-0 muted">Нет данных</p>
       </div>
       {% endfor %}
     </div>

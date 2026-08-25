@@ -142,7 +142,7 @@
   <div class="d-flex align-items-center gap-3 flex-wrap">
     <div>
       <h1 class="fw-bold mb-1">{{ file.icon }} {{ file.name }}</h1>
-      <p class="mb-0" style="color:var(--text-secondary);">{{ file.description }}</p>
+      <p class="mb-0 muted">{{ file.description }}</p>
     </div>
     <div class="ms-auto d-flex gap-2 align-items-center">
       <a href="{% url url_highlights %}" class="action-btn text-decoration-none" style="font-size:0.75rem;"><i class="bi bi-brush"></i> Выделения</a>
@@ -175,7 +175,7 @@
       {% for note in notes %}
       <div class="note-chip" data-note-id="{{ note.id }}">
         <div class="d-flex justify-content-between">
-          <small style="color:var(--text-secondary);">{{ note.highlighted_text|truncatechars:60 }}</small>
+          <small class="muted">{{ note.highlighted_text|truncatechars:60 }}</small>
           <button class="btn-delete-note action-btn" style="font-size:0.65rem;padding:0.1rem 0.4rem;" data-note-id="{{ note.id }}"><i class="bi bi-x-lg"></i></button>
         </div>
         <p class="mb-0 mt-1">{{ note.content }}</p>
@@ -235,7 +235,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p class="small" style="color:var(--text-secondary);" id="note-highlighted-preview"></p>
+        <p class="small muted" id="note-highlighted-preview"></p>
         <textarea class="form-control" id="note-content" rows="3" placeholder="Твоя заметка..." style="background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text-primary);"></textarea>
         <input type="hidden" id="note-highlighted" value="">
         <input type="hidden" id="note-anchor" value="">

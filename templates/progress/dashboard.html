@@ -46,10 +46,10 @@
         {% endfor %}
       </div>
       <div class="d-flex justify-content-end gap-1 mt-2">
-        <small style="color: var(--text-secondary);">Меньше</small>
+        <small class="muted">Меньше</small>
         <div style="width: 14px; height: 14px; border-radius: 4px; background: var(--glass-bg);"></div>
         <div style="width: 14px; height: 14px; border-radius: 4px; background: var(--accent);"></div>
-        <small style="color: var(--text-secondary);">Больше</small>
+        <small class="muted">Больше</small>
       </div>
     </div>
   </div>
@@ -58,15 +58,15 @@
     <div class="glass-card p-4">
       <h5 class="fw-bold mb-3"><i class="bi bi-trophy"></i> Статистика</h5>
       <div class="d-flex justify-content-between mb-2">
-        <span style="color: var(--text-secondary);">Текущая серия</span>
+        <span class="muted">Текущая серия</span>
         <span class="fw-bold">{{ streak.current_streak }} дней</span>
       </div>
       <div class="d-flex justify-content-between mb-2">
-        <span style="color: var(--text-secondary);">Рекорд</span>
+        <span class="muted">Рекорд</span>
         <span class="fw-bold">{{ streak.longest_streak }} дней</span>
       </div>
       <div class="d-flex justify-content-between mb-2">
-        <span style="color: var(--text-secondary);">Слов в повторении</span>
+        <span class="muted">Слов в повторении</span>
         <span class="fw-bold">{{ words_in_review }}</span>
       </div>
     </div>

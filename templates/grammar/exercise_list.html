@@ -54,7 +54,7 @@
       <span class="badge align-self-start mb-2" style="background: {% if ex.difficulty == 'beginner' %}#00b894{% elif ex.difficulty == 'elementary' %}#fdcb6e{% else %}#e17055{% endif %}; color: {% if ex.difficulty == 'elementary' %}#333{% else %}#fff{% endif %};">{{ ex.get_difficulty_display }}</span>
       <p class="flex-grow-1 mb-2">{{ ex.question }}</p>
       <div class="mt-auto">
-        <small style="color: var(--text-secondary);">{{ ex.get_difficulty_display }}</small>
+        <small class="muted">{{ ex.get_difficulty_display }}</small>
       </div>
     </div>
     {% endfor %}

@@ -15,7 +15,7 @@
   <a href="{% url 'word_list_detail' wl.id %}" class="text-decoration-none glass-card" style="color: var(--text-primary);">
     <div class="fs-1 mb-1"><i class="bi bi-collection"></i></div>
     <h5 class="fw-bold mb-1">{{ wl.name }}</h5>
-    <small style="color: var(--text-secondary);">{{ wl.word_count }} слов</small>
+    <small class="muted">{{ wl.word_count }} слов</small>
     <small class="d-block mt-1" style="color: var(--text-secondary); font-size: 0.7rem;">
       Создана {{ wl.created_at|date:"d.m.Y" }}
     </small>
@@ -26,7 +26,7 @@
 <div class="glass-card empty-state" style="max-width: 500px; margin: 0 auto;">
   <div class="empty-icon"><i class="bi bi-collection"></i></div>
   <h3 class="fw-bold mb-2">Нет коллекций</h3>
-  <p style="color: var(--text-secondary);">Создай свою первую коллекцию слов!</p>
+  <p class="muted">Создай свою первую коллекцию слов!</p>
 </div>
 {% endif %}
 {% endblock %}

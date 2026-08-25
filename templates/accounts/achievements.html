@@ -9,7 +9,7 @@
   <div class="glass-card text-center">
     <div class="fs-1 mb-2">{{ a.icon }}</div>
     <h5 class="fw-bold mb-1">{{ a.title }}</h5>
-    <p style="color: var(--text-secondary);" class="small mb-1">{{ a.description }}</p>
+    <p class="muted small mb-1">{{ a.description }}</p>
     <small style="color: var(--text-secondary); opacity: 0.6;">{{ a.earned_at|date:"d.m.Y" }}</small>
   </div>
   {% endfor %}
@@ -18,7 +18,7 @@
 <div class="glass-card p-5 text-center" style="max-width: 500px; margin: 0 auto;">
   <div class="fs-1 mb-3"><i class="bi bi-trophy"></i></div>
   <h3 class="fw-bold mb-2">Пока нет достижений</h3>
-  <p style="color: var(--text-secondary);">Проходи уроки, тесты и учи слова, чтобы разблокировать ачивки!</p>
+  <p class="muted">Проходи уроки, тесты и учи слова, чтобы разблокировать ачивки!</p>
   <div class="d-flex gap-2 justify-content-center flex-wrap mt-3">
     <a href="{% url 'lesson_list' %}" class="btn-glass btn-accent text-decoration-none"><i class="bi bi-journal-bookmark-fill"></i> Уроки</a>
     <a href="{% url 'category_list' %}" class="btn-glass text-decoration-none"><i class="bi bi-book-half"></i> Словарь</a>

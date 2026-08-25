@@ -5,14 +5,14 @@
 
 <div class="glass-card p-4 mb-4">
   <h1 class="fw-bold mb-1">{{ course.title }}</h1>
-  <p style="color: var(--text-secondary);">{{ course.description }}</p>
+  <p class="muted">{{ course.description }}</p>
 </div>
 
 {% if lesson %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h3 class="fw-bold mb-0">{{ lesson.title }}</h3>
   {% if lesson_count > 1 %}
-  <small style="color: var(--text-secondary);">{{ current_idx|add:1 }} / {{ lesson_count }}</small>
+  <small class="muted">{{ current_idx|add:1 }} / {{ lesson_count }}</small>
   {% endif %}
 </div>
 
@@ -33,7 +33,7 @@
         {% endif %}
 
         {% if step.content_russian %}
-        <p style="color: var(--text-secondary);">{{ step.content_russian }}</p>
+        <p class="muted">{{ step.content_russian }}</p>
         {% endif %}
 
         {% if step.image %}
@@ -44,7 +44,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <p style="color: var(--text-secondary);">Шаги урока пока не добавлены.</p>
+  <p class="muted">Шаги урока пока не добавлены.</p>
   {% endif %}
 </div>
 
@@ -68,7 +68,7 @@
 {% else %}
 <div class="glass-card p-5 text-center">
   <h3 class="fw-bold mb-2">📭 Нет уроков</h3>
-  <p style="color: var(--text-secondary);">Уроки пока не добавлены в этот курс.</p>
+  <p class="muted">Уроки пока не добавлены в этот курс.</p>
 </div>
 {% endif %}
 {% endblock %}
