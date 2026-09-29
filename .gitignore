@@ -57,3 +57,5 @@ coverage.xml
 
 # Batch scripts
 # seed.bat
+
+site/

@@ -9,6 +9,7 @@
 
 | ID | Дата | Агент | Задача | Статус | Запись |
 |----|------|-------|--------|--------|--------|
+| 0023 | 2026-09-29 | Gemini | Переход на легковесный MkDocs-ридер баз заметок (iOS Glassmorphism) | done | [запись](0023-2026-09-29-mkdocs-notes-reader.md) |
 | 0022 | 2026-08-23 | ox-alpha | korean-text везде + экспорт прогресса JSON (запушено) | done (125 passed) | [запись](0022-2026-08-23-korean-text-export.md) |
 | 0021 | 2026-08-23 | ox-alpha | Bulk muted/badge — 25 шаблонов, ~50 инлайнов | done (125 passed) | [запись](0021-2026-08-23-bulk-muted.md) |
 | 0020 | 2026-08-23 | ox-alpha | Библиотека — bookmarks/search/highlights иконки и muted | done (125 passed) | [запись](0020-2026-08-23-library-second-pass.md) |

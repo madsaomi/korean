@@ -1,0 +1,85 @@
+site_name: K-Lab Заметки
+site_description: Интерактивная база знаний и конспекты по корейскому и японскому языкам
+site_author: K-Lab
+
+theme:
+  name: material
+  language: ru
+  custom_dir: docs/overrides
+  favicon: assets/favicon.png
+  logo: assets/logo.png
+  palette:
+    # Светлая стеклянная тема
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Перейти в тёмный режим
+    # Тёмная стеклянная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Перейти в светлый режим
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+extra_css:
+  - assets/css/glassmorphism.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.keys
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+
+nav:
+  - Главная: index.md
+  - 🇰🇷 Корейский:
+      - 01. Введение: korean/01_Введение.md
+      - 02. Хангыль: korean/02_Хангыль.md
+      - 03. Грамматика: korean/03_Грамматика.md
+      - 04. Лексика: korean/04_Лексика.md
+      - 05. Диалоги и фразы: korean/05_Фразы_и_Диалоги.md
+      - 06. Культура: korean/06_Культура.md
+      - 07. Числа и время: korean/07_Числа_и_Время.md
+      - 08. Ресурсы: korean/08_Ресурсы.md
+  - 🇯🇵 Японский:
+      - 00. Оглавление: japanese/00_Оглавление.md
+      - Основы:
+          - 01. Введение: japanese/01_Основы/01_Введение.md
+          - 02. Хирагана и Катакана: japanese/01_Основы/02_Хирагана_Катакана.md
+          - 03. Кандзи: japanese/01_Основы/03_Кандзи.md
+      - Грамматика:
+          - 04. Грамматика N5: japanese/02_Грамматика/04_Грамматика_N5.md
+          - 05. Прилагательные и время: japanese/02_Грамматика/05_Прилагат_Числа_Время.md
+          - 06. Грамматика N4: japanese/02_Грамматика/06_Грамматика_N4.md
+      - Практика:
+          - 07. Лексика: japanese/03_Практика/07_Лексика.md
+          - 08. Фразы и диалоги: japanese/03_Практика/08_Фразы_диалоги.md
+          - 09. Приложения: japanese/03_Практика/09_Приложения.md
+      - Справочники:
+          - 10. Ошибки: japanese/04_Справочники/10_Ошибки.md
+          - 11. Экзамен JLPT: japanese/04_Справочники/11_JLPT.md
+          - 12. Культура и глоссарий: japanese/04_Справочники/12_Культура_Глоссарий.md
+          - 13. Словарь: japanese/04_Справочники/13_Словарь.md
+          - 14. Ресурсы: japanese/04_Справочники/14_Ресурсы.md

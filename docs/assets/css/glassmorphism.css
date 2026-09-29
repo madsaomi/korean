@@ -1,0 +1,251 @@
+/* iOS-inspired Glassmorphism & Liquid Design for MkDocs Material */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-bg-hover: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 10px 30px 0 rgba(31, 38, 135, 0.08);
+  --glass-blur: blur(20px);
+  --glass-radius: 18px;
+  --glass-accent: #007aff; /* Apple Blue */
+}
+
+[data-md-color-scheme="slate"] {
+  --glass-bg: rgba(22, 28, 45, 0.55);
+  --glass-bg-hover: rgba(30, 39, 62, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.35);
+  --glass-accent: #0a84ff; /* iOS Dark Mode Blue */
+}
+
+/* Background animated gradient / mesh */
+body {
+  background: 
+    radial-gradient(at 0% 0%, rgba(120, 119, 198, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(74, 144, 226, 0.18) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(235, 87, 87, 0.12) 0px, transparent 50%),
+    linear-gradient(135deg, #f5f7fb 0%, #e4e8f0 100%) !important;
+  background-attachment: fixed !important;
+  min-height: 100vh;
+}
+
+[data-md-color-scheme="slate"] body {
+  background: 
+    radial-gradient(at 0% 0%, rgba(94, 92, 230, 0.22) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(10, 132, 255, 0.2) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(255, 55, 95, 0.15) 0px, transparent 50%),
+    linear-gradient(135deg, #0d1117 0%, #161b22 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* iOS Frosted Glass Header */
+.md-header {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+  color: var(--md-default-fg-color) !important;
+}
+
+.md-header__topic, .md-header__title, .md-header__button {
+  color: var(--md-default-fg-color) !important;
+}
+
+/* iOS Frosted Glass Navigation Tabs */
+.md-tabs {
+  background: rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+[data-md-color-scheme="slate"] .md-tabs {
+  background: rgba(15, 23, 42, 0.35) !important;
+}
+
+.md-tabs__link {
+  font-weight: 500 !important;
+  color: var(--md-default-fg-color) !important;
+  opacity: 0.75;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 10px !important;
+  padding: 6px 14px !important;
+}
+
+.md-tabs__link--active, .md-tabs__link:hover {
+  opacity: 1 !important;
+  background: var(--glass-bg-hover) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Glass Main Container */
+.md-main__inner {
+  margin-top: 1.5rem !important;
+}
+
+.md-content__inner {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--glass-radius) !important;
+  padding: 2.2rem 2.5rem !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+/* Sidebar navigation */
+.md-sidebar__inner {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--glass-radius) !important;
+  padding: 1rem 0.8rem !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+.md-nav__link {
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.md-nav__link:hover {
+  background: var(--glass-bg-hover) !important;
+  color: var(--glass-accent) !important;
+}
+
+.md-nav__item--active > .md-nav__link {
+  font-weight: 600 !important;
+  color: var(--glass-accent) !important;
+  background: rgba(0, 122, 255, 0.12) !important;
+}
+
+/* Search Box iOS-style */
+.md-search__inner {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-blur) !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--glass-border) !important;
+}
+
+.md-search__input {
+  border-radius: 14px !important;
+}
+
+.md-search-result__item {
+  border-radius: 10px;
+}
+
+/* Tables in notes */
+table {
+  background: rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-md-color-scheme="slate"] table {
+  background: rgba(25, 33, 50, 0.4) !important;
+}
+
+th {
+  background: rgba(0, 122, 255, 0.08) !important;
+  font-weight: 600 !important;
+}
+
+/* Code blocks & Callouts */
+.highlight, pre {
+  border-radius: 14px !important;
+  border: 1px solid var(--glass-border) !important;
+  background: rgba(20, 24, 33, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.admonition {
+  border-radius: 14px !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04) !important;
+}
+
+/* Interactive Glass Cards on Landing Page */
+.glass-hero {
+  padding: 1.8rem;
+  border-radius: var(--glass-radius);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+}
+[data-md-color-scheme="slate"] .glass-hero {
+  background: linear-gradient(135deg, rgba(30, 41, 65, 0.6) 0%, rgba(15, 23, 42, 0.3) 100%);
+}
+
+.glass-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.8rem;
+  margin-top: 1.5rem;
+}
+
+.glass-card {
+  padding: 1.8rem;
+  border-radius: var(--glass-radius);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  background: var(--glass-bg-hover);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.12);
+}
+
+.glass-btn {
+  display: inline-block;
+  margin-top: auto;
+  padding: 10px 18px;
+  background: var(--glass-accent);
+  color: #ffffff !important;
+  font-weight: 500;
+  border-radius: 12px;
+  text-decoration: none !important;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.35);
+  transition: all 0.2s ease;
+}
+
+.glass-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Scrollbar iOS-style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
